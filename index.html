@@ -538,7 +538,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <div class="auth-divider"><span>ou</span></div><button type="button" class="btn btn-outline auth-submit" onclick="mostrarCadastroAuth()">Criar conta</button>
       </form>
       <form class="auth-card" id="auth-signup-form" hidden>
-        <span class="auth-eyebrow">Novo acesso</span><h2>Criar conta</h2><p>Após confirmar o e-mail, um administrador liberará seus módulos.</p>
+        <span class="auth-eyebrow">Novo acesso</span><h2>Criar conta</h2><p>Após confirmar o e-mail, o módulo LECOMs estará disponível. Outros módulos são liberados por um administrador.</p>
         <label for="signup-name">Nome completo</label><input id="signup-name" type="text" autocomplete="name" required>
         <label for="signup-email">E-mail</label><input id="signup-email" type="email" autocomplete="email" required>
         <label for="signup-password">Senha</label><input id="signup-password" type="password" autocomplete="new-password" minlength="8" required>
@@ -1714,7 +1714,7 @@ async function iniciarAuthPortal(){
       mostrarLoginAuth();
       mostrarMensagemCadastro('auth-success','Conta criada com sucesso. Seu acesso será liberado após a configuração do administrador.');
     }else{
-      mostrarMensagemCadastro('signup-success','Conta criada. Verifique seu e-mail para confirmar o cadastro; depois, aguarde a liberação dos módulos por um administrador.');
+      mostrarMensagemCadastro('signup-success','Conta criada. Verifique seu e-mail para confirmar o cadastro. Após a confirmação, LECOMs estará disponível; outros módulos dependem de liberação administrativa.');
     }
   });
   const recuperacao=document.getElementById('auth-recovery-form');
