@@ -525,7 +525,21 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     <label for="auth-password">Senha</label><input id="auth-password" type="password" autocomplete="current-password" required>
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:20px" type="submit" id="auth-submit">Entrar</button>
     <div id="auth-error" class="auth-error" role="alert"></div>
+    <div id="auth-success" class="auth-error" style="background:#eaf8f0;color:#166534" role="status"></div>
+    <button type="button" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:10px" onclick="mostrarCadastroAuth()">Criar conta</button>
     <p class="auth-session-note">O acesso depende da migration e da confirmação do seu usuário no Supabase. O conteúdo local existente permanece apenas como contingência até a migração dos dados.</p>
+  </form>
+  <form class="auth-card" id="auth-signup-form" hidden>
+    <h1>Criar conta</h1>
+    <p>Após confirmar seu e-mail, um administrador deverá liberar seus módulos no portal.</p>
+    <label for="signup-name">Nome completo</label><input id="signup-name" type="text" autocomplete="name" required>
+    <label for="signup-email">E-mail</label><input id="signup-email" type="email" autocomplete="email" required>
+    <label for="signup-password">Senha</label><input id="signup-password" type="password" autocomplete="new-password" minlength="8" required>
+    <label for="signup-password-confirm">Confirmar senha</label><input id="signup-password-confirm" type="password" autocomplete="new-password" minlength="8" required>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:20px" type="submit" id="signup-submit">Criar conta</button>
+    <div id="signup-error" class="auth-error" role="alert"></div>
+    <div id="signup-success" class="auth-error" style="background:#eaf8f0;color:#166534" role="status"></div>
+    <button type="button" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:10px" onclick="mostrarLoginAuth()">Voltar para entrar</button>
   </form>
 </div>
 
@@ -1530,8 +1544,16 @@ function atualizarNavegacaoAcessos(){
   });
 }
 function mostrarErroAuth(mensagem){const el=document.getElementById('auth-error');if(!el)return;el.textContent=mensagem||'';el.classList.toggle('show',!!mensagem);}
+function mostrarMensagemCadastro(id,mensagem){const el=document.getElementById(id);if(!el)return;el.textContent=mensagem||'';el.classList.toggle('show',!!mensagem);}
+function limparMensagensAuth(){mostrarErroAuth('');mostrarMensagemCadastro('auth-success','');mostrarMensagemCadastro('signup-error','');mostrarMensagemCadastro('signup-success','');}
+function mostrarCadastroAuth(){document.getElementById('auth-login-form').hidden=true;document.getElementById('auth-signup-form').hidden=false;limparMensagensAuth();}
+function mostrarLoginAuth(){document.getElementById('auth-signup-form').hidden=true;document.getElementById('auth-login-form').hidden=false;limparMensagensAuth();}
 function exibirLogin(mensagem){const gate=document.getElementById('auth-gate');if(gate)gate.hidden=false;mostrarErroAuth(mensagem);}
-function ocultarLogin(){const gate=document.getElementById('auth-gate');if(gate)gate.hidden=true;mostrarErroAuth('');}
+function ocultarLogin(){const gate=document.getElementById('auth-gate');if(gate)gate.hidden=true;limparMensagensAuth();}
+function obterRedirectAuth(){
+  const origem=window.location.origin;
+  return origem&&origem!=='null'&&/^https?:$/.test(window.location.protocol)?`${origem}${window.location.pathname}`:undefined;
+}
 
 function ativarCacheDoUsuario(userId){
   if(!userId)return;
@@ -1644,6 +1666,30 @@ async function iniciarAuthPortal(){
     const {error}=await supabasePortal.auth.signInWithPassword({email:document.getElementById('auth-email').value.trim(),password:document.getElementById('auth-password').value});
     botao.disabled=false;botao.textContent='Entrar';
     if(error)mostrarErroAuth('Não foi possível entrar. Verifique seu e-mail, senha e confirmação de conta.');
+  });
+  const cadastro=document.getElementById('auth-signup-form');
+  cadastro?.addEventListener('submit',async evento=>{
+    evento.preventDefault();limparMensagensAuth();
+    if(!supabasePortal){mostrarMensagemCadastro('signup-error','Não foi possível carregar o serviço de autenticação. Verifique a conexão e atualize a página.');return;}
+    const nome=document.getElementById('signup-name').value.trim();
+    const email=document.getElementById('signup-email').value.trim();
+    const senha=document.getElementById('signup-password').value;
+    const confirmacao=document.getElementById('signup-password-confirm').value;
+    if(senha!==confirmacao){mostrarMensagemCadastro('signup-error','A confirmação da senha não corresponde à senha informada.');return;}
+    const botao=document.getElementById('signup-submit');botao.disabled=true;botao.textContent='Criando conta…';
+    const redirectTo=obterRedirectAuth();
+    const options={data:{full_name:nome}};
+    if(redirectTo)options.emailRedirectTo=redirectTo;
+    const {data,error}=await supabasePortal.auth.signUp({email,password:senha,options});
+    botao.disabled=false;botao.textContent='Criar conta';
+    if(error){mostrarMensagemCadastro('signup-error','Não foi possível criar a conta. Verifique os dados e tente novamente.');return;}
+    cadastro.reset();
+    if(data.session){
+      mostrarLoginAuth();
+      mostrarMensagemCadastro('auth-success','Conta criada com sucesso. Seu acesso será liberado após a configuração do administrador.');
+    }else{
+      mostrarMensagemCadastro('signup-success','Conta criada. Verifique seu e-mail para confirmar o cadastro; depois, aguarde a liberação dos módulos por um administrador.');
+    }
   });
   if(!window.supabase?.createClient){exibirLogin('Não foi possível carregar o cliente de autenticação. Verifique a conexão e atualize a página.');return;}
   supabasePortal=window.supabase.createClient(SUPABASE_PORTAL_CONFIG.url,SUPABASE_PORTAL_CONFIG.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
