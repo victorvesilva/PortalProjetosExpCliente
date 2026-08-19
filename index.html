@@ -1359,6 +1359,11 @@ function navigate(page){
     toast('Acesso restrito a administradores.');
     return;
   }
+  const modulo=MODULO_POR_PAGINA[page];
+  if(modulo && !temPermissaoModulo(modulo)){
+    toast('Seu perfil não possui acesso a este módulo.');
+    return;
+  }
   // Compatibilidade com links antigos: a lista de projetos foi incorporada ao Portfólio.
   if(page==='projetos') page='home';
   if(!PAGE_META[page]) return;
@@ -1495,8 +1500,17 @@ let supabasePortal=null;
 let sessaoPortal=null;
 let perfilPortal=null;
 let perfilPortalPendente=false;
+let permissoesModuloPortal=new Set();
+let permissoesModuloProntas=false;
+const MODULOS_PORTAL=[
+  ['portfolio','Portfólio de Projetos'],['tap','TAP'],['eap','EAP'],['raci','Matriz RACI'],
+  ['cronograma','Cronograma'],['statusreport','Status Report'],['riscos','Riscos'],['pontosfocais','Pontos Focais'],
+  ['encaminhamentos','Encaminhamentos'],['tep','TEP'],['licoes','Lições Aprendidas'],['lecoms','LECOMs']
+];
+const MODULO_POR_PAGINA={home:'portfolio',projetos:'portfolio',portfdash:'portfolio',dashboardprojeto:'portfolio',tap:'tap',eap:'eap',raci:'raci',cronograma:'cronograma',statusreport:'statusreport',riscos:'riscos',pontosfocais:'pontosfocais',encaminhamentos:'encaminhamentos',tep:'tep',licoes:'licoes',lecoms:'lecoms'};
 
 function podeGerenciarAcessos(){ return !!sessaoPortal && perfilPortal?.role==='admin' && perfilPortal?.active!==false; }
+function temPermissaoModulo(modulo){return podeGerenciarAcessos()||permissoesModuloPortal.has(modulo);}
 function atualizarNavegacaoAcessos(){
   const item=document.querySelector('.nav-item[data-page="acessos"]');
   if(!item)return;
@@ -1506,6 +1520,14 @@ function atualizarNavegacaoAcessos(){
   item.title=bloqueado?'Disponível apenas para administradores':'';
   const sair=document.getElementById('auth-logout');
   if(sair)sair.style.display=sessaoPortal?'inline-flex':'none';
+  document.querySelectorAll('.nav-item[data-page]').forEach(nav=>{
+    const modulo=MODULO_POR_PAGINA[nav.dataset.page];
+    if(!modulo)return;
+    const bloqueado=!temPermissaoModulo(modulo);
+    nav.classList.toggle('locked',bloqueado);
+    nav.setAttribute('aria-disabled',String(bloqueado));
+    nav.title=bloqueado?'Sem permissão para este módulo':'';
+  });
 }
 function mostrarErroAuth(mensagem){const el=document.getElementById('auth-error');if(!el)return;el.textContent=mensagem||'';el.classList.toggle('show',!!mensagem);}
 function exibirLogin(mensagem){const gate=document.getElementById('auth-gate');if(gate)gate.hidden=false;mostrarErroAuth(mensagem);}
@@ -1531,14 +1553,64 @@ async function carregarPerfilPortal(){
   perfilPortal=data;
 }
 
-function renderAcessos(){
+async function carregarPermissoesModuloPortal(){
+  permissoesModuloPortal=new Set();permissoesModuloProntas=false;
+  if(!supabasePortal||!sessaoPortal?.user)return false;
+  if(podeGerenciarAcessos()){permissoesModuloProntas=true;return true;}
+  const {data,error}=await supabasePortal.from('user_module_permissions').select('module_key').eq('user_id',sessaoPortal.user.id);
+  if(error)return false;
+  permissoesModuloPortal=new Set((data||[]).map(item=>item.module_key));
+  permissoesModuloProntas=true;
+  return true;
+}
+
+async function listarUsuariosAcessos(){
+  const {data:usuarios,error:erroUsuarios}=await supabasePortal.from('profiles').select('id,full_name,role,active,created_at').order('full_name',{ascending:true});
+  if(erroUsuarios)throw erroUsuarios;
+  const {data:permissoes,error:erroPermissoes}=await supabasePortal.from('user_module_permissions').select('user_id,module_key');
+  if(erroPermissoes)throw erroPermissoes;
+  const porUsuario=new Map();
+  (permissoes||[]).forEach(p=>{if(!porUsuario.has(p.user_id))porUsuario.set(p.user_id,new Set());porUsuario.get(p.user_id).add(p.module_key);});
+  return {usuarios:usuarios||[],porUsuario};
+}
+
+function cartaoPermissoesUsuario(usuario,permitidos){
+  const proprio=usuario.id===sessaoPortal?.user?.id;
+  const checks=MODULOS_PORTAL.map(([chave,rotulo])=>`<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:11.5px;background:#fff"><input type="checkbox" data-permissao-usuario="${usuario.id}" data-modulo="${chave}" ${permitidos.has(chave)?'checked':''} ${usuario.role==='admin'?'disabled':''}> ${rotulo}</label>`).join('');
+  return `<div class="card" style="padding:16px;margin-top:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><b>${esc(usuario.full_name||'Usuário sem nome')}</b><div class="mono" style="font-size:11px;color:var(--ink-mute);margin-top:3px">${esc(usuario.id)}</div></div><span class="badge ${usuario.active?'badge-ok':'badge-danger'}">${usuario.active?'Ativo':'Inativo'}</span></div><div style="display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:10px;margin-top:14px"><label style="font-size:12px;font-weight:700">Perfil<select id="perfil-${usuario.id}" ${proprio?'disabled':''} style="display:block;width:100%;margin-top:5px"><option value="collaborator" ${usuario.role==='collaborator'?'selected':''}>Colaborador</option><option value="admin" ${usuario.role==='admin'?'selected':''}>Administrador</option></select></label><label style="font-size:12px;font-weight:700;display:flex;align-items:end;gap:8px;padding-bottom:7px"><input id="ativo-${usuario.id}" type="checkbox" ${usuario.active?'checked':''} ${proprio?'disabled':''}> Usuário ativo</label></div><div style="margin-top:14px"><b style="font-size:12px">Módulos permitidos</b><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">${usuario.role==='admin'?'<span style="font-size:12px;color:var(--ink-soft)">Administradores possuem acesso integral por padrão.</span>':checks}</div></div><div style="display:flex;justify-content:flex-end;margin-top:15px"><button class="btn btn-primary btn-sm" onclick="salvarAcessosUsuario('${usuario.id}')" ${proprio?'disabled title="Não é permitido alterar o próprio perfil nesta tela"':''}>Salvar acesso</button></div></div>`;
+}
+
+async function renderAcessos(){
   const alvo=document.getElementById('acessos-conteudo');if(!alvo)return;
   if(!podeGerenciarAcessos()){
     alvo.innerHTML='<div class="page-placeholder"><div class="icon">🔐</div><h3>Acesso restrito</h3><p>Esta área é exclusiva para administradores.</p></div>';
     return;
   }
   const nome=perfilPortal.full_name||sessaoPortal.user.email||'Administrador';
-  alvo.innerHTML=`<div class="card access-user-card"><div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap"><div><div style="font-weight:800;font-size:16px">Administração de acessos</div><p style="font-size:13px;color:var(--ink-soft);margin:5px 0 0">Perfil autenticado e regras aplicadas pelo Supabase.</p></div><button class="btn btn-outline btn-sm" onclick="sairDoPortal()">Sair</button></div><div class="access-kv"><b>Usuário</b><span>${esc(nome)}</span><b>E-mail</b><span>${esc(sessaoPortal.user.email||'—')}</span><b>Perfil</b><span class="badge badge-ok">Administrador</span><b>Permissões</b><span>Gestão integral de dados, usuários e campos sensíveis.</span></div><div style="margin-top:20px;padding:12px 14px;border-radius:8px;background:var(--blue-tint);font-size:12px;color:var(--ink-soft)">O cadastro, convite e redefinição de senha devem ser realizados por uma rotina administrativa segura (Edge Function/servidor) antes de serem expostos nesta tela.</div></div>`;
+  alvo.innerHTML=`<div class="card access-user-card"><div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap"><div><div style="font-weight:800;font-size:16px">Administração de acessos</div><p style="font-size:13px;color:var(--ink-soft);margin:5px 0 0">Controle individual de visibilidade por módulo.</p></div><button class="btn btn-outline btn-sm" onclick="sairDoPortal()">Sair</button></div><div class="access-kv"><b>Administrador atual</b><span>${esc(nome)}</span><b>E-mail</b><span>${esc(sessaoPortal.user.email||'—')}</span><b>Campos sensíveis</b><span>Exclusivos de administradores.</span></div><div id="acessos-lista" style="margin-top:22px"><p style="font-size:13px;color:var(--ink-soft)">Carregando usuários e permissões…</p></div></div>`;
+  try{
+    const {usuarios,porUsuario}=await listarUsuariosAcessos();
+    const lista=document.getElementById('acessos-lista');if(!lista)return;
+    lista.innerHTML=`<div style="font-weight:800;font-size:14px;margin-bottom:6px">Usuários cadastrados</div><p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px">Administradores veem tudo. Colaboradores só acessam módulos concedidos e, dentro deles, continuam limitados aos próprios registros.</p>${usuarios.map(u=>cartaoPermissoesUsuario(u,porUsuario.get(u.id)||new Set())).join('')||'<p style="font-size:13px;color:var(--ink-soft)">Nenhum perfil disponível.</p>'}`;
+  }catch(e){
+    const lista=document.getElementById('acessos-lista');if(lista)lista.innerHTML='<div style="padding:12px;border-radius:8px;background:#fff7ed;font-size:12px;color:#9a4d08">Não foi possível carregar as permissões. Execute primeiro a migration da Fase 2 e atualize esta página.</div>';
+  }
+}
+
+async function salvarAcessosUsuario(userId){
+  if(!podeGerenciarAcessos()||userId===sessaoPortal?.user?.id){toast('Não é permitido alterar o próprio perfil nesta tela.');return;}
+  const perfil=document.getElementById(`perfil-${userId}`),ativo=document.getElementById(`ativo-${userId}`);
+  const {error:erroPerfil}=await supabasePortal.from('profiles').update({role:perfil.value,active:ativo.checked}).eq('id',userId);
+  if(erroPerfil){toast('Não foi possível salvar o perfil do usuário.');return;}
+  const selecionados=[...document.querySelectorAll(`[data-permissao-usuario="${userId}"]:checked`)].map(el=>el.dataset.modulo);
+  const {error:erroExcluir}=await supabasePortal.from('user_module_permissions').delete().eq('user_id',userId);
+  if(erroExcluir){toast('O perfil foi salvo, mas as permissões não foram atualizadas.');return;}
+  if(selecionados.length){
+    const linhas=selecionados.map(module_key=>({user_id:userId,module_key,created_by:sessaoPortal.user.id}));
+    const {error:erroInserir}=await supabasePortal.from('user_module_permissions').insert(linhas);
+    if(erroInserir){toast('O perfil foi salvo, mas as permissões não foram atualizadas.');return;}
+  }
+  toast('Acessos atualizados.');renderAcessos();
 }
 
 async function aplicarSessaoPortal(session){
@@ -1552,6 +1624,12 @@ async function aplicarSessaoPortal(session){
     return;
   }
   if(perfilPortal?.active===false){atualizarNavegacaoAcessos();exibirLogin('Este usuário está inativo. Solicite a liberação a um administrador.');return;}
+  const permissoesCarregadas=await carregarPermissoesModuloPortal();
+  if(!permissoesCarregadas&&!podeGerenciarAcessos()){
+    atualizarNavegacaoAcessos();
+    exibirLogin('Seu perfil está ativo, mas as permissões por módulo ainda não foram configuradas. Execute a migration da Fase 2 e solicite a liberação ao administrador.');
+    return;
+  }
   atualizarNavegacaoAcessos();
   ocultarLogin();
   renderAcessos();
