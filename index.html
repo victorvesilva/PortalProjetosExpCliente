@@ -127,6 +127,7 @@ img[src$="hapvida-logo.jpg"]{
 .nav-item[data-page="licoes"] .icon::before{content:'✦'}
 .nav-item[data-page="projetos"] .icon::before{content:'▱'}
 .nav-item[data-page="lecoms"] .icon::before{content:'▣'}
+.nav-item[data-page="solicitacoes"] .icon::before{content:'⊞'}
 .nav-item[data-page="configuracoes"] .icon::before{content:'⚙'}
 .nav-item[data-page="acessos"] .icon::before{content:'⌑'}
 /* Locked: cor sólida direta (não opacity sobre opacity — isso multiplicava os
@@ -182,6 +183,15 @@ body.sidebar-collapsed #btn-sidebar-toggle{display:flex}
 
 .topbar-title h2{font-size:16px; font-weight:800}
 .topbar-title p{font-size:11.5px; color:var(--ink-mute); margin:1px 0 0}
+.global-search{width:min(290px,28vw);min-width:180px;padding:8px 11px;border:1.5px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);font:inherit;font-size:12px;outline:none}
+.global-search:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,65,166,.1)}
+.global-search-results{position:absolute;right:18px;top:58px;width:min(390px,calc(100vw - 36px));max-height:360px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg);z-index:50;display:none}
+.global-search-results.open{display:block}.global-search-result{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-bottom:1px solid var(--line);cursor:pointer}.global-search-result:last-child{border-bottom:0}.global-search-result:hover{background:#f6f8fc}.global-search-result b{font-size:12px;color:var(--ink)}.global-search-result small{display:block;color:var(--ink-mute);font-size:10.5px;margin-top:3px}
+.notification-wrap{position:relative;margin-left:auto;flex:0 0 auto}.notification-button{border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);border-radius:9px;width:38px;height:38px;cursor:pointer;position:relative;display:grid;place-items:center}.notification-button svg{width:18px;height:18px;stroke:currentColor}.notification-button:hover{border-color:var(--blue);color:var(--blue)}.notification-count{position:absolute;right:-5px;top:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-weight:800;display:grid;place-items:center}.notification-popover{position:absolute;right:0;top:46px;width:min(360px,calc(100vw - 32px));max-height:330px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg);z-index:50;display:none}.notification-popover.open{display:block}.notification-popover h4{margin:0;padding:13px;border-bottom:1px solid var(--line);font-size:12px}.notification-item{padding:10px 13px;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-soft)}.notification-item:last-child{border-bottom:0}
+#auth-logout{margin-left:0 !important}
+.access-user-list{display:flex;flex-direction:column;gap:8px}.access-user-row{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}.access-user-row summary{list-style:none;cursor:pointer;padding:13px 15px;display:flex;align-items:center;gap:12px}.access-user-row summary::-webkit-details-marker{display:none}.access-user-row summary::after{content:'＋';margin-left:auto;color:var(--ink-mute);font-size:16px}.access-user-row[open] summary::after{content:'−'}.access-user-row summary:hover{background:#f7f9fd}.access-user-details{padding:0 15px 15px;border-top:1px solid var(--line)}
+.multi-select-dropdown{position:relative}.multi-select-dropdown summary{list-style:none;cursor:pointer;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink-soft);font-size:13px}.multi-select-dropdown summary::-webkit-details-marker{display:none}.multi-select-dropdown[open] summary{border-color:var(--blue);border-radius:8px 8px 0 0}.multi-select-options{position:absolute;left:0;right:0;z-index:8;background:#fff;border:1.5px solid var(--blue);border-top:0;border-radius:0 0 8px 8px;padding:8px;box-shadow:var(--shadow-lg);display:grid;grid-template-columns:repeat(2,minmax(200px,1fr));gap:4px 14px;max-height:220px;overflow-y:auto}.multi-select-options label{display:flex!important;align-items:center;justify-content:flex-start;width:100%;min-height:32px;box-sizing:border-box;gap:8px;margin:0!important;padding:6px 8px;border-radius:6px;font-size:11.5px;line-height:1.25;white-space:normal}.multi-select-options label input[type=checkbox]{flex:0 0 auto;width:15px;height:15px;margin:0;order:0}.multi-select-options label:hover{background:#f1f5fb}
+@media(max-width:700px){.multi-select-options{grid-template-columns:1fr;gap:3px}}
 
 .project-switch{
   margin-left:auto; display:flex; align-items:center; gap:10px; padding:7px 14px 7px 8px;
@@ -489,6 +499,8 @@ body.sidebar-collapsed #btn-sidebar-toggle{display:flex}
   #main{margin-left:0}
   #btn-sidebar-toggle{display:flex}
   .project-switch .info{display:none}
+  .global-search{width:min(220px,36vw);min-width:140px}
+  .grid-3{grid-template-columns:repeat(2,minmax(140px,1fr)) !important}
 }
 @media print{
   #sidebar,.topbar,#sr-empty,.sr-grid{display:none !important}
@@ -583,14 +595,17 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     <div class="nav-item active" data-page="home"><span class="icon"></span> Portfólio de Projetos</div>
     <div class="nav-item" data-page="dashboardprojeto"><span class="icon">📊</span> Dashboard do Projeto</div>
     <div class="nav-item" data-page="lecoms"><span class="icon">▣</span> LECOMs</div>
+    <div class="nav-item" data-page="solicitacoes"><span class="icon">＋</span> Solicitações</div>
   </div>
 
   <!-- PLANEJAMENTO -->
   <div class="nav-group-label" data-toggle-group><span>Planejamento</span><span class="chevron">▾</span></div>
   <div class="nav-group-body">
     <div class="nav-item nav-item-sub" data-page="tap"><span class="icon">📄</span> TAP</div>
+    <!-- EAP e Matriz RACI temporariamente ocultos do menu. Preservar para reativação futura.
     <div class="nav-item nav-item-sub" data-page="eap"><span class="icon">🌳</span> EAP</div>
     <div class="nav-item nav-item-sub" data-page="raci"><span class="icon">👥</span> Matriz RACI</div>
+    -->
   </div>
 
   <!-- EXECUÇÃO -->
@@ -600,7 +615,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     <div class="nav-item nav-item-sub" data-page="statusreport"><span class="icon">📈</span> Status Report</div>
     <div class="nav-item nav-item-sub" data-page="riscos"><span class="icon">⚠️</span> Riscos</div>
     <div class="nav-item nav-item-sub" data-page="pontosfocais"><span class="icon">🎯</span> Pontos Focais</div>
-    <div class="nav-item nav-item-sub" data-page="encaminhamentos"><span class="icon">✅</span> Encaminhamentos</div>
+    <div class="nav-item nav-item-sub" data-page="encaminhamentos"><span class="icon">✅</span> On Demand</div>
   </div>
 
   <!-- ENCERRAMENTO -->
@@ -638,7 +653,10 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
       </div>
       <span class="chev">▾</span>
     </div>
+    <input id="busca-global" class="global-search" type="search" placeholder="Buscar no portal..." aria-label="Buscar no portal" oninput="buscarGlobal(this.value)" onkeydown="if(event.key==='Escape')fecharBuscaGlobal()">
+    <div class="notification-wrap"><button id="notification-button" class="notification-button" aria-label="Notificações" onclick="alternarNotificacoes()"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span id="notification-count" class="notification-count" style="display:none">0</span></button><div id="notification-popover" class="notification-popover"></div></div>
     <button id="auth-logout" class="btn btn-outline btn-sm" style="display:none;margin-left:auto" onclick="sairDoPortal()">Sair</button>
+    <div id="busca-global-resultados" class="global-search-results" role="listbox"></div>
   </div>
 
   <div class="content">
@@ -691,7 +709,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
           </span>
         </div>
 
-        <div class="grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px">
+        <div class="grid-3" style="display:grid; grid-template-columns:repeat(5,minmax(145px,1fr)); gap:16px; margin-bottom:16px">
           <div class="card">
             <div class="card-eyebrow" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);margin-bottom:8px">Cronograma</div>
             <div style="font-family:'Manrope';font-size:26px;font-weight:800;color:var(--blue)" id="dash-crono-pct">0%</div>
@@ -703,9 +721,19 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
             <p style="font-size:12px;color:var(--ink-soft);margin-top:4px" id="dash-riscos-sub">Nenhum risco em aberto</p>
           </div>
           <div class="card">
-            <div class="card-eyebrow" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);margin-bottom:8px">Encaminhamentos</div>
+            <div class="card-eyebrow" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);margin-bottom:8px">On Demand</div>
             <div style="font-family:'Manrope';font-size:26px;font-weight:800;color:var(--red)" id="dash-enc-count">0</div>
             <p style="font-size:12px;color:var(--ink-soft);margin-top:4px" id="dash-enc-sub">Nenhum vencido</p>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);margin-bottom:8px">Próximos prazos</div>
+            <div style="font-family:'Manrope';font-size:26px;font-weight:800;color:#A16207" id="dash-proximos-count">0</div>
+            <p style="font-size:12px;color:var(--ink-soft);margin-top:4px">Próximos 7 dias</p>
+          </div>
+          <div class="card">
+            <div class="card-eyebrow" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);margin-bottom:8px">Sem atualização</div>
+            <div style="font-family:'Manrope';font-size:26px;font-weight:800;color:var(--blue)" id="dash-sem-atualizacao">0</div>
+            <p style="font-size:12px;color:var(--ink-soft);margin-top:4px">Projetos há mais de 14 dias</p>
           </div>
         </div>
 
@@ -937,12 +965,12 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     <div class="page" id="page-encaminhamentos">
       <div class="empty-state" id="enc-empty">
         <div class="icon">✅</div><h3>Nenhum projeto selecionado</h3>
-        <p>Selecione um projeto na Central de Comando para ver ou cadastrar encaminhamentos.</p>
+        <p>Selecione um projeto na Central de Comando para ver ou cadastrar itens On Demand.</p>
         <button class="btn btn-primary" onclick="navigate('home')">Ir para Central de Comando</button>
       </div>
       <div id="enc-conteudo" style="display:none">
       <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:14px">
-        <button class="btn btn-outline btn-sm" onclick="abrirPreviewEncaminhamentos()">Exportar PDF</button><button class="btn btn-primary" onclick="abrirModalEncaminhamento()">+ Novo Encaminhamento</button>
+        <button class="btn btn-outline btn-sm" onclick="abrirPreviewEncaminhamentos()">Exportar PDF</button><button class="btn btn-primary" onclick="abrirModalEncaminhamento()">+ Novo On Demand</button>
       </div>
       <div class="dtable-wrap">
         <table class="dtable">
@@ -1002,7 +1030,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <div class="card"><div class="card-eyebrow" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);margin-bottom:8px">Atenção</div><div style="font-family:'Manrope';font-size:26px;font-weight:800;color:#A16207" id="portf-atencao">0</div><p style="font-size:12px;color:var(--ink-soft);margin-top:4px">Projetos com alerta</p></div>
         <div class="card"><div class="card-eyebrow" style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-mute);margin-bottom:8px">Em risco</div><div style="font-family:'Manrope';font-size:26px;font-weight:800;color:var(--red)" id="portf-risco">0</div><p style="font-size:12px;color:var(--ink-soft);margin-top:4px">Projetos críticos</p></div>
       </div>
-      <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Projeto</th><th>Status</th><th>Saúde</th><th>Cronograma</th><th>Riscos</th><th>Encaminhamentos</th><th>Próximo marco</th><th></th></tr></thead><tbody id="portf-tbody"></tbody></table></div>
+      <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Projeto</th><th>Status</th><th>Saúde</th><th>Cronograma</th><th>Riscos</th><th>On Demand</th><th>Próximo marco</th><th></th></tr></thead><tbody id="portf-tbody"></tbody></table></div>
     </div>
     <div class="page" id="page-projetos">
       <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap"><div><b style="font-size:14px">Portfólio de Projetos</b><p style="font-size:12px;color:var(--ink-mute);margin:4px 0 0">Visão executiva de planejamento, replanejamento e entrega.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="baixarModeloProjetos()">Modelo de planilha</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('projetos-importar').click()">Importar</button><button class="btn btn-outline btn-sm" onclick="exportarProjetosXlsx()">Exportar</button><button class="btn btn-primary" onclick="abrirModalProjeto()">+ Novo Projeto</button></div></div>
@@ -1025,16 +1053,28 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
       <div class="card" style="margin-bottom:16px;padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap"><select id="lecom-filtro-status" onchange="renderLecoms()"><option value="">Todos os status</option><option value="a_iniciar">À iniciar</option><option value="andamento">Em andamento</option><option value="atrasado">Atrasado</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select><select id="lecom-filtro-classificacao" onchange="renderLecoms()"><option value="">Projeto e melhoria</option><option value="projeto">Projeto</option><option value="melhoria">Melhoria</option></select><input id="lecom-busca" oninput="renderLecoms()" placeholder="Buscar iniciativa, ID ou solicitante" style="min-width:230px"></div>
       <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Iniciativa / ID</th><th>Solicitante</th><th>Classificação</th><th>Priorização</th><th>Compromisso</th><th>Responsável TI</th><th>Produção</th><th>Status</th><th></th></tr></thead><tbody id="lecoms-tbody"></tbody></table></div>
     </div>
+    <div class="page" id="page-solicitacoes">
+      <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+        <div><b style="font-size:14px">Solicitações</b><p style="font-size:12px;color:var(--ink-mute);margin:4px 0 0">Cadastre uma solicitação de LECOM ou um novo projeto.</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="solicitacoes-filtro-status" onchange="renderSolicitacoes()" style="padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px"><option value="">Todos os status</option><option value="enviada">Enviada</option><option value="em_analise">Em análise</option><option value="aprovada">Aprovada</option><option value="em_execucao">Em execução</option><option value="concluida">Concluída</option><option value="reprovada">Reprovada</option><option value="cancelada">Cancelada</option></select><button class="btn btn-outline btn-sm" onclick="abrirModalSolicitacao('lecom')">+ Solicitar LECOM</button><button class="btn btn-primary btn-sm" onclick="abrirModalSolicitacao('projeto')">+ Solicitar novo projeto</button></div>
+      </div>
+      <div class="card" style="margin-bottom:16px;padding:13px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span class="badge badge-info" id="solicitacoes-visao-label">Minhas solicitações</span><span style="font-size:12px;color:var(--ink-soft)" id="solicitacoes-resumo">Carregando solicitações…</span></div>
+      <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Tipo</th><th>Título da demanda</th><th>Solicitante</th><th>Área</th><th>Data</th><th>Status</th><th></th></tr></thead><tbody id="solicitacoes-tbody"></tbody></table></div>
+    </div>
     <div class="page" id="page-configuracoes">
       <div class="card" style="max-width:760px">
         <div style="font-weight:800;font-size:15px;margin-bottom:6px">Ambiente de demonstração</div>
-        <p style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0 0 18px">Carregue uma carteira fictícia completa para demonstrar os módulos de projeto, cronograma, status report, riscos, EAP, RACI, pontos focais, encaminhamentos, TEP e LECOMs.</p>
+        <p style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0 0 18px">Carregue uma carteira fictícia completa para demonstrar os módulos de projeto, cronograma, status report, riscos, EAP, RACI, pontos focais, On Demand, TEP e LECOMs.</p>
         <div style="padding:12px 14px;border-radius:8px;background:#fff7ed;color:#9a4d08;font-size:12px;margin-bottom:18px">Esta ação substitui os dados atualmente armazenados neste navegador.</div>
         <button class="btn btn-primary" onclick="carregarDadosDemo()">Carregar dados de demonstração</button>
       </div>
       <div class="card" style="max-width:760px;margin-top:16px">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><div style="font-weight:800;font-size:15px">Console do sistema</div><p style="font-size:12px;color:var(--ink-soft);margin:5px 0 0">Registro local de erros e eventos importantes. Útil para identificar falhas de exportação.</p></div><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="copiarLogsSistema()">Copiar logs</button><button class="btn btn-outline btn-sm" onclick="limparLogsSistema()">Limpar</button></div></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px" class="console-grid"><div><b style="font-size:12px;color:var(--green)">Execuções e sucessos</b><pre id="console-execucao" style="margin:8px 0 0;max-height:260px;overflow:auto;padding:14px;border-radius:8px;background:#101827;color:#d7e2f4;font:11px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap">Nenhuma execução registrada.</pre></div><div><b style="font-size:12px;color:var(--red)">Erros</b><pre id="console-erros" style="margin:8px 0 0;max-height:260px;overflow:auto;padding:14px;border-radius:8px;background:#261419;color:#ffd9df;font:11px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap">Nenhum erro registrado.</pre></div></div>
+      </div>
+      <div class="card" style="max-width:760px;margin-top:16px">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><div style="font-weight:800;font-size:15px">Histórico de alterações</div><p style="font-size:12px;color:var(--ink-soft);margin:5px 0 0">Auditoria local das operações realizadas neste navegador. A auditoria definitiva deve ser persistida no Supabase.</p></div><button class="btn btn-outline btn-sm" onclick="limparAuditoriaLocal()">Limpar histórico</button></div>
+        <pre id="auditoria-local" style="margin:14px 0 0;max-height:240px;overflow:auto;padding:14px;border-radius:8px;background:#f6f8fc;color:var(--ink-soft);font:11px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap">Nenhuma alteração registrada.</pre>
       </div>
     </div>
     <div class="page" id="page-acessos"><div id="acessos-conteudo"></div></div>
@@ -1106,6 +1146,43 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     </div></div><div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-lecom')">Cancelar</button><button class="btn btn-primary" onclick="salvarLecom()">Salvar LECOM</button></div>
   </div>
 </div>
+
+<!-- ═══ MODAL: Solicitar LECOM / novo projeto ═══ -->
+<div class="modal-overlay" id="modal-solicitacao">
+  <div class="modal modal-lg" style="width:min(1080px,94vw)">
+    <div class="modal-header"><h3 id="modal-solicitacao-titulo">Solicitar LECOM</h3><button class="modal-close" onclick="fecharModal('modal-solicitacao')">✕</button></div>
+    <div class="modal-body"><input type="hidden" id="sol-id"><input type="hidden" id="sol-tipo">
+      <div class="form-grid">
+        <div class="field"><label>Solicitante <span class="req">*</span></label><input id="sol-solicitante" placeholder="Nome do solicitante"></div>
+        <div class="field"><label>Área solicitante <span class="req">*</span></label><input id="sol-area-solicitante" placeholder="Ex: Atendimento"></div>
+        <div class="field"><label>Formulário de Segurança da Informação <span class="req">*</span></label><select id="sol-seguranca"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+        <div class="field"><label>Envolve IA? <span class="req">*</span></label><select id="sol-envolve-ia"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+        <div class="field span2"><label>Área TI <span class="req">*</span></label><details class="multi-select-dropdown" id="sol-area-ti-dropdown"><summary id="sol-area-ti-label">Selecione uma ou mais áreas TI</summary><div class="multi-select-options"><label><input type="checkbox" name="sol-area-ti" value="Arquitetura" onchange="atualizarAreasTiSolicitacao()"> Arquitetura</label><label><input type="checkbox" name="sol-area-ti" value="Backoffice" onchange="atualizarAreasTiSolicitacao()"> Backoffice</label><label><input type="checkbox" name="sol-area-ti" value="Digital" onchange="atualizarAreasTiSolicitacao()"> Digital</label><label><input type="checkbox" name="sol-area-ti" value="Governança de TI" onchange="atualizarAreasTiSolicitacao()"> Governança de TI</label><label><input type="checkbox" name="sol-area-ti" value="Infraestrutura" onchange="atualizarAreasTiSolicitacao()"> Infraestrutura</label><label><input type="checkbox" name="sol-area-ti" value="Inovação" onchange="atualizarAreasTiSolicitacao()"> Inovação</label><label><input type="checkbox" name="sol-area-ti" value="Insights" onchange="atualizarAreasTiSolicitacao()"> Insights</label><label><input type="checkbox" name="sol-area-ti" value="Segurança da Informação" onchange="atualizarAreasTiSolicitacao()"> Segurança da Informação</label><label><input type="checkbox" name="sol-area-ti" value="SIGO" onchange="atualizarAreasTiSolicitacao()"> SIGO</label><label><input type="checkbox" name="sol-area-ti" value="SIGA" onchange="atualizarAreasTiSolicitacao()"> SIGA</label></div></details></div>
+        <div class="field"><label>Produto / funcionalidade</label><input id="sol-produto" placeholder="Ex: WhatsApp, URA, Automação, Autorização, Agendas"></div>
+        <div class="field span2"><label>Título da demanda <span class="req">*</span></label><input id="sol-titulo" placeholder="Descreva o nome da solicitação"></div>
+        <div class="field span2"><label>Objetivo <span class="req">*</span></label><textarea id="sol-objetivo" rows="3"></textarea></div>
+        <div class="field span2"><label>Justificativa <span class="req">*</span></label><textarea id="sol-justificativa" rows="3"></textarea></div>
+        <div class="field span2"><label>Principais entregas</label><textarea id="sol-entregas" rows="3"></textarea></div>
+        <div class="field span2"><label>Áreas de negócio e TI impactadas</label><textarea id="sol-areas-impactadas" rows="2"></textarea></div>
+        <div class="field span2"><label>Sistemas, telas ou relatórios impactados</label><textarea id="sol-sistemas-impactados" rows="2"></textarea></div>
+        <div class="field"><label>Tipo de demanda <span class="req">*</span></label><select id="sol-tipo-demanda"><option value="evolucao">Evolução</option><option value="sustentacao">Sustentação</option><option value="transformacao">Transformação</option></select></div>
+        <div class="field"><label>Comissão aprovadora <span class="req">*</span></label><select id="sol-comissao"><option value="assistencial">Assistencial</option><option value="eficiencia_operacional">Eficiência Operacional</option></select></div>
+        <div class="field"><label>Impacto na jornada do beneficiário?</label><select id="sol-impacto-jornada"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+        <div class="field"><label>Impacto em NIPS?</label><select id="sol-impacto-nips"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+        <div class="field"><label>Impacto financeiro?</label><select id="sol-impacto-financeiro" onchange="alternarCamposCondicionaisSolicitacao()"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+        <div class="field"><label>Impacto compliance?</label><select id="sol-impacto-compliance" onchange="alternarCamposCondicionaisSolicitacao()"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+        <div class="field"><label>Risco assistencial?</label><select id="sol-risco-assistencial" onchange="alternarCamposCondicionaisSolicitacao()"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+        <div class="field span2" id="sol-financeiro-wrap" hidden><label>Descrição e indicador de impacto financeiro <span class="req">*</span></label><textarea id="sol-financeiro-detalhe" rows="2" placeholder="Descreva o impacto e informe o indicador"></textarea></div>
+        <div class="field span2" id="sol-compliance-wrap" hidden><label>Descrição e indicador de impacto compliance <span class="req">*</span></label><textarea id="sol-compliance-detalhe" rows="2" placeholder="Descreva o impacto e informe o indicador"></textarea></div>
+        <div class="field span2" id="sol-risco-wrap" hidden><label>Descrição e indicador de risco assistencial <span class="req">*</span></label><textarea id="sol-risco-detalhe" rows="2" placeholder="Descreva o risco e informe o indicador"></textarea></div>
+        <div class="field span2"><label>Observações</label><textarea id="sol-observacoes" rows="3"></textarea></div>
+        <div class="field span2"><label>Anexos</label><input id="sol-anexos" type="file" multiple><small style="display:block;color:var(--ink-mute);margin-top:5px">Os nomes e metadados serão registrados. O armazenamento definitivo no Supabase Storage será conectado posteriormente.</small><div id="sol-anexos-lista" style="font-size:11px;color:var(--ink-soft);margin-top:6px"></div></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-solicitacao')">Cancelar</button><button class="btn btn-primary" onclick="salvarSolicitacao()">Enviar solicitação</button></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-solicitacao-detalhe"><div class="modal modal-lg" style="width:min(980px,94vw)"><div class="modal-header"><h3>Detalhes da solicitação</h3><button class="modal-close" onclick="fecharModal('modal-solicitacao-detalhe')">✕</button></div><div class="modal-body" id="sol-detalhe-conteudo"></div><div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-solicitacao-detalhe')">Fechar</button></div></div></div>
 
 <!-- ═══ MODAL: Nova/Editar melhoria ═══ -->
 <div class="modal-overlay" id="modal-melhoria">
@@ -1309,7 +1386,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
 <div class="modal-overlay" id="modal-encaminhamento">
   <div class="modal">
     <div class="modal-header">
-      <h3 id="modal-enc-titulo">Novo Encaminhamento</h3>
+      <h3 id="modal-enc-titulo">Novo On Demand</h3>
       <button class="modal-close" onclick="fecharModal('modal-encaminhamento')">✕</button>
     </div>
     <div class="modal-body">
@@ -1326,7 +1403,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="fecharModal('modal-encaminhamento')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarEncaminhamento()">Salvar Encaminhamento</button>
+      <button class="btn btn-primary" onclick="salvarEncaminhamento()">Salvar On Demand</button>
     </div>
   </div>
 </div>
@@ -1368,7 +1445,7 @@ const PAGE_META = {
   statusreport:      { titulo:'Status Report',            sub:'Relatório executivo de acompanhamento' },
   riscos:            { titulo:'Riscos',                   sub:'Mapa de riscos do projeto' },
   pontosfocais:      { titulo:'Pontos Focais',            sub:'Contatos e responsáveis do projeto' },
-  encaminhamentos:   { titulo:'Encaminhamentos',          sub:'Ações extraídas de atas e reuniões' },
+  encaminhamentos:   { titulo:'On Demand',                sub:'Ações e solicitações do projeto' },
   tep:               { titulo:'TEP',                      sub:'Termo de Encerramento do Projeto' },
   licoes:            { titulo:'Lições Aprendidas',        sub:'Registro estruturado de aprendizados' },
   atas:              { titulo:'Gerador de Atas',          sub:'Atas no padrão Hapvida' },
@@ -1376,6 +1453,7 @@ const PAGE_META = {
   projetos:          { titulo:'Projetos',                 sub:'Portfólio de projetos do trimestre' },
   melhorias:         { titulo:'Melhorias',                sub:'Portfólio de demandas do trimestre' },
   lecoms:            { titulo:'LECOMs',                   sub:'Portfólio de iniciativas, projetos e melhorias' },
+  solicitacoes:      { titulo:'Solicitações',             sub:'Solicitação de LECOM ou novo projeto' },
   configuracoes:     { titulo:'Configurações',            sub:'Chaves de API e preferências' },
   acessos:           { titulo:'Acessos',                  sub:'Usuários e permissões do portal' },
 };
@@ -1502,9 +1580,62 @@ function toast(msg){
   toastTimer = setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(-50%)'; }, 2800);
 }
 
+/* Busca global: localiza rapidamente projetos e registros sem perder o contexto atual. */
+function fecharBuscaGlobal(){const el=document.getElementById('busca-global-resultados');if(el){el.classList.remove('open');el.innerHTML='';}}
+function abrirResultadoGlobal(tipo,id,projetoId){
+  fecharBuscaGlobal();
+  const input=document.getElementById('busca-global');if(input)input.value='';
+  if(projetoId) definirProjetoAtivo(projetoId);
+  if(tipo==='projeto'){selecionarProjeto(id);return;}
+  const paginas={tarefa:'cronograma',risco:'riscos',ondemand:'encaminhamentos',lecom:'lecoms'};
+  if(paginas[tipo]) navigate(paginas[tipo]);
+}
+function buscarGlobal(valor){
+  const painel=document.getElementById('busca-global-resultados');if(!painel)return;
+  const termo=String(valor||'').trim().toLocaleLowerCase('pt-BR');
+  if(termo.length<2){fecharBuscaGlobal();return;}
+  const normalizar=v=>String(v||'').toLocaleLowerCase('pt-BR');
+  const resultados=[];
+  STATE.projetos.forEach(p=>{if([p.nome,p.lecom,p.gerente_projeto,p.macro_entrega].some(v=>normalizar(v).includes(termo)))resultados.push({tipo:'projeto',id:p.id,projetoId:p.id,titulo:p.nome,sub:`Projeto · ${p.lecom||'sem código'}`});});
+  STATE.tarefas.forEach(t=>{if([t.nome,t.responsavel,t.area,t.fase].some(v=>normalizar(v).includes(termo))){const p=STATE.projetos.find(x=>x.id===t.projeto_id);resultados.push({tipo:'tarefa',id:t.id,projetoId:t.projeto_id,titulo:t.nome,sub:`Atividade · ${p?.nome||'projeto'} · ${t.responsavel||'sem responsável'}`});}});
+  STATE.riscos.forEach(r=>{if([r.descricao,r.responsavel,r.categoria].some(v=>normalizar(v).includes(termo))){const p=STATE.projetos.find(x=>x.id===r.projeto_id);resultados.push({tipo:'risco',id:r.id,projetoId:r.projeto_id,titulo:r.descricao,sub:`Risco · ${p?.nome||'projeto'} · ${r.status||'sem status'}`});}});
+  STATE.encaminhamentos.forEach(e=>{if([e.tema,e.acao,e.responsavel].some(v=>normalizar(v).includes(termo))){const p=STATE.projetos.find(x=>x.id===e.projeto_id);resultados.push({tipo:'ondemand',id:e.id,projetoId:e.projeto_id,titulo:e.tema,sub:`On Demand · ${p?.nome||'projeto'} · ${e.status||'sem status'}`});}});
+  STATE.melhorias.forEach(l=>{if([l.iniciativa,l.titulo,l.codigo,l.solicitante,l.area_solicitante].some(v=>normalizar(v).includes(termo)))resultados.push({tipo:'lecom',id:l.id,titulo:l.iniciativa||l.titulo||l.codigo,sub:`LECOM · ${l.codigo||'sem código'} · ${l.status_producao||'sem status'}`});});
+  const limite=resultados.slice(0,12);
+  painel.innerHTML=limite.length?limite.map(r=>`<div class="global-search-result" role="option" onclick="abrirResultadoGlobal('${r.tipo}','${r.id}','${r.projetoId||''}')"><span style="font-size:15px;opacity:.7">${r.tipo==='projeto'?'▣':r.tipo==='tarefa'?'□':r.tipo==='risco'?'△':r.tipo==='ondemand'?'✓':'◈'}</span><span><b>${esc(r.titulo)}</b><small>${esc(r.sub)}</small></span></div>`).join(''):'<div style="padding:16px;color:var(--ink-mute);font-size:12px">Nenhum resultado encontrado.</div>';
+  painel.classList.add('open');
+}
+document.addEventListener('click',e=>{if(!e.target.closest('#busca-global')&&!e.target.closest('#busca-global-resultados'))fecharBuscaGlobal();});
+function listaNotificacoesPortal(){
+  const hoje=hojeISO(), itens=[];
+  STATE.tarefas.filter(t=>isAtrasada(t)).forEach(t=>itens.push({nivel:'erro',texto:'Atividade atrasada: '+t.nome,projeto:t.projeto_id,pagina:'cronograma'}));
+  STATE.tarefas.filter(t=>estaVencendoEmBreve(t.data_fim)&&!['concluido','cancelado'].includes(t.status)&&!isAtrasada(t)).forEach(t=>itens.push({nivel:'warn',texto:'Prazo próximo: '+t.nome,projeto:t.projeto_id,pagina:'cronograma'}));
+  STATE.encaminhamentos.filter(e=>e.prazo&&e.prazo<hoje&&!['Concluído','Cancelado'].includes(e.status)).forEach(e=>itens.push({nivel:'erro',texto:'On Demand vencido: '+e.tema,projeto:e.projeto_id,pagina:'encaminhamentos'}));
+  STATE.riscos.filter(r=>r.status!=='Encerrado'&&nivelRisco(r.probabilidade,r.impacto).label==='Alto').forEach(r=>itens.push({nivel:'erro',texto:'Risco alto: '+r.descricao,projeto:r.projeto_id,pagina:'riscos'}));
+  return itens.slice(0,20);
+}
+function renderNotificacoes(){
+  const count=document.getElementById('notification-count'),pop=document.getElementById('notification-popover');if(!count||!pop)return;
+  const itens=listaNotificacoesPortal();count.textContent=itens.length;count.style.display=itens.length?'grid':'none';
+  pop.innerHTML='<h4>Alertas e notificações</h4>'+(itens.length?itens.map(n=>`<div class="notification-item" style="border-left:3px solid ${n.nivel==='erro'?'var(--red)':'var(--orange)'};cursor:pointer" onclick="fecharNotificacoes();definirProjetoAtivo('${n.projeto}');navigate('${n.pagina}')">${esc(n.texto)}</div>`).join(''):'<div class="notification-item" style="color:var(--ink-mute)">Nenhuma pendência crítica encontrada.</div>');
+}
+function alternarNotificacoes(){const el=document.getElementById('notification-popover');if(!el)return;renderNotificacoes();el.classList.toggle('open');}
+function fecharNotificacoes(){document.getElementById('notification-popover')?.classList.remove('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.notification-wrap'))fecharNotificacoes();});
+
 const LOG_SISTEMA_KEY='portal_projetos_logs_v1';
 let LOGS_SISTEMA=[];
 try{LOGS_SISTEMA=JSON.parse(localStorage.getItem(LOG_SISTEMA_KEY)||'[]');if(!Array.isArray(LOGS_SISTEMA))LOGS_SISTEMA=[];}catch(e){LOGS_SISTEMA=[];}
+const AUDITORIA_LOCAL_KEY='portal_projetos_auditoria_v1';
+let AUDITORIA_LOCAL=[];
+try{AUDITORIA_LOCAL=JSON.parse(localStorage.getItem(AUDITORIA_LOCAL_KEY)||'[]');if(!Array.isArray(AUDITORIA_LOCAL))AUDITORIA_LOCAL=[];}catch(e){AUDITORIA_LOCAL=[];}
+function registrarAuditoria(acao,entidade,detalhe){
+  AUDITORIA_LOCAL.unshift({data:new Date().toLocaleString('pt-BR'),usuario:sessaoPortal?.user?.email||'sessão local',acao,entidade,detalhe:String(detalhe||'')});AUDITORIA_LOCAL=AUDITORIA_LOCAL.slice(0,100);
+  try{localStorage.setItem(AUDITORIA_LOCAL_KEY,JSON.stringify(AUDITORIA_LOCAL));}catch(e){}
+  renderAuditoriaLocal();
+}
+function renderAuditoriaLocal(){const el=document.getElementById('auditoria-local');if(!el)return;el.textContent=AUDITORIA_LOCAL.length?AUDITORIA_LOCAL.map(a=>`[${a.data}] ${a.acao.toUpperCase()} | ${a.entidade} | ${a.usuario}\n${a.detalhe}`).join('\n\n'):'Nenhuma alteração registrada.';}
+function limparAuditoriaLocal(){AUDITORIA_LOCAL=[];try{localStorage.removeItem(AUDITORIA_LOCAL_KEY);}catch(e){}renderAuditoriaLocal();toast('Histórico de alterações limpo.');}
 function registrarLogSistema(nivel,origem,detalhe){
   const mensagem=detalhe instanceof Error?(detalhe.stack||detalhe.message):String(detalhe||'');
   LOGS_SISTEMA.unshift({data:new Date().toLocaleString('pt-BR'),nivel,origem,mensagem});LOGS_SISTEMA=LOGS_SISTEMA.slice(0,100);
@@ -1516,6 +1647,7 @@ function renderConsoleSistema(){
   const listaErros=LOGS_SISTEMA.filter(l=>l.nivel==='erro'),listaExecucao=LOGS_SISTEMA.filter(l=>l.nivel!=='erro');
   execucao.textContent=listaExecucao.length?listaExecucao.map(formatarLogSistema).join('\n\n'):'Nenhuma execução registrada.';
   erros.textContent=listaErros.length?listaErros.map(formatarLogSistema).join('\n\n'):'Nenhum erro registrado.';
+  renderAuditoriaLocal();
 }
 function limparLogsSistema(){LOGS_SISTEMA=[];try{localStorage.removeItem(LOG_SISTEMA_KEY);}catch(e){}renderConsoleSistema();toast('Console limpo.');}
 async function copiarLogsSistema(){const texto=LOGS_SISTEMA.length?LOGS_SISTEMA.map(l=>`[${l.data}] ${l.nivel.toUpperCase()} | ${l.origem}\n${l.mensagem}`).join('\n\n'):'Nenhum evento registrado.';try{await navigator.clipboard.writeText(texto);toast('Logs copiados.');}catch(e){registrarLogSistema('erro','Console','Não foi possível copiar os logs: '+e.message);toast('Não foi possível copiar os logs.');}}
@@ -1536,18 +1668,21 @@ let supabasePortal=null;
 let sessaoPortal=null;
 let perfilPortal=null;
 let perfilPortalPendente=false;
+let adminPortalConfirmado=false;
 let fluxoRecuperacaoSenha=false;
 let permissoesModuloPortal=new Set();
 let permissoesModuloProntas=false;
 const MODULOS_PORTAL=[
   ['portfolio','Portfólio de Projetos'],['tap','TAP'],['eap','EAP'],['raci','Matriz RACI'],
   ['cronograma','Cronograma'],['statusreport','Status Report'],['riscos','Riscos'],['pontosfocais','Pontos Focais'],
-  ['encaminhamentos','Encaminhamentos'],['tep','TEP'],['licoes','Lições Aprendidas'],['lecoms','LECOMs']
+  ['encaminhamentos','On Demand'],['tep','TEP'],['licoes','Lições Aprendidas'],['lecoms','LECOMs'],['solicitacoes','Solicitações']
 ];
-const MODULO_POR_PAGINA={home:'portfolio',projetos:'portfolio',portfdash:'portfolio',dashboardprojeto:'portfolio',tap:'tap',eap:'eap',raci:'raci',cronograma:'cronograma',statusreport:'statusreport',riscos:'riscos',pontosfocais:'pontosfocais',encaminhamentos:'encaminhamentos',tep:'tep',licoes:'licoes',lecoms:'lecoms'};
+const MODULO_POR_PAGINA={home:'portfolio',projetos:'portfolio',portfdash:'portfolio',dashboardprojeto:'portfolio',tap:'tap',eap:'eap',raci:'raci',cronograma:'cronograma',statusreport:'statusreport',riscos:'riscos',pontosfocais:'pontosfocais',encaminhamentos:'encaminhamentos',tep:'tep',licoes:'licoes',lecoms:'lecoms',solicitacoes:'solicitacoes'};
 
-function podeGerenciarAcessos(){ return !!sessaoPortal && perfilPortal?.role==='admin' && perfilPortal?.active!==false; }
-function temPermissaoModulo(modulo){return podeGerenciarAcessos()||permissoesModuloPortal.has(modulo);}
+function papelPortal(){return String(perfilPortal?.role||'').trim().toLowerCase();}
+/* A confirmação por RPC usa a função is_admin() protegida por RLS como fonte de verdade. */
+function podeGerenciarAcessos(){ return !!sessaoPortal && (adminPortalConfirmado||papelPortal()==='admin') && perfilPortal?.active!==false; }
+function temPermissaoModulo(modulo){return podeGerenciarAcessos()||modulo==='solicitacoes'&&papelPortal()==='collaborator'||permissoesModuloPortal.has(modulo);}
 function atualizarNavegacaoAcessos(){
   const item=document.querySelector('.nav-item[data-page="acessos"]');
   if(!item)return;
@@ -1601,6 +1736,13 @@ async function carregarPerfilPortal(){
   perfilPortal=data;
 }
 
+async function verificarAdministradorPortal(){
+  adminPortalConfirmado=false;
+  if(!supabasePortal||!sessaoPortal?.user)return;
+  const {data,error}=await supabasePortal.rpc('is_admin');
+  adminPortalConfirmado=!error&&data===true;
+}
+
 async function carregarPermissoesModuloPortal(){
   permissoesModuloPortal=new Set();permissoesModuloProntas=false;
   if(!supabasePortal||!sessaoPortal?.user)return false;
@@ -1613,7 +1755,12 @@ async function carregarPermissoesModuloPortal(){
 }
 
 async function listarUsuariosAcessos(){
-  const {data:usuarios,error:erroUsuarios}=await supabasePortal.from('profiles').select('id,full_name,role,active,created_at').order('full_name',{ascending:true});
+  let consulta=await supabasePortal.from('profiles').select('id,full_name,email,role,active,created_at').order('full_name',{ascending:true});
+  if(consulta.error){
+    /* Compatibilidade com a migration base, que ainda não possui email em profiles. */
+    consulta=await supabasePortal.from('profiles').select('id,full_name,role,active,created_at').order('full_name',{ascending:true});
+  }
+  const {data:usuarios,error:erroUsuarios}=consulta;
   if(erroUsuarios)throw erroUsuarios;
   const {data:permissoes,error:erroPermissoes}=await supabasePortal.from('user_module_permissions').select('user_id,module_key');
   if(erroPermissoes)throw erroPermissoes;
@@ -1625,7 +1772,8 @@ async function listarUsuariosAcessos(){
 function cartaoPermissoesUsuario(usuario,permitidos){
   const proprio=usuario.id===sessaoPortal?.user?.id;
   const checks=MODULOS_PORTAL.map(([chave,rotulo])=>`<label style="display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:11.5px;background:#fff"><input type="checkbox" data-permissao-usuario="${usuario.id}" data-modulo="${chave}" ${permitidos.has(chave)?'checked':''} ${usuario.role==='admin'?'disabled':''}> ${rotulo}</label>`).join('');
-  return `<div class="card" style="padding:16px;margin-top:12px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><b>${esc(usuario.full_name||'Usuário sem nome')}</b><div class="mono" style="font-size:11px;color:var(--ink-mute);margin-top:3px">${esc(usuario.id)}</div></div><span class="badge ${usuario.active?'badge-ok':'badge-danger'}">${usuario.active?'Ativo':'Inativo'}</span></div><div style="display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:10px;margin-top:14px"><label style="font-size:12px;font-weight:700">Perfil<select id="perfil-${usuario.id}" ${proprio?'disabled':''} style="display:block;width:100%;margin-top:5px"><option value="collaborator" ${usuario.role==='collaborator'?'selected':''}>Colaborador</option><option value="admin" ${usuario.role==='admin'?'selected':''}>Administrador</option></select></label><label style="font-size:12px;font-weight:700;display:flex;align-items:end;gap:8px;padding-bottom:7px"><input id="ativo-${usuario.id}" type="checkbox" ${usuario.active?'checked':''} ${proprio?'disabled':''}> Usuário ativo</label></div><div style="margin-top:14px"><b style="font-size:12px">Módulos permitidos</b><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">${usuario.role==='admin'?'<span style="font-size:12px;color:var(--ink-soft)">Administradores possuem acesso integral por padrão.</span>':checks}</div></div><div style="display:flex;justify-content:flex-end;margin-top:15px"><button class="btn btn-primary btn-sm" onclick="salvarAcessosUsuario('${usuario.id}')" ${proprio?'disabled title="Não é permitido alterar o próprio perfil nesta tela"':''}>Salvar acesso</button></div></div>`;
+  const email=usuario.email || (proprio ? sessaoPortal?.user?.email : 'E-mail gerenciado pelo Supabase Auth');
+  return `<details class="access-user-row"><summary><span style="width:32px;height:32px;border-radius:50%;background:#e8eefb;color:var(--blue);display:grid;place-items:center;font-weight:800">${esc((usuario.full_name||'?').trim().charAt(0).toUpperCase())}</span><span style="min-width:0;flex:1"><b data-usuario-nome="${usuario.id}" style="display:block">${esc(usuario.full_name||'Usuário sem nome')}</b><small style="display:block;color:var(--ink-mute);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(email||'E-mail não disponível')}</small></span><span class="badge ${usuario.active?'badge-ok':'badge-danger'}">${usuario.active?'Ativo':'Inativo'}</span><span class="badge badge-neutral">${usuario.role==='admin'?'Administrador':'Colaborador'}</span></summary><div class="access-user-details"><div style="display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:10px;margin-top:14px"><label style="font-size:12px;font-weight:700">Perfil<select id="perfil-${usuario.id}" ${proprio?'disabled':''} style="display:block;width:100%;margin-top:5px"><option value="collaborator" ${usuario.role==='collaborator'?'selected':''}>Colaborador</option><option value="admin" ${usuario.role==='admin'?'selected':''}>Administrador</select></label><label style="font-size:12px;font-weight:700;display:flex;align-items:end;gap:8px;padding-bottom:7px"><input id="ativo-${usuario.id}" type="checkbox" ${usuario.active?'checked':''} ${proprio?'disabled':''}> Usuário ativo</label></div><div style="margin-top:14px"><b style="font-size:12px">Módulos permitidos</b><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">${usuario.role==='admin'?'<span style="font-size:12px;color:var(--ink-soft)">Administradores possuem acesso integral por padrão.</span>':checks}</div></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:15px"><button class="btn btn-outline btn-sm" onclick="excluirUsuarioAcesso('${usuario.id}')" ${proprio?'disabled title="Não é permitido excluir o próprio usuário"':''}>Excluir usuário</button><button class="btn btn-primary btn-sm" onclick="salvarAcessosUsuario('${usuario.id}')" ${proprio?'disabled title="Não é permitido alterar o próprio perfil nesta tela"':''}>Salvar acesso</button></div></div></details>`;
 }
 
 async function renderAcessos(){
@@ -1639,7 +1787,7 @@ async function renderAcessos(){
   try{
     const {usuarios,porUsuario}=await listarUsuariosAcessos();
     const lista=document.getElementById('acessos-lista');if(!lista)return;
-    lista.innerHTML=`<div style="font-weight:800;font-size:14px;margin-bottom:6px">Usuários cadastrados</div><p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px">Administradores veem tudo. Colaboradores só acessam módulos concedidos e, dentro deles, continuam limitados aos próprios registros.</p>${usuarios.map(u=>cartaoPermissoesUsuario(u,porUsuario.get(u.id)||new Set())).join('')||'<p style="font-size:13px;color:var(--ink-soft)">Nenhum perfil disponível.</p>'}`;
+    lista.innerHTML=`<div style="font-weight:800;font-size:14px;margin-bottom:6px">Usuários cadastrados</div><p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px">Clique em um usuário para visualizar ou alterar perfil, status e módulos. Administradores veem tudo; colaboradores continuam limitados aos próprios registros.</p><div class="access-user-list">${usuarios.map(u=>cartaoPermissoesUsuario(u,porUsuario.get(u.id)||new Set())).join('')||'<p style="font-size:13px;color:var(--ink-soft)">Nenhum perfil disponível.</p>'}</div>`;
   }catch(e){
     const lista=document.getElementById('acessos-lista');if(lista)lista.innerHTML='<div style="padding:12px;border-radius:8px;background:#fff7ed;font-size:12px;color:#9a4d08">Não foi possível carregar as permissões. Execute primeiro a migration da Fase 2 e atualize esta página.</div>';
   }
@@ -1661,16 +1809,32 @@ async function salvarAcessosUsuario(userId){
   toast('Acessos atualizados.');renderAcessos();
 }
 
+async function excluirUsuarioAcesso(userId){
+  if(!podeGerenciarAcessos()||userId===sessaoPortal?.user?.id){toast('Não é permitido excluir o próprio usuário.');return;}
+  const nome=document.querySelector(`[data-usuario-nome="${userId}"]`)?.textContent||'este usuário';
+  if(!confirm(`Excluir ${nome.trim()}? A operação tentará remover a conta no Supabase Auth. Caso o endpoint seguro ainda não esteja configurado, o usuário será apenas inativado.`))return;
+  try{
+    const resposta=await supabasePortal.functions.invoke('admin-delete-user',{body:{user_id:userId}});
+    if(!resposta.error){registrarAuditoria('excluir','usuário',`Usuário ${userId} removido pelo endpoint seguro.`);toast('Usuário excluído do Supabase.');renderAcessos();return;}
+  }catch(e){registrarLogSistema('info','Acessos','Endpoint admin-delete-user indisponível; aplicada inativação lógica.');}
+  const {error}=await supabasePortal.from('profiles').update({active:false}).eq('id',userId);
+  if(error){toast('Não foi possível excluir ou inativar o usuário.');registrarLogSistema('erro','Acessos',error);return;}
+  registrarAuditoria('inativar','usuário',`Usuário ${userId} marcado como inativo. Exclusão definitiva requer Edge Function segura.`);
+  toast('Usuário inativado. A exclusão definitiva requer o endpoint seguro do Supabase.');renderAcessos();
+}
+
 async function aplicarSessaoPortal(session){
   sessaoPortal=session||null;
-  if(!sessaoPortal){perfilPortal=null;perfilPortalPendente=false;atualizarNavegacaoAcessos();exibirLogin();return;}
+  if(!sessaoPortal){perfilPortal=null;perfilPortalPendente=false;adminPortalConfirmado=false;atualizarNavegacaoAcessos();exibirLogin();return;}
   ativarCacheDoUsuario(sessaoPortal.user.id);
+  await verificarAdministradorPortal();
   await carregarPerfilPortal();
-  if(perfilPortalPendente){
+  if(perfilPortalPendente&&!adminPortalConfirmado){
     atualizarNavegacaoAcessos();
     exibirLogin('Seu login foi reconhecido, mas o perfil ainda não está disponível. Execute a migration e promova o primeiro administrador antes de acessar o portal.');
     return;
   }
+  if(perfilPortalPendente&&adminPortalConfirmado){perfilPortal={id:sessaoPortal.user.id,full_name:sessaoPortal.user.email,role:'admin',active:true};perfilPortalPendente=false;}
   if(perfilPortal?.active===false){atualizarNavegacaoAcessos();exibirLogin('Este usuário está inativo. Solicite a liberação a um administrador.');return;}
   const permissoesCarregadas=await carregarPermissoesModuloPortal();
   if(!permissoesCarregadas&&!podeGerenciarAcessos()){
@@ -1780,13 +1944,16 @@ const STATE = {
   melhorias: [],            // { id, titulo, prioridade, status, responsavel, prazo, ... }
   pontosFocais: [],         // { id, projeto_id, nome, area, papel, email, telefone }
   statusReports: {},        // { [projeto_id]: {...} } — singleton por projeto (decisão travada: sobrescreve)
+  solicitacoes: [],         // solicitações de LECOM/projeto feitas por colaboradores
 };
 
 function salvarState(){
   try{
     /* Nunca persistimos chaves, sessão ou payloads sensíveis no cache local. */
-    const cacheSeguro={projetos:STATE.projetos,riscos:STATE.riscos,encaminhamentos:STATE.encaminhamentos,tarefas:STATE.tarefas,eapNos:STATE.eapNos,raciAtividades:STATE.raciAtividades,raciPessoas:STATE.raciPessoas,raciMatriz:STATE.raciMatriz,licoesAprendidas:STATE.licoesAprendidas,teps:STATE.teps,melhorias:STATE.melhorias,pontosFocais:STATE.pontosFocais,statusReports:STATE.statusReports};
+    const cacheSeguro={projetos:STATE.projetos,riscos:STATE.riscos,encaminhamentos:STATE.encaminhamentos,tarefas:STATE.tarefas,eapNos:STATE.eapNos,raciAtividades:STATE.raciAtividades,raciPessoas:STATE.raciPessoas,raciMatriz:STATE.raciMatriz,licoesAprendidas:STATE.licoesAprendidas,teps:STATE.teps,melhorias:STATE.melhorias,pontosFocais:STATE.pontosFocais,statusReports:STATE.statusReports,solicitacoes:STATE.solicitacoes};
     localStorage.setItem(LS_KEY, JSON.stringify(cacheSeguro));
+    registrarAuditoria('salvar','dados','Dados do portal salvos no cache local por '+Object.keys(cacheSeguro).length+' conjuntos.');
+    renderNotificacoes();
   }
   catch(e){ console.error('Falha ao salvar STATE:', e); }
 }
@@ -1801,6 +1968,8 @@ function carregarState(){
 
 /* ═══ utilitários compartilhados por todos os módulos ═══ */
 function uid(){ return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+function dataNoLimiteISO(dias=7){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+dias);return d.toISOString().slice(0,10);}
+function estaVencendoEmBreve(data,dias=7){const hoje=hojeISO(),limite=dataNoLimiteISO(dias);return !!data&&data>=hoje&&data<=limite;}
 function carregarDadosDemo(){
   if(!confirm('Carregar a demonstração? Os dados atuais deste navegador serão substituídos.')) return;
   const p1={id:'demo-p1',nome:'Jornada Digital do Beneficiário',lecom:'LECOM-DEMO-001',gerente_projeto:'Mariana Costa',patrocinador:'Ricardo Almeida',lider_ti:'Felipe Nunes',direcao_ti:'Experiência do Cliente e Operações',data_inicio:'2026-08-01',data_fim_prevista:'2026-11-28',data_abertura:'2026-07-15',macro_entrega:'Portal unificado e autosserviço',entregaveis:'Novo portal, integração de autenticação e central de solicitações',data_replanejada:'2026-12-05',data_entrega_final:'',status:'execucao',status_portfolio:'andamento',objetivo:'Simplificar o acesso do beneficiário a serviços digitais, reduzindo chamadas ao atendimento e elevando a satisfação.',arquivado:false,criado_em:'2026-07-15T10:00:00.000Z'};
@@ -1894,6 +2063,10 @@ function carregarDadosDemo(){
     'demo-p3':{periodo_referencia:'2026-08-18',farol_geral:'vermelho',resumo_executivo:'O piloto requer ajuste de escala e treinamento antes da expansão.',proximos_passos:'Definir unidades, concluir treinamento e replanejar a onda piloto.',atualizado_em:'2026-08-18T12:00:00.000Z'},
     'demo-p4':{periodo_referencia:'2026-07-28',farol_geral:'verde',resumo_executivo:'Projeto concluído com aceite da direção e transição para sustentação.',proximos_passos:'Monitorar adoção e medir ganhos de visibilidade.',atualizado_em:'2026-07-28T12:00:00.000Z'}
   });
+  STATE.solicitacoes=[
+    {id:'sol-demo-001',tipo_solicitacao:'lecom',solicitante:'Mariana Costa',area_solicitante:'Experiência do Cliente',seguranca_informacao:'sim',envolve_ia:'nao',areas_ti:['Digital','Segurança da Informação'],produto_funcionalidade:'Portal e autenticação',titulo:'Evolução do autosserviço do beneficiário',objetivo:'Reduzir o volume de contatos repetitivos e facilitar o acesso digital.',justificativa:'A jornada atual exige múltiplas interações para concluir solicitações simples.',principais_entregas:'Novo fluxo de autenticação, telas de acompanhamento e painel de solicitações.',areas_impactadas:'Experiência do Cliente, Atendimento e Tecnologia',sistemas_impactados:'Portal do beneficiário, CRM e relatórios de atendimento',tipo_demanda:'evolucao',comissao_aprovadora:'eficiencia_operacional',impacto_jornada:'sim',impacto_nips:'sim',impacto_financeiro:'sim',impacto_financeiro_detalhe:'Redução estimada de 12% nos contatos repetitivos; indicador: custo por atendimento.',impacto_compliance:'nao',impacto_compliance_detalhe:'',risco_assistencial:'nao',risco_assistencial_detalhe:'',observacoes:'Solicitação criada para demonstração do fluxo de LECOM.',owner_id:sessaoPortal?.user?.id||'local-user',owner_email:sessaoPortal?.user?.email||'admin@demo.local',status:'em_analise',criado_em:'2026-08-18T10:00:00.000Z',atualizado_em:'2026-08-19T14:00:00.000Z',anexos:[{nome:'mapa-jornada.pdf',tamanho:245760,tipo:'application/pdf'}],admin_descricao:'Em análise pela área Digital e Segurança da Informação.'},
+    {id:'sol-demo-002',tipo_solicitacao:'projeto',solicitante:'Eduardo Ramos',area_solicitante:'Autorizações',seguranca_informacao:'nao',envolve_ia:'sim',areas_ti:['Arquitetura','Insights'],produto_funcionalidade:'Automação e autorização',titulo:'Novo projeto de motor inteligente de autorizações',objetivo:'Aumentar a previsibilidade e reduzir o prazo de análise das autorizações.',justificativa:'O processo atual depende de validações manuais e regras distribuídas.',principais_entregas:'Catálogo de regras, motor de decisão, APIs e cockpit operacional.',areas_impactadas:'Assistencial, Operações, Autorizações e Tecnologia',sistemas_impactados:'Sistema de autorizações, API de regras e painel operacional',tipo_demanda:'transformacao',comissao_aprovadora:'assistencial',impacto_jornada:'sim',impacto_nips:'nao',impacto_financeiro:'nao',impacto_financeiro_detalhe:'',impacto_compliance:'sim',impacto_compliance_detalhe:'Garantir rastreabilidade das decisões; indicador: percentual de decisões auditáveis.',risco_assistencial:'sim',risco_assistencial_detalhe:'Validar regras críticas antes da entrada em produção; indicador: taxa de divergência assistencial.',observacoes:'Projeto demonstrativo com status aprovado.',owner_id:sessaoPortal?.user?.id||'local-user',owner_email:sessaoPortal?.user?.email||'admin@demo.local',status:'aprovada',criado_em:'2026-08-12T09:00:00.000Z',atualizado_em:'2026-08-17T16:00:00.000Z',anexos:[],admin_descricao:'Aprovado para detalhamento técnico e planejamento.'}
+  ];
   const lecomSeeds=[
     ['Portal de atualização cadastral','2026042','Atendimento','Carlos Moreira','Jornada do Beneficiário','andamento','sim','sim','nao'],['Régua de comunicação preventiva','2026043','Marketing','Carlos Moreira','Régua de Comunicação','conclusao','sim','nao','nao'],['Integração de resultados de exames','2026044','Assistencial','Fernanda Nóbrega','Portal e App','andamento','sim','sim','sim'],['Fila inteligente de SAC','2026045','Operações','Rafael Barini','Call Center','especificacao','nao','sim','nao'],['Automação de reembolso','2026046','Financeiro','Jorge Andrade','Autorização','andamento','sim','nao','nao'],['Notificação de agendamento','2026047','Produtos','Felipe Arantes','WhatsApp e Chatbot','conclusao','sim','nao','nao'],['Gestão de documentos digitais','2026048','Jurídico','Rafael Barini','Jornada Pós-Atendimento','especificacao','nao','nao','nao'],['Assistente virtual de elegibilidade','2026049','Atendimento','Jorge Andrade','Dados, BI e IA','andamento','sim','sim','sim'],['Melhoria na confirmação de consultas','2026050','Operações','Carlos Moreira','Portal e App','conclusao','sim','nao','nao']
   ];
@@ -1921,7 +2094,7 @@ function renderProjetosHome(){
   document.getElementById('home-atencao').textContent=saudes.filter(s=>s.cls==='health-warn').length;
   document.getElementById('home-risco').textContent=saudes.filter(s=>s.cls==='health-risk').length;
   const distribuicao={andamento:projetosTodos.filter(p=>p.status_portfolio==='andamento'||p.status==='execucao').length,a_iniciar:projetosTodos.filter(p=>(p.status_portfolio||'a_iniciar')==='a_iniciar').length,concluido:projetosTodos.filter(p=>p.status_portfolio==='concluido'||p.status==='encerrado').length,atrasado:projetosTodos.filter(p=>p.status_portfolio==='atrasado').length}; const totalGrafico=Math.max(projetosTodos.length,1),cores=['#0041A6','#F59E0B','#16A05B','#DC2626'],valores=[distribuicao.andamento,distribuicao.a_iniciar,distribuicao.concluido,distribuicao.atrasado];let acumulado=0;const faixas=valores.map((v,i)=>{const ini=acumulado, fim=acumulado+=v/totalGrafico*100;return cores[i]+' '+ini+'% '+fim+'%';});document.getElementById('home-pizza').style.background='conic-gradient('+faixas.join(',')+')';document.getElementById('home-pizza-total').textContent=projetosTodos.length;document.getElementById('home-pizza-legenda').innerHTML=[['Em andamento',valores[0]],['À iniciar',valores[1]],['Concluídos',valores[2]],['Atrasados',valores[3]]].map((x,i)=>'<div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+cores[i]+';margin-right:6px"></span>'+x[0]+': <b>'+x[1]+'</b></div>').join('');
-  const hoje=hojeISO(), alertas=[...STATE.tarefas.filter(t=>isAtrasada(t)).map(t=>'Atividade atrasada: '+t.nome),...STATE.encaminhamentos.filter(e=>e.prazo&&e.prazo<hoje&&!['Concluído','Cancelado'].includes(e.status)).map(e=>'Encaminhamento vencido: '+e.tema),...STATE.riscos.filter(r=>r.status!=='Encerrado'&&nivelRisco(r.probabilidade,r.impacto).label==='Alto').map(r=>'Risco alto: '+r.descricao)].slice(0,5);document.getElementById('home-alertas').innerHTML=alertas.length?alertas.map(a=>'<div style="padding:8px 10px;border-left:3px solid var(--red);background:#fff7f7;margin-bottom:7px">'+esc(a)+'</div>').join(''):'<div style="color:var(--ink-mute);padding:12px 0">Nenhum alerta de prazo no momento.</div>';
+  const hoje=hojeISO(), alertas=[...STATE.tarefas.filter(t=>isAtrasada(t)).map(t=>'Atividade atrasada: '+t.nome),...STATE.tarefas.filter(t=>estaVencendoEmBreve(t.data_fim)&&!['concluido','cancelado'].includes(t.status)&&!isAtrasada(t)).map(t=>'Prazo próximo: '+t.nome),...STATE.encaminhamentos.filter(e=>e.prazo&&e.prazo<hoje&&!['Concluído','Cancelado'].includes(e.status)).map(e=>'On Demand vencido: '+e.tema),...STATE.encaminhamentos.filter(e=>estaVencendoEmBreve(e.prazo)&&!['Concluído','Cancelado'].includes(e.status)).map(e=>'On Demand vence em breve: '+e.tema),...STATE.riscos.filter(r=>r.status!=='Encerrado'&&nivelRisco(r.probabilidade,r.impacto).label==='Alto').map(r=>'Risco alto: '+r.descricao)].slice(0,7);document.getElementById('home-alertas').innerHTML=alertas.length?alertas.map(a=>'<div style="padding:8px 10px;border-left:3px solid var(--red);background:#fff7f7;margin-bottom:7px">'+esc(a)+'</div>').join(''):'<div style="color:var(--ink-mute);padding:12px 0">Nenhum alerta de prazo no momento.</div>';
   const lista = STATE.projetos.filter(p =>
     !filtro || p.nome.toLowerCase().includes(filtro) || (p.lecom||'').toLowerCase().includes(filtro)
   );
@@ -2058,7 +2231,7 @@ function salvarProjeto(){
 function excluirProjeto(id){
   const p = STATE.projetos.find(x => x.id === id);
   if(!p) return;
-  if(!confirm(`Excluir o projeto "${p.nome}"? Todas as tarefas, riscos, encaminhamentos, pontos focais e o Status Report vinculados também serão removidos.`)) return;
+  if(!confirm(`Excluir o projeto "${p.nome}"? Todas as tarefas, riscos, itens On Demand, pontos focais e o Status Report vinculados também serão removidos.`)) return;
   STATE.projetos = STATE.projetos.filter(x => x.id !== id);
   STATE.riscos = STATE.riscos.filter(x => x.projeto_id !== id);
   STATE.encaminhamentos = STATE.encaminhamentos.filter(x => x.projeto_id !== id);
@@ -2233,7 +2406,7 @@ function gerarPdfRiscos(){
   const doc=pdfDocumentoBase('Mapa de Riscos');if(!doc)return;const riscos=riscosDoProjeto(), linhas=riscos.map(r=>[r.descricao,r.categoria,r.probabilidade,r.impacto,nivelRisco(r.probabilidade,r.impacto).label,r.status,r.responsavel]);if(!linhas.length)pdfSecao(doc,'Riscos','Nenhum risco cadastrado para este projeto.');else pdfTabela(doc,['RISCO','CATEGORIA','PROB.','IMPACTO','NÍVEL','STATUS','RESP.'],linhas,[52,25,17,18,18,23,29]);salvarPdfDocumento(doc,'RISCOS');
 }
 function gerarPdfEncaminhamentos(){
-  const doc=pdfDocumentoBase('Encaminhamentos do Projeto');if(!doc)return;const itens=encaminhamentosDoProjeto(), linhas=itens.map(e=>[e.tema,e.acao,e.responsavel,fmtData(e.prazo),e.status]);if(!linhas.length)pdfSecao(doc,'Encaminhamentos','Nenhum encaminhamento cadastrado para este projeto.');else pdfTabela(doc,['TEMA','AÇÃO','RESPONSÁVEL','PRAZO','STATUS'],linhas,[42,64,34,21,21]);salvarPdfDocumento(doc,'ENCAMINHAMENTOS');
+  const doc=pdfDocumentoBase('On Demand do Projeto');if(!doc)return;const itens=encaminhamentosDoProjeto(), linhas=itens.map(e=>[e.tema,e.acao,e.responsavel,fmtData(e.prazo),e.status]);if(!linhas.length)pdfSecao(doc,'On Demand','Nenhum item On Demand cadastrado para este projeto.');else pdfTabela(doc,['TEMA','AÇÃO','RESPONSÁVEL','PRAZO','STATUS'],linhas,[42,64,34,21,21]);salvarPdfDocumento(doc,'ON_DEMAND');
 }
 
 /* ═══════════════════════════════════════════
@@ -2297,7 +2470,7 @@ function renderEap(){
 function gerarPdfEap(){
   if(!projetoAtivo || typeof window.jspdf==='undefined'){toast('Selecione um projeto e verifique a biblioteca de PDF.');return;} const nos=eapNosDoProjeto().slice().sort((a,b)=>a.codigo.localeCompare(b.codigo,undefined,{numeric:true})), pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'}), azul=[0,65,166]; let y=30;
   const status={planejado:'Planejada',andamento:'Em andamento',concluido:'Concluída',bloqueado:'Bloqueada'}; const cabecalho=()=>{pdf.setFillColor(...azul);pdf.rect(0,0,210,22,'F');pdf.setTextColor(255);pdf.setFontSize(15);pdf.text('EAP - Estrutura Analítica do Projeto',14,13);pdf.setFontSize(8);pdf.text(projetoAtivo.nome+' · '+(projetoAtivo.lecom || ''),14,18);pdf.setFillColor(232,238,248);pdf.rect(12,y-6,186,8,'F');pdf.setTextColor(14,47,116);pdf.setFontSize(7);pdf.text('CÓDIGO',15,y-1);pdf.text('ENTREGA',38,y-1);pdf.text('RESPONSÁVEL',125,y-1);pdf.text('STATUS',165,y-1);};cabecalho();
-  if(!nos.length){pdf.setTextColor(58,78,122);pdf.setFontSize(10);pdf.text('Nenhuma entrega cadastrada.',14,y+8);} nos.forEach(no=>{if(y>272){pdf.addPage();y=25;cabecalho();}const nivel=(no.codigo||'').split('.').length-1, titulo=(EAP_VIEW==='arvore' ? '  '.repeat(nivel) : '')+no.titulo;pdf.setTextColor(32,48,80);pdf.setFontSize(8);pdf.text(no.codigo,15,y+4);pdf.text(pdf.splitTextToSize(titulo,80),38,y+4);pdf.text(pdf.splitTextToSize(no.responsavel || '—',34),125,y+4);pdf.text(status[no.status]||'Planejada',165,y+4);pdf.setDrawColor(220,226,240);pdf.line(12,y+10,198,y+10);y+=13;});pdf.save('EAP_'+(projetoAtivo.lecom || 'PROJETO').replace(/[^\w-]/g,'_')+'_'+EAP_VIEW.toUpperCase()+'.pdf');
+  if(!nos.length){pdf.setTextColor(58,78,122);pdf.setFontSize(10);pdf.text('Nenhuma entrega cadastrada.',14,y+8);} nos.forEach(no=>{if(y>272){pdf.addPage();y=25;cabecalho();}const nivel=(no.codigo||'').split('.').length-1, titulo=(EAP_VIEW==='arvore' ? '  '.repeat(nivel) : '')+no.titulo;pdf.setTextColor(32,48,80);pdf.setFontSize(8);pdf.text(no.codigo,15,y+4);pdf.text(pdf.splitTextToSize(titulo,80),38,y+4);pdf.text(pdf.splitTextToSize(no.responsavel || '—',34),125,y+4);pdf.text(status[no.status]||'Planejada',165,y+4);pdf.setDrawColor(220,226,240);pdf.line(12,y+10,198,y+10);y+=13;});finalizarPdfPadrao(pdf,'EAP_'+(projetoAtivo.lecom || 'PROJETO').replace(/[^\w-]/g,'_')+'_'+EAP_VIEW.toUpperCase());
 }
 function abrirModalEap(id, paiId){
   if(!projetoAtivo){ toast('Selecione um projeto primeiro.'); return; }
@@ -2445,7 +2618,7 @@ function previewDocumentoSimples(titulo,html,acao){if(!projetoAtivo){toast('Sele
 function abrirPreviewTap(){const v=id=>document.getElementById(id)?.value || '';previewDocumentoSimples('TAP - Termo de Abertura','<div style="border-top:1px solid var(--line);padding-top:14px"><b>Objetivo do projeto</b><p>'+esc(v('tap-objetivo') || 'Não informado.')+'</p><p><b>Patrocinador:</b> '+esc(v('tap-patrocinador') || '—')+'<br><b>Gerente:</b> '+esc(v('tap-gerente') || '—')+'<br><b>Prazo:</b> '+fmtData(v('tap-inicio'))+' a '+fmtData(v('tap-fim'))+'</p></div>',gerarPdfTap);}
 function abrirPreviewTep(){const v=id=>document.getElementById(id)?.value || '';previewDocumentoSimples('TEP - Termo de Encerramento','<div style="border-top:1px solid var(--line);padding-top:14px"><b>Resumo do encerramento</b><p>'+esc(v('tep-resumo') || 'Não informado.')+'</p><p><b>Entregas concluídas:</b><br>'+esc(v('tep-entregas') || '—')+'</p><p><b>Pendências ou transição:</b><br>'+esc(v('tep-pendencias') || '—')+'</p></div>',gerarPdfTep);}
 function abrirPreviewRiscos(){const itens=riscosDoProjeto();previewDocumentoSimples('Mapa de Riscos','<div class="dtable-wrap"><table class="dtable"><thead><tr><th>Risco</th><th>Nível</th><th>Status</th></tr></thead><tbody>'+(itens.length?itens.map(r=>'<tr><td>'+esc(r.descricao)+'</td><td>'+nivelRisco(r.probabilidade,r.impacto).label+'</td><td>'+esc(r.status)+'</td></tr>').join(''):'<tr><td colspan="3">Nenhum risco cadastrado.</td></tr>')+'</tbody></table></div>',gerarPdfRiscos);}
-function abrirPreviewEncaminhamentos(){const itens=encaminhamentosDoProjeto();previewDocumentoSimples('Encaminhamentos','<div class="dtable-wrap"><table class="dtable"><thead><tr><th>Tema</th><th>Responsável</th><th>Prazo</th><th>Status</th></tr></thead><tbody>'+(itens.length?itens.map(e=>'<tr><td>'+esc(e.tema)+'</td><td>'+esc(e.responsavel || '—')+'</td><td>'+fmtData(e.prazo)+'</td><td>'+esc(e.status)+'</td></tr>').join(''):'<tr><td colspan="4">Nenhum encaminhamento cadastrado.</td></tr>')+'</tbody></table></div>',gerarPdfEncaminhamentos);}
+function abrirPreviewEncaminhamentos(){const itens=encaminhamentosDoProjeto();previewDocumentoSimples('On Demand','<div class="dtable-wrap"><table class="dtable"><thead><tr><th>Tema</th><th>Responsável</th><th>Prazo</th><th>Status</th></tr></thead><tbody>'+(itens.length?itens.map(e=>'<tr><td>'+esc(e.tema)+'</td><td>'+esc(e.responsavel || '—')+'</td><td>'+fmtData(e.prazo)+'</td><td>'+esc(e.status)+'</td></tr>').join(''):'<tr><td colspan="4">Nenhum item On Demand cadastrado.</td></tr>')+'</tbody></table></div>',gerarPdfEncaminhamentos);}
 function abrirPreviewPontosFocais(){const itens=pontosFocaisDoProjeto();previewDocumentoSimples('Pontos Focais','<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">'+(itens.length?itens.map(p=>'<div style="border:1px solid var(--line);border-radius:8px;padding:12px"><b>'+esc(p.nome)+'</b><p style="font-size:12px">'+esc(p.papel || '—')+'<br>'+esc(p.area || '—')+'<br>'+esc(p.email || '—')+'</p></div>').join(''):'<p>Nenhum ponto focal cadastrado.</p>')+'</div>',gerarPdfPontosFocais);}
 function abrirPreviewEap(){const itens=eapNosDoProjeto().slice().sort((a,b)=>a.codigo.localeCompare(b.codigo,undefined,{numeric:true}));previewDocumentoSimples('EAP - '+(EAP_VIEW==='arvore'?'Árvore':'Lista'),'<div>'+(itens.length?itens.map(n=>'<div style="padding:8px 0 8px '+(EAP_VIEW==='arvore'?(n.codigo.split('.').length-1)*20:0)+'px;border-bottom:1px solid var(--line)"><b>'+esc(n.codigo)+' '+esc(n.titulo)+'</b><small style="display:block;color:var(--ink-mute)">'+esc(n.responsavel || '—')+'</small></div>').join(''):'<p>Nenhuma entrega cadastrada.</p>')+'</div>',gerarPdfEap);}
 function abrirPreviewCronograma(){
@@ -2471,7 +2644,7 @@ function abrirPreviewLicoes(){
 function gerarPdfLicoes(){
   if(!projetoAtivo || typeof window.jspdf==='undefined'){toast('Biblioteca de PDF indisponível.');return;} const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'}),itens=licoesDoProjeto();let y=30;
   const cab=()=>{pdf.setFillColor(0,65,166);pdf.rect(0,0,210,22,'F');pdf.setTextColor(255);pdf.setFontSize(15);pdf.text('Lições Aprendidas',14,13);pdf.setFontSize(8);pdf.text(projetoAtivo.nome+' - '+(projetoAtivo.lecom || ''),14,18);};cab();
-  if(!itens.length){pdf.setTextColor(58,78,122);pdf.setFontSize(10);pdf.text('Nenhuma lição registrada.',14,y);}itens.forEach((l,i)=>{const linhas=pdf.splitTextToSize(l.aprendizado || '—',176),altura=20+linhas.length*4;if(y+altura>278){pdf.addPage();y=24;cab();}pdf.setTextColor(0,65,166);pdf.setFontSize(10);pdf.text(String(i+1).padStart(2,'0')+'. '+l.titulo,14,y);pdf.setTextColor(58,78,122);pdf.setFontSize(8);pdf.text(linhas,14,y+6);pdf.setTextColor(96,115,150);pdf.setFontSize(7);pdf.text((l.categoria || '—')+' - '+(l.responsavel || '—')+' - '+fmtData(l.data_registro),14,y+13+linhas.length*4);pdf.setDrawColor(220,226,240);pdf.line(14,y+altura-3,196,y+altura-3);y+=altura;});pdf.save('LICOES_APRENDIDAS_'+(projetoAtivo.lecom || 'PROJETO').replace(/[^\w-]/g,'_')+'.pdf');
+  if(!itens.length){pdf.setTextColor(58,78,122);pdf.setFontSize(10);pdf.text('Nenhuma lição registrada.',14,y);}itens.forEach((l,i)=>{const linhas=pdf.splitTextToSize(l.aprendizado || '—',176),altura=20+linhas.length*4;if(y+altura>278){pdf.addPage();y=24;cab();}pdf.setTextColor(0,65,166);pdf.setFontSize(10);pdf.text(String(i+1).padStart(2,'0')+'. '+l.titulo,14,y);pdf.setTextColor(58,78,122);pdf.setFontSize(8);pdf.text(linhas,14,y+6);pdf.setTextColor(96,115,150);pdf.setFontSize(7);pdf.text((l.categoria || '—')+' - '+(l.responsavel || '—')+' - '+fmtData(l.data_registro),14,y+13+linhas.length*4);pdf.setDrawColor(220,226,240);pdf.line(14,y+altura-3,196,y+altura-3);y+=altura;});finalizarPdfPadrao(pdf,'LICOES_APRENDIDAS_'+(projetoAtivo.lecom || 'PROJETO').replace(/[^\w-]/g,'_'));
 }
 
 const LECOM_COLUNAS = [
@@ -2509,7 +2682,7 @@ function prepararPreviewLecom(){const tipo=document.getElementById('lecom-export
 function abrirPreviewLecomLista(){const conteudo='<div class="card" style="padding:24px"><h2 style="color:var(--blue);margin:0">Portfólio de LECOMs</h2><p style="font-size:12px;color:var(--ink-mute)">'+STATE.melhorias.length+' iniciativa(s) cadastrada(s)</p><div class="dtable-wrap"><table class="dtable"><thead><tr><th>Iniciativa</th><th>Solicitante</th><th>Classificação</th><th>Produção</th><th>Status</th></tr></thead><tbody>'+STATE.melhorias.map(l=>'<tr><td><b>'+esc(l.iniciativa || l.titulo || '—')+'</b><small style="display:block">'+esc(l.codigo || '')+'</small></td><td>'+esc(l.solicitante || '—')+'</td><td>'+esc(l.classificacao || '—')+'</td><td>'+fmtData(l.final_producao)+'</td><td>'+rotuloStatusLecom(l.status_producao)+'</td></tr>').join('')+'</tbody></table></div></div>';abrirPreviewExportacao('Lista de LECOMs',conteudo,gerarPdfLecoms);}
 function abrirPreviewLecomDetalhe(id){const l=STATE.melhorias.find(item=>item.id===id);if(!l)return;abrirPreviewExportacao('Detalhe da LECOM',detalheLecomHtml(l),()=>gerarPdfLecomDetalhe(id));}
 function gerarPdfLecomDetalhe(id){
-  const l=STATE.melhorias.find(item=>item.id===id);if(!l||typeof window.jspdf==='undefined'){toast('Biblioteca de PDF indisponível.');return;}const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});let y=30;pdf.setFillColor(0,65,166);pdf.rect(0,0,210,22,'F');pdf.setTextColor(255);pdf.setFontSize(15);pdf.text('Detalhe da LECOM',14,13);pdf.setFontSize(8);pdf.text((l.codigo || '')+' - '+(l.iniciativa || l.titulo || ''),14,18);const secao=(t,c)=>{pdf.setTextColor(0,65,166);pdf.setFontSize(9);pdf.text(t.toUpperCase(),14,y);pdf.setTextColor(58,78,122);pdf.setFontSize(9);const linhas=pdf.splitTextToSize(c,180);pdf.text(linhas,14,y+5);y+=linhas.length*4+13;};secao('Solicitação','Solicitante: '+(l.solicitante||'—')+'\nÁrea solicitante: '+(l.area_solicitante||'—')+'\nClassificação: '+(l.classificacao||'—')+'\nCompromisso: '+(l.compromisso||'—'));secao('Priorização e responsabilidade','TI: '+(l.priorizacao_ti||'—')+' | Negócio: '+(l.priorizacao_negocio||'—')+'\nÁrea TI: '+(l.area_ti||'—')+'\nDiretor TI: '+(l.diretor_ti||'—'));secao('Especificação','Planejada: '+fmtData(l.plan_especificacao)+' | Final: '+fmtData(l.final_especificacao)+' | Status: '+rotuloStatusLecom(l.status_especificacao));secao('Homologação','Planejada: '+fmtData(l.plan_homologacao)+' | Final: '+fmtData(l.final_homologacao)+' | Status: '+rotuloStatusLecom(l.status_homologacao));secao('Produção','Planejada: '+fmtData(l.plan_producao)+' | Final: '+fmtData(l.final_producao)+' | Status: '+rotuloStatusLecom(l.status_producao));pdf.save('LECOM_'+(l.codigo || l.id).replace(/[^\w-]/g,'_')+'.pdf');
+  const l=STATE.melhorias.find(item=>item.id===id);if(!l||typeof window.jspdf==='undefined'){toast('Biblioteca de PDF indisponível.');return;}const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});let y=30;pdf.setFillColor(0,65,166);pdf.rect(0,0,210,22,'F');pdf.setTextColor(255);pdf.setFontSize(15);pdf.text('Detalhe da LECOM',14,13);pdf.setFontSize(8);pdf.text((l.codigo || '')+' - '+(l.iniciativa || l.titulo || ''),14,18);const secao=(t,c)=>{pdf.setTextColor(0,65,166);pdf.setFontSize(9);pdf.text(t.toUpperCase(),14,y);pdf.setTextColor(58,78,122);pdf.setFontSize(9);const linhas=pdf.splitTextToSize(c,180);pdf.text(linhas,14,y+5);y+=linhas.length*4+13;};secao('Solicitação','Solicitante: '+(l.solicitante||'—')+'\nÁrea solicitante: '+(l.area_solicitante||'—')+'\nClassificação: '+(l.classificacao||'—')+'\nCompromisso: '+(l.compromisso||'—'));secao('Priorização e responsabilidade','TI: '+(l.priorizacao_ti||'—')+' | Negócio: '+(l.priorizacao_negocio||'—')+'\nÁrea TI: '+(l.area_ti||'—')+'\nDiretor TI: '+(l.diretor_ti||'—'));secao('Especificação','Planejada: '+fmtData(l.plan_especificacao)+' | Final: '+fmtData(l.final_especificacao)+' | Status: '+rotuloStatusLecom(l.status_especificacao));secao('Homologação','Planejada: '+fmtData(l.plan_homologacao)+' | Final: '+fmtData(l.final_homologacao)+' | Status: '+rotuloStatusLecom(l.status_homologacao));secao('Produção','Planejada: '+fmtData(l.plan_producao)+' | Final: '+fmtData(l.final_producao)+' | Status: '+rotuloStatusLecom(l.status_producao));finalizarPdfPadrao(pdf,'LECOM_'+(l.codigo || l.id).replace(/[^\w-]/g,'_'));
 }
 function abrirModalLecom(id){
   const lecom=id ? STATE.melhorias.find(l=>l.id===id) : {}; document.getElementById('lc-id').value=id || ''; document.getElementById('modal-lecom-titulo').textContent=id?'Editar LECOM':'Nova LECOM';
@@ -2531,7 +2704,7 @@ function importarLecoms(input){
   const leitor=new FileReader(); leitor.onload=e=>{ try { const livro=XLSX.read(e.target.result,{type:'array',cellDates:true}); const linhas=XLSX.utils.sheet_to_json(livro.Sheets[livro.SheetNames[0]],{header:1,defval:'',raw:false}); const cabecalho=linhas[0].map(normalizarTextoLecom), mapa={}; LECOM_COLUNAS.forEach(([rotulo,chave])=>mapa[chave]=cabecalho.indexOf(normalizarTextoLecom(rotulo))); const novos=linhas.slice(1).map(linha=>{const item={id:uid(),criado_em:new Date().toISOString()}; LECOM_COLUNAS.forEach(([,chave])=>item[chave]=mapa[chave]>=0 ? linha[mapa[chave]] : ''); ['plan_especificacao','final_especificacao','plan_homologacao','final_homologacao','plan_producao','final_producao'].forEach(chave=>item[chave]=isoImportacao(item[chave])); ['status_especificacao','status_homologacao','status_producao'].forEach(chave=>item[chave]=statusLecom(item[chave])); item.iniciativa=String(item.iniciativa || '').trim(); item.titulo=item.iniciativa; return item; }).filter(item=>item.iniciativa); if(!novos.length) throw new Error('Nenhuma iniciativa válida encontrada.'); STATE.melhorias.push(...novos); salvarState(); renderLecoms(); toast(`${novos.length} LECOM(s) importada(s).`); } catch(erro){ toast(erro.message || 'Não foi possível importar a planilha.'); } finally { input.value=''; } }; leitor.readAsArrayBuffer(arquivo);
 }
 function gerarPdfLecomsLegado(){
-  if(typeof window.jspdf==='undefined'){toast('Biblioteca de PDF indisponível.');return;} const pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'}), itens=STATE.melhorias, C=[0,65,166]; pdf.setFillColor(...C);pdf.rect(0,0,297,22,'F');pdf.setTextColor(255);pdf.setFontSize(16);pdf.text('Portfólio de LECOMs',14,14);pdf.setFontSize(8);pdf.text(`Atualizado em ${fmtData(hojeISO())}`,14,19); let y=32; const header=['Iniciativa / ID','Solicitante','Classificação','Priorização TI','Compromisso','Produção','Status'], larguras=[69,42,27,30,30,35,35]; const cabecalho=()=>{pdf.setFillColor(230,237,249);pdf.rect(10,y-6,277,8,'F');pdf.setTextColor(14,47,116);pdf.setFontSize(7);let x=12;header.forEach((h,i)=>{pdf.text(h,x,y-1);x+=larguras[i];});}; cabecalho(); itens.forEach((l,i)=>{if(y>194){pdf.addPage();y=20;cabecalho();} pdf.setTextColor(32,48,80);pdf.setFontSize(7);let x=12;const valores=[`${l.iniciativa || l.titulo || '—'}\n${l.codigo || ''}`,l.solicitante || '—',l.classificacao || '—',l.priorizacao_ti || '—',l.compromisso || '—',`${fmtData(l.plan_producao)}\n${fmtData(l.final_producao)}`,rotuloStatusLecom(l.status_producao)]; valores.forEach((v,j)=>{pdf.text(pdf.splitTextToSize(String(v),larguras[j]-3),x,y);x+=larguras[j];});pdf.setDrawColor(220,226,240);pdf.line(10,y+8,287,y+8);y+=11;}); pdf.save('PORTFOLIO_LECOMS.pdf');
+  if(typeof window.jspdf==='undefined'){toast('Biblioteca de PDF indisponível.');return;} const pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'}), itens=STATE.melhorias, C=[0,65,166]; pdf.setFillColor(...C);pdf.rect(0,0,297,22,'F');pdf.setTextColor(255);pdf.setFontSize(16);pdf.text('Portfólio de LECOMs',14,14);pdf.setFontSize(8);pdf.text(`Atualizado em ${fmtData(hojeISO())}`,14,19); let y=32; const header=['Iniciativa / ID','Solicitante','Classificação','Priorização TI','Compromisso','Produção','Status'], larguras=[69,42,27,30,30,35,35]; const cabecalho=()=>{pdf.setFillColor(230,237,249);pdf.rect(10,y-6,277,8,'F');pdf.setTextColor(14,47,116);pdf.setFontSize(7);let x=12;header.forEach((h,i)=>{pdf.text(h,x,y-1);x+=larguras[i];});}; cabecalho(); itens.forEach((l,i)=>{if(y>194){pdf.addPage();y=20;cabecalho();} pdf.setTextColor(32,48,80);pdf.setFontSize(7);let x=12;const valores=[`${l.iniciativa || l.titulo || '—'}\n${l.codigo || ''}`,l.solicitante || '—',l.classificacao || '—',l.priorizacao_ti || '—',l.compromisso || '—',`${fmtData(l.plan_producao)}\n${fmtData(l.final_producao)}`,rotuloStatusLecom(l.status_producao)]; valores.forEach((v,j)=>{pdf.text(pdf.splitTextToSize(String(v),larguras[j]-3),x,y);x+=larguras[j];});pdf.setDrawColor(220,226,240);pdf.line(10,y+8,287,y+8);y+=11;}); finalizarPdfPadrao(pdf,'PORTFOLIO_LECOMS');
 }
 
 /* Painel executivo de LECOMs: a exportação principal privilegia leitura gerencial,
@@ -2629,6 +2802,58 @@ async function gerarPdfLecoms(){
 }
 function abrirPreviewLecomLista(){const r=resumoExecutivoLecom();abrirPreviewExportacao('Visão geral de LECOMs',painelLecomHtml(r),gerarPdfLecoms);converterRoscasLecomParaCanvas(document.getElementById('preview-exportacao-conteudo'),r);}
 
+const STATUS_SOLICITACAO_LABEL={enviada:'Enviada',em_analise:'Em análise',aprovada:'Aprovada',em_execucao:'Em execução',concluida:'Concluída',reprovada:'Reprovada',cancelada:'Cancelada'};
+function usuarioSolicitacaoAtual(){return sessaoPortal?.user?.id||'local-user';}
+function solicitacoesVisiveis(){return podeGerenciarAcessos()?STATE.solicitacoes.slice():STATE.solicitacoes.filter(s=>(s.owner_id||'local-user')===usuarioSolicitacaoAtual());}
+function abrirModalSolicitacao(tipo){
+  const titulo=tipo==='projeto'?'Solicitar novo projeto':'Solicitar LECOM';
+  document.getElementById('modal-solicitacao-titulo').textContent=titulo;
+  document.getElementById('sol-tipo').value=tipo;document.getElementById('sol-id').value='';
+  ['sol-solicitante','sol-area-solicitante','sol-produto','sol-titulo','sol-objetivo','sol-justificativa','sol-entregas','sol-areas-impactadas','sol-sistemas-impactados','sol-financeiro-detalhe','sol-compliance-detalhe','sol-risco-detalhe','sol-observacoes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['sol-seguranca','sol-envolve-ia','sol-impacto-jornada','sol-impacto-nips','sol-impacto-financeiro','sol-impacto-compliance','sol-risco-assistencial'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='nao';});
+  document.querySelectorAll('input[name="sol-area-ti"]').forEach(el=>el.checked=false);atualizarAreasTiSolicitacao();const files=document.getElementById('sol-anexos');if(files)files.value='';document.getElementById('sol-anexos-lista').textContent='';alternarCamposCondicionaisSolicitacao();
+  const nome=perfilPortal?.full_name||sessaoPortal?.user?.user_metadata?.full_name||'';document.getElementById('sol-solicitante').value=nome;
+  abrirModal('modal-solicitacao');
+}
+function atualizarAreasTiSolicitacao(){const selecionadas=[...document.querySelectorAll('input[name="sol-area-ti"]:checked')].map(el=>el.value),label=document.getElementById('sol-area-ti-label');if(label)label.textContent=selecionadas.length?selecionadas.join(', '):'Selecione uma ou mais áreas TI';}
+function alternarCamposCondicionaisSolicitacao(){
+  [['sol-impacto-financeiro','sol-financeiro-wrap'],['sol-impacto-compliance','sol-compliance-wrap'],['sol-risco-assistencial','sol-risco-wrap']].forEach(([campo,wrap])=>{const ativo=document.getElementById(campo)?.value==='sim',box=document.getElementById(wrap);if(box)box.hidden=!ativo;});
+}
+function coletarSolicitacaoFormulario(){
+  const v=id=>String(document.getElementById(id)?.value||'').trim();
+  return {tipo_solicitacao:document.getElementById('sol-tipo').value||'lecom',solicitante:v('sol-solicitante'),area_solicitante:v('sol-area-solicitante'),seguranca_informacao:document.getElementById('sol-seguranca').value,envolve_ia:document.getElementById('sol-envolve-ia').value,areas_ti:[...document.querySelectorAll('input[name="sol-area-ti"]:checked')].map(el=>el.value),produto_funcionalidade:v('sol-produto'),titulo:v('sol-titulo'),objetivo:v('sol-objetivo'),justificativa:v('sol-justificativa'),principais_entregas:v('sol-entregas'),areas_impactadas:v('sol-areas-impactadas'),sistemas_impactados:v('sol-sistemas-impactados'),tipo_demanda:document.getElementById('sol-tipo-demanda').value,comissao_aprovadora:document.getElementById('sol-comissao').value,impacto_jornada:document.getElementById('sol-impacto-jornada').value,impacto_nips:document.getElementById('sol-impacto-nips').value,impacto_financeiro:document.getElementById('sol-impacto-financeiro').value,impacto_financeiro_detalhe:v('sol-financeiro-detalhe'),impacto_compliance:document.getElementById('sol-impacto-compliance').value,impacto_compliance_detalhe:v('sol-compliance-detalhe'),risco_assistencial:document.getElementById('sol-risco-assistencial').value,risco_assistencial_detalhe:v('sol-risco-detalhe'),observacoes:v('sol-observacoes')};
+}
+function salvarSolicitacao(){
+  const dados=coletarSolicitacaoFormulario();
+  if(!dados.solicitante||!dados.area_solicitante||!dados.titulo||!dados.objetivo||!dados.justificativa||!dados.areas_ti.length){toast('Preencha os campos obrigatórios, incluindo ao menos uma Área TI.');return;}
+  if(dados.impacto_financeiro==='sim'&&!dados.impacto_financeiro_detalhe||dados.impacto_compliance==='sim'&&!dados.impacto_compliance_detalhe||dados.risco_assistencial==='sim'&&!dados.risco_assistencial_detalhe){toast('Preencha a descrição e o indicador dos impactos selecionados.');return;}
+  const files=[...(document.getElementById('sol-anexos')?.files||[])].map(f=>({nome:f.name,tamanho:f.size,tipo:f.type}));
+  const item={id:uid(),...dados,owner_id:usuarioSolicitacaoAtual(),owner_email:sessaoPortal?.user?.email||'',status:'enviada',criado_em:new Date().toISOString(),atualizado_em:new Date().toISOString(),anexos:files,admin_descricao:''};
+  STATE.solicitacoes.unshift(item);salvarState();registrarAuditoria('criar','solicitação',`${item.tipo_solicitacao==='projeto'?'Novo projeto':'LECOM'}: ${item.titulo}`);fecharModal('modal-solicitacao');renderSolicitacoes();toast('Solicitação enviada com sucesso.');
+}
+function renderSolicitacoes(){
+  const tbody=document.getElementById('solicitacoes-tbody');if(!tbody)return;
+  const lista=solicitacoesVisiveis(),filtro=document.getElementById('solicitacoes-filtro-status')?.value||'',filtrada=lista.filter(s=>!filtro||s.status===filtro),admin=podeGerenciarAcessos();
+  document.getElementById('solicitacoes-visao-label').textContent=admin?'Todas as solicitações':'Minhas solicitações';document.getElementById('solicitacoes-resumo').textContent=`${filtrada.length} solicitação(ões) exibida(s)`;
+  if(!filtrada.length){tbody.innerHTML='<tr><td colspan="7"><div class="dtable-empty">Nenhuma solicitação encontrada.</div></td></tr>';return;}
+  tbody.innerHTML=filtrada.map(s=>`<tr style="cursor:pointer" onclick="abrirDetalheSolicitacao('${s.id}')"><td><span class="badge badge-info">${s.tipo_solicitacao==='projeto'?'Novo projeto':'LECOM'}</span></td><td><b>${esc(s.titulo)}</b><small class="mono" style="display:block;color:var(--ink-mute);margin-top:3px">${esc(s.id)}</small></td><td>${esc(s.solicitante)}</td><td>${esc(s.area_solicitante)}</td><td>${fmtData((s.criado_em||'').slice(0,10))}</td><td><span class="badge ${s.status==='concluida'?'badge-ok':s.status==='reprovada'||s.status==='cancelada'?'badge-danger':'badge-warn'}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></td><td class="dtable-actions"><button onclick="event.stopPropagation();abrirDetalheSolicitacao('${s.id}')" title="Visualizar">▣</button></td></tr>`).join('');
+}
+function abrirDetalheSolicitacao(id){
+  const s=STATE.solicitacoes.find(x=>x.id===id);if(!s||(!podeGerenciarAcessos()&&(s.owner_id||'local-user')!==usuarioSolicitacaoAtual())){toast('Solicitação não disponível.');return;}
+  const linha=(label,val)=>`<div style="border-bottom:1px solid var(--line);padding:9px 0"><small style="display:block;color:var(--ink-mute);font-weight:800;text-transform:uppercase;font-size:10px">${label}</small><span style="display:block;margin-top:4px;white-space:pre-wrap">${esc(val||'—')}</span></div>`;
+  const areas=(s.areas_ti||[]).join(', '),anexos=(s.anexos||[]).map(a=>a.nome).join(', ');
+  const admin=podeGerenciarAcessos();
+  document.getElementById('sol-detalhe-conteudo').innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><span class="badge badge-info">${s.tipo_solicitacao==='projeto'?'Solicitação de novo projeto':'Solicitação de LECOM'}</span><h2 style="color:var(--blue);margin:10px 0 4px;font-size:20px">${esc(s.titulo)}</h2><span class="mono" style="font-size:11px;color:var(--ink-mute)">${esc(s.id)} · ${fmtData((s.criado_em||'').slice(0,10))}</span></div><span class="badge ${s.status==='concluida'?'badge-ok':s.status==='reprovada'||s.status==='cancelada'?'badge-danger':'badge-warn'}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></div>${s.projeto_id?`<div style="margin-top:14px;padding:11px 13px;border-radius:8px;background:#eef8f2;color:#17663a;font-size:12px">Projeto criado automaticamente no Portfólio. <button class="btn btn-outline btn-sm" style="margin-left:8px" onclick="fecharModal('modal-solicitacao-detalhe');selecionarProjeto('${s.projeto_id}')">Abrir projeto</button></div>`:''}<div style="display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;margin-top:18px">${linha('Solicitante',s.solicitante)}${linha('Área solicitante',s.area_solicitante)}${linha('E-mail',s.owner_email||'Gerenciado pelo Supabase Auth')}${linha('Área TI',areas)}${linha('Produto / funcionalidade',s.produto_funcionalidade)}${linha('Tipo de demanda',s.tipo_demanda)}${linha('Comissão aprovadora',s.comissao_aprovadora)}${linha('Segurança da informação',s.seguranca_informacao)}${linha('Envolve IA',s.envolve_ia)}${linha('Impacto na jornada',s.impacto_jornada)}${linha('Impacto em NIPS',s.impacto_nips)}${linha('Impacto financeiro',s.impacto_financeiro==='sim'?s.impacto_financeiro_detalhe:'Não')}${linha('Impacto compliance',s.impacto_compliance==='sim'?s.impacto_compliance_detalhe:'Não')}${linha('Risco assistencial',s.risco_assistencial==='sim'?s.risco_assistencial_detalhe:'Não')}</div><div style="margin-top:16px">${linha('Objetivo',s.objetivo)}${linha('Justificativa',s.justificativa)}${linha('Principais entregas',s.principais_entregas)}${linha('Áreas impactadas',s.areas_impactadas)}${linha('Sistemas, telas ou relatórios impactados',s.sistemas_impactados)}${linha('Observações',s.observacoes)}${linha('Anexos',anexos)}</div>${admin?`<div style="margin-top:18px;padding:14px;background:#f6f8fc;border-radius:9px"><b style="font-size:12px">Gestão administrativa</b><div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:10px"><label style="font-size:12px;font-weight:700">Status<select id="sol-status-admin" style="display:block;margin-top:5px;padding:8px;border:1px solid var(--line);border-radius:7px"><option value="enviada">Enviada</option><option value="em_analise">Em análise</option><option value="aprovada">Aprovada</option><option value="em_execucao">Em execução</option><option value="concluida">Concluída</option><option value="reprovada">Reprovada</option><option value="cancelada">Cancelada</option></select></label><input id="sol-admin-descricao" placeholder="Descrição / retorno ao solicitante" style="flex:1;min-width:240px;padding:8px;border:1px solid var(--line);border-radius:7px"><button class="btn btn-primary btn-sm" onclick="salvarStatusSolicitacao('${s.id}')">Atualizar solicitação</button></div></div>`:''}`;
+  if(admin){document.getElementById('sol-status-admin').value=s.status;document.getElementById('sol-admin-descricao').value=s.admin_descricao||'';}
+  abrirModal('modal-solicitacao-detalhe');
+}
+function criarProjetoAPartirDaSolicitacao(s){
+  if(!s||s.tipo_solicitacao!=='projeto'||s.projeto_id)return null;
+  const projeto={id:uid(),nome:s.titulo,lecom:'SOL-'+String(s.id).replace(/[^a-z0-9]/gi,'').slice(-10).toUpperCase(),gerente_projeto:s.solicitante,patrocinador:s.comissao_aprovadora==='assistencial'?'Comissão Assistencial':'Comissão de Eficiência Operacional',lider_ti:(s.areas_ti||[]).join(', '),direcao_ti:'Experiência do Cliente e Operações',data_inicio:'',data_fim_prevista:'',data_abertura:hojeISO(),macro_entrega:s.produto_funcionalidade||'Projeto aprovado a partir de solicitação',entregaveis:s.principais_entregas||'',data_replanejada:'',data_entrega_final:'',status:'planejamento',status_portfolio:'a_iniciar',objetivo:s.objetivo||'',arquivado:false,criado_em:new Date().toISOString(),solicitacao_id:s.id};
+  STATE.projetos.unshift(projeto);s.projeto_id=projeto.id;return projeto;
+}
+function salvarStatusSolicitacao(id){const s=STATE.solicitacoes.find(x=>x.id===id);if(!s||!podeGerenciarAcessos())return;const statusAnterior=s.status;s.status=document.getElementById('sol-status-admin').value;s.admin_descricao=document.getElementById('sol-admin-descricao').value.trim();s.atualizado_em=new Date().toISOString();let projetoCriado=null;if(s.status==='aprovada'&&statusAnterior!=='aprovada'&&s.tipo_solicitacao==='projeto'&&!s.projeto_id)projetoCriado=criarProjetoAPartirDaSolicitacao(s);salvarState();registrarAuditoria('atualizar','solicitação',`${s.titulo}: ${STATUS_SOLICITACAO_LABEL[s.status]}`);if(projetoCriado){registrarAuditoria('criar','projeto',`Projeto criado automaticamente a partir da solicitação ${s.id}: ${projetoCriado.nome}`);renderProjetosHome();renderPortfolioProjetos();toast('Solicitação aprovada e projeto adicionado ao Portfólio.');}else{toast('Solicitação atualizada.');}fecharModal('modal-solicitacao-detalhe');renderSolicitacoes();}
+
 function renderMelhorias(){
   const filtro = document.getElementById('melhorias-filtro-status')?.value || '';
   const lista = STATE.melhorias.filter(m => !filtro || m.status === filtro);
@@ -2707,7 +2932,7 @@ function renderTep(){
     <div class="sr-stat"><b>${projetoAtivo.lecom || '—'}</b><span>${esc(projetoAtivo.nome)}</span></div>
     <div class="sr-stat"><b>${concluidas}/${tarefas.length}</b><span>Atividades concluídas</span></div>
     <div class="sr-stat"><b>${riscosAbertos}</b><span>Risco(s) ainda em aberto</span></div>
-    <div class="sr-stat"><b>${encPendentes}</b><span>Encaminhamento(s) pendente(s)</span></div>
+    <div class="sr-stat"><b>${encPendentes}</b><span>On Demand pendente(s)</span></div>
     <div class="sr-stat"><b>${licoes}</b><span>Lição(ões) aprendida(s) registrada(s)</span></div>`;
 }
 function salvarTep(){
@@ -2941,7 +3166,7 @@ function renderEncaminhamentos(){
   const tbody = document.getElementById('enc-tbody');
   const lista = encaminhamentosDoProjeto();
   if(!lista.length){
-    tbody.innerHTML = `<tr><td colspan="6"><div class="dtable-empty"><span class="icon">✅</span>Nenhum encaminhamento cadastrado para este projeto.</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="dtable-empty"><span class="icon">✅</span>Nenhum item On Demand cadastrado para este projeto.</div></td></tr>`;
     return;
   }
   const statusCls = { 'A Iniciar':'badge-neutral', 'Em Andamento':'badge-warn', 'Atrasado':'badge-danger', 'Concluído':'badge-ok', 'Cancelado':'badge-neutral' };
@@ -2967,14 +3192,14 @@ function abrirModalEncaminhamento(id){
   document.getElementById('me-id').value = id || '';
   if(id){
     const e = STATE.encaminhamentos.find(x => x.id === id);
-    document.getElementById('modal-enc-titulo').textContent = 'Editar Encaminhamento';
+    document.getElementById('modal-enc-titulo').textContent = 'Editar On Demand';
     document.getElementById('me-tema').value = e.tema;
     document.getElementById('me-acao').value = e.acao;
     document.getElementById('me-responsavel').value = e.responsavel || '';
     document.getElementById('me-prazo').value = e.prazo || '';
     document.getElementById('me-status').value = e.status;
   }else{
-    document.getElementById('modal-enc-titulo').textContent = 'Novo Encaminhamento';
+    document.getElementById('modal-enc-titulo').textContent = 'Novo On Demand';
     ['me-tema','me-acao','me-responsavel','me-prazo'].forEach(f => document.getElementById(f).value = '');
     document.getElementById('me-status').value = 'A Iniciar';
   }
@@ -2993,21 +3218,21 @@ function salvarEncaminhamento(){
   };
   if(id){
     Object.assign(STATE.encaminhamentos.find(x => x.id === id), dados);
-    toast('Encaminhamento atualizado.');
+    toast('On Demand atualizado.');
   }else{
     STATE.encaminhamentos.push({ id: uid(), projeto_id: projetoAtivo.id, ...dados, criado_em: new Date().toISOString() });
-    toast('Encaminhamento cadastrado.');
+    toast('On Demand cadastrado.');
   }
   salvarState();
   fecharModal('modal-encaminhamento');
   renderEncaminhamentos();
 }
 function excluirEncaminhamento(id){
-  if(!confirm('Excluir este encaminhamento?')) return;
+  if(!confirm('Excluir este item On Demand?')) return;
   STATE.encaminhamentos = STATE.encaminhamentos.filter(x => x.id !== id);
   salvarState();
   renderEncaminhamentos();
-  toast('Encaminhamento excluído.');
+  toast('On Demand excluído.');
 }
 
 /* ═══════════════════════════════════════════
@@ -3567,7 +3792,7 @@ function renderPontosFocais(){
 function gerarPdfPontosFocais(){
   if(!projetoAtivo || typeof window.jspdf==='undefined'){toast('Selecione um projeto e verifique a biblioteca de PDF.');return;} const itens=pontosFocaisDoProjeto(), pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'}), azul=[0,65,166]; let y=30;
   const cabecalho=()=>{pdf.setFillColor(...azul);pdf.rect(0,0,210,22,'F');pdf.setTextColor(255);pdf.setFontSize(15);pdf.text('Pontos Focais',14,13);pdf.setFontSize(8);pdf.text(projetoAtivo.nome+' · '+(projetoAtivo.lecom || ''),14,18);pdf.setFillColor(232,238,248);pdf.rect(12,y-6,186,8,'F');pdf.setTextColor(14,47,116);pdf.setFontSize(7);pdf.text('NOME',15,y-1);pdf.text('ÁREA / PAPEL',62,y-1);pdf.text('CONTATOS',128,y-1);}; cabecalho();
-  if(!itens.length){pdf.setTextColor(58,78,122);pdf.setFontSize(10);pdf.text('Nenhum ponto focal cadastrado.',14,y+8);} itens.forEach(p=>{if(y>274){pdf.addPage();y=25;cabecalho();}pdf.setTextColor(32,48,80);pdf.setFontSize(9);pdf.text(pdf.splitTextToSize(p.nome,43),15,y+4);pdf.setFontSize(8);pdf.text(pdf.splitTextToSize((p.area || '—')+'\n'+(p.papel || ''),60),62,y+4);pdf.text(pdf.splitTextToSize((p.email || '—')+'\n'+(p.telefone || ''),63),128,y+4);pdf.setDrawColor(220,226,240);pdf.line(12,y+14,198,y+14);y+=18;}); pdf.save('PONTOS_FOCAIS_'+(projetoAtivo.lecom || 'PROJETO').replace(/[^\w-]/g,'_')+'.pdf');
+  if(!itens.length){pdf.setTextColor(58,78,122);pdf.setFontSize(10);pdf.text('Nenhum ponto focal cadastrado.',14,y+8);} itens.forEach(p=>{if(y>274){pdf.addPage();y=25;cabecalho();}pdf.setTextColor(32,48,80);pdf.setFontSize(9);pdf.text(pdf.splitTextToSize(p.nome,43),15,y+4);pdf.setFontSize(8);pdf.text(pdf.splitTextToSize((p.area || '—')+'\n'+(p.papel || ''),60),62,y+4);pdf.text(pdf.splitTextToSize((p.email || '—')+'\n'+(p.telefone || ''),63),128,y+4);pdf.setDrawColor(220,226,240);pdf.line(12,y+14,198,y+14);y+=18;}); finalizarPdfPadrao(pdf,'PONTOS_FOCAIS_'+(projetoAtivo.lecom || 'PROJETO').replace(/[^\w-]/g,'_'));
 }
 function abrirModalPontoFocal(id){
   if(!projetoAtivo){ toast('Selecione um projeto primeiro.'); return; }
@@ -3647,7 +3872,7 @@ function renderStatusReport(){
     <div class="sr-stat"><b>${pct}%</b><span>Progresso do cronograma (${concluidas}/${ts.length} atividades)</span></div>
     <div class="sr-stat"><b>${atrasadas}</b><span>Atividade(s) em atraso</span></div>
     <div class="sr-stat"><b>${riscosAbertos}</b><span>Risco(s) em aberto</span></div>
-    <div class="sr-stat"><b>${encVencidos}</b><span>Encaminhamento(s) vencido(s)</span></div>
+    <div class="sr-stat"><b>${encVencidos}</b><span>On Demand vencido(s)</span></div>
   `;
   renderStatusReportOnePage(sr, { ts, concluidas, atrasadas, pct, riscosAbertos, encVencidos });
 }
@@ -3666,7 +3891,7 @@ function renderStatusReportExecutivo(sr, dados){
     const barras = itens.map(t => { const ini = t.data_inicio || t.data_fim, fin = t.data_fim || t.data_inicio; const left = Math.max(0, diffDias(inicio, ini) / totalDias * 100); const width = Math.max(1.5, (diffDias(ini, fin) + 1) / totalDias * 100); const st = isAtrasada(t) ? 'atrasado' : t.status; const cor = { a_iniciar:'var(--ink-mute)', andamento:'var(--yellow)', atrasado:'var(--red)', impedido:'#7B3FBF', concluido:'var(--green)' }[st] || 'var(--ink-mute)'; return `<span title="${esc(t.nome)} — ${fmtData(fin)}" style="position:absolute;left:${left}%;width:${width}%;height:10px;top:10px;border-radius:6px;background:${cor}"></span>`; }).join('');
     return `<div style="display:grid;grid-template-columns:170px 1fr;gap:10px;align-items:center;margin-top:7px"><b style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(fase)}</b><div style="height:30px;background:var(--paper);border-radius:7px;position:relative;overflow:hidden">${barras}</div></div>`;
   };
-  document.getElementById('sr-executivo').innerHTML = `<div class="card"><div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap"><div><span class="mono" style="font-size:11px;color:var(--ink-mute)">${esc(projetoAtivo.lecom)}</span><h2 style="font-size:19px;margin:3px 0">${esc(projetoAtivo.nome)}</h2><p style="font-size:12px;color:var(--ink-soft);margin:0">Período de referência: ${fmtData(sr.periodo_referencia || hojeISO())}</p></div><div style="display:flex;gap:8px;align-items:center"><span class="health-pill ${saude.cls}"><span class="health-dot"></span>${saude.label}</span><button class="btn btn-outline btn-sm" onclick="imprimirStatusReport()">Imprimir / PDF</button></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0">${farol('Geral',sr.farol_geral)}${farol('Escopo',sr.farol_escopo)}${farol('Prazo',sr.farol_prazo)}${farol('Custo',sr.farol_custo)}</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px" class="sr-kpis"><div class="sr-stat"><b>${dados.pct}%</b><span>Execução do cronograma</span></div><div class="sr-stat"><b>${dados.atrasadas}</b><span>Atividade(s) em atraso</span></div><div class="sr-stat"><b>${dados.riscosAbertos}</b><span>Risco(s) em aberto</span></div><div class="sr-stat"><b>${dados.encVencidos}</b><span>Encaminhamento(s) vencido(s)</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px" class="sr-resumos"><div><small style="font-weight:800;color:var(--ink-mute);text-transform:uppercase">Resumo executivo</small><p style="font-size:13px;line-height:1.55;color:var(--ink-soft);white-space:pre-wrap">${esc(sr.resumo_executivo || 'Preencha o resumo executivo para registrar a situação do período.')}</p></div><div><small style="font-weight:800;color:var(--ink-mute);text-transform:uppercase">Próximos passos</small><p style="font-size:13px;line-height:1.55;color:var(--ink-soft);white-space:pre-wrap">${esc(sr.proximos_passos || 'Defina os próximos passos do projeto.')}</p></div></div><div style="margin-top:16px"><small style="font-weight:800;color:var(--ink-mute);text-transform:uppercase">Gantt executivo por fase</small>${inicio ? `<div style="display:flex;justify-content:space-between;font:11px 'JetBrains Mono';color:var(--ink-mute);margin-top:8px"><span>${fmtData(inicio)}</span><span>${fmtData(fim)}</span></div>${fases.map(linhaFase).join('')}` : '<p style="font-size:12px;color:var(--ink-mute)">Nenhuma atividade com data para compor o Gantt.</p>'}</div></div>`;
+  document.getElementById('sr-executivo').innerHTML = `<div class="card"><div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap"><div><span class="mono" style="font-size:11px;color:var(--ink-mute)">${esc(projetoAtivo.lecom)}</span><h2 style="font-size:19px;margin:3px 0">${esc(projetoAtivo.nome)}</h2><p style="font-size:12px;color:var(--ink-soft);margin:0">Período de referência: ${fmtData(sr.periodo_referencia || hojeISO())}</p></div><div style="display:flex;gap:8px;align-items:center"><span class="health-pill ${saude.cls}"><span class="health-dot"></span>${saude.label}</span><button class="btn btn-outline btn-sm" onclick="imprimirStatusReport()">Imprimir / PDF</button></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0">${farol('Geral',sr.farol_geral)}${farol('Escopo',sr.farol_escopo)}${farol('Prazo',sr.farol_prazo)}${farol('Custo',sr.farol_custo)}</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px" class="sr-kpis"><div class="sr-stat"><b>${dados.pct}%</b><span>Execução do cronograma</span></div><div class="sr-stat"><b>${dados.atrasadas}</b><span>Atividade(s) em atraso</span></div><div class="sr-stat"><b>${dados.riscosAbertos}</b><span>Risco(s) em aberto</span></div><div class="sr-stat"><b>${dados.encVencidos}</b><span>On Demand vencido(s)</span></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px" class="sr-resumos"><div><small style="font-weight:800;color:var(--ink-mute);text-transform:uppercase">Resumo executivo</small><p style="font-size:13px;line-height:1.55;color:var(--ink-soft);white-space:pre-wrap">${esc(sr.resumo_executivo || 'Preencha o resumo executivo para registrar a situação do período.')}</p></div><div><small style="font-weight:800;color:var(--ink-mute);text-transform:uppercase">Próximos passos</small><p style="font-size:13px;line-height:1.55;color:var(--ink-soft);white-space:pre-wrap">${esc(sr.proximos_passos || 'Defina os próximos passos do projeto.')}</p></div></div><div style="margin-top:16px"><small style="font-weight:800;color:var(--ink-mute);text-transform:uppercase">Gantt executivo por fase</small>${inicio ? `<div style="display:flex;justify-content:space-between;font:11px 'JetBrains Mono';color:var(--ink-mute);margin-top:8px"><span>${fmtData(inicio)}</span><span>${fmtData(fim)}</span></div>${fases.map(linhaFase).join('')}` : '<p style="font-size:12px;color:var(--ink-mute)">Nenhuma atividade com data para compor o Gantt.</p>'}</div></div>`;
 }
 function imprimirStatusReport(){ window.print(); }
 function dadosOnePageStatus(sr){
@@ -3686,7 +3911,7 @@ function dadosOnePageStatus(sr){
     ...tarefas.filter(isAtrasada).map(t => `Atividade atrasada: ${t.nome}`),
     ...tarefas.filter(t => t.status === 'impedido').map(t => `Atividade impedida: ${t.nome}`),
     ...riscosDoProjeto().filter(r => r.status !== 'Encerrado' && nivelRisco(r.probabilidade,r.impacto).label === 'Alto').map(r => `Risco alto: ${r.descricao}`),
-    ...encaminhamentosDoProjeto().filter(e => e.prazo && e.prazo < hojeISO() && !['Concluído','Cancelado'].includes(e.status)).map(e => `Encaminhamento vencido: ${e.tema}`)
+    ...encaminhamentosDoProjeto().filter(e => e.prazo && e.prazo < hojeISO() && !['Concluído','Cancelado'].includes(e.status)).map(e => `On Demand vencido: ${e.tema}`)
   ].slice(0,5);
   return { inicio, fim, totalDias, fases, atencao, sr };
 }
@@ -3882,6 +4107,11 @@ function renderDashboardProjeto(){
   const encVencidos = encaminhamentosDoProjeto().filter(e => e.prazo && e.prazo < hoje && e.status !== 'Concluído' && e.status !== 'Cancelado');
   document.getElementById('dash-enc-count').textContent = encaminhamentosDoProjeto().length;
   document.getElementById('dash-enc-sub').textContent = encVencidos.length ? `${encVencidos.length} vencido(s)` : 'Nenhum vencido';
+  const proximos=ts.filter(t=>estaVencendoEmBreve(t.data_fim)&&!['concluido','cancelado'].includes(t.status)).length+encaminhamentosDoProjeto().filter(e=>estaVencendoEmBreve(e.prazo)&&!['Concluído','Cancelado'].includes(e.status)).length;
+  document.getElementById('dash-proximos-count').textContent=proximos;
+  const ultimaAtualizacao=STATE.statusReports[projetoAtivo.id]?.atualizado_em||projetoAtivo.criado_em||'';
+  const diasSemAtualizacao=ultimaAtualizacao?Math.floor((Date.now()-new Date(ultimaAtualizacao).getTime())/86400000):0;
+  document.getElementById('dash-sem-atualizacao').textContent=diasSemAtualizacao>14?1:0;
 
   const marcos = ts.filter(t => (t.tipo === 'marco' || t.tipo === 'golive') && t.status !== 'concluido' && t.status !== 'cancelado')
     .sort((a,b) => (a.data_fim||'').localeCompare(b.data_fim||'')).slice(0, 5);
@@ -3893,7 +4123,7 @@ function renderDashboardProjeto(){
       <span class="mono" style="font-size:11.5px; color:var(--ink-mute)">${fmtData(m.data_fim)}</span>
     </div>`).join('') : `<p style="font-size:12.5px; color:var(--ink-mute)">Nenhum marco pendente cadastrado.</p>`;
   const grupos=[['Em andamento',ts.filter(t=>t.status==='andamento').length,'#F59E0B'],['Concluídas',concluidas,'#16A05B'],['Atrasadas',ts.filter(t=>isAtrasada(t)||t.status==='atrasado').length,'#DC2626'],['Não iniciadas',ts.filter(t=>t.status==='a_iniciar').length,'#94A3B8'],['Impedidas',ts.filter(t=>t.status==='impedido').length,'#7B3FBF']], total=Math.max(ts.length,1);let cursor=0;document.getElementById('dash-pizza').style.background='conic-gradient('+grupos.map(g=>{const ini=cursor, fim=cursor+=g[1]/total*100;return g[2]+' '+ini+'% '+fim+'%';}).join(',')+')';document.getElementById('dash-pizza-total').textContent=ts.length;document.getElementById('dash-pizza-legenda').innerHTML=grupos.map(g=>'<div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+g[2]+';margin-right:6px"></span>'+g[0]+': <b>'+g[1]+'</b></div>').join('');
-  const alertas=[...ts.filter(t=>isAtrasada(t)||t.status==='atrasado').map(t=>'Atividade atrasada: '+t.nome),...encVencidos.map(e=>'Encaminhamento vencido: '+e.tema)]; const altos=riscosAbertos.filter(r=>nivelRisco(r.probabilidade,r.impacto).label==='Alto').map(r=>'Risco alto: '+r.descricao);alertas.push(...altos);document.getElementById('dash-alertas').innerHTML=alertas.length?alertas.slice(0,5).map(a=>'<div style="padding:8px 10px;margin-bottom:7px;background:#fff7f7;border-left:3px solid var(--red)">'+esc(a)+'</div>').join(''):'<div style="color:var(--ink-mute);padding:12px 0">Nenhuma atenção crítica no momento.</div>';
+  const alertas=[...ts.filter(t=>isAtrasada(t)||t.status==='atrasado').map(t=>'Atividade atrasada: '+t.nome),...ts.filter(t=>estaVencendoEmBreve(t.data_fim)&&!['concluido','cancelado'].includes(t.status)&&!isAtrasada(t)).map(t=>'Prazo próximo: '+t.nome),...encVencidos.map(e=>'On Demand vencido: '+e.tema),...encaminhamentosDoProjeto().filter(e=>estaVencendoEmBreve(e.prazo)&&!['Concluído','Cancelado'].includes(e.status)).map(e=>'On Demand vence em breve: '+e.tema)]; const altos=riscosAbertos.filter(r=>nivelRisco(r.probabilidade,r.impacto).label==='Alto').map(r=>'Risco alto: '+r.descricao);alertas.push(...altos);document.getElementById('dash-alertas').innerHTML=alertas.length?alertas.slice(0,7).map(a=>'<div style="padding:8px 10px;margin-bottom:7px;background:#fff7f7;border-left:3px solid var(--red)">'+esc(a)+'</div>').join(''):'<div style="color:var(--ink-mute);padding:12px 0">Nenhuma atenção crítica no momento.</div>';
   document.getElementById('dash-escopo').innerHTML='<b>Macroentrega</b><p style="margin:5px 0 12px;color:var(--ink-soft)">'+esc(projetoAtivo.macro_entrega || 'Não informada.')+'</p><b>Entregáveis principais</b><p style="margin:5px 0;color:var(--ink-soft)">'+esc(projetoAtivo.entregaveis || 'Não informados.')+'</p>';
   document.getElementById('dash-governanca').innerHTML='<div><b>Direção de Negócios:</b> '+esc(projetoAtivo.patrocinador || '—')+'</div><div><b>Gerente:</b> '+esc(projetoAtivo.gerente_projeto || '—')+'</div><div><b>Líder TI:</b> '+esc(projetoAtivo.lider_ti || '—')+'</div><div><b>Direção TI:</b> '+esc(projetoAtivo.direcao_ti || '—')+'</div>';
 }
@@ -3905,6 +4135,7 @@ const PAGE_ON_ENTER = {
   projetos: renderPortfolioProjetos,
   melhorias: renderMelhorias,
   lecoms: renderLecoms,
+  solicitacoes: renderSolicitacoes,
   tap: preencherTAP,
   eap: renderEap,
   raci: renderRaci,
@@ -3917,6 +4148,7 @@ const PAGE_ON_ENTER = {
   statusreport: renderStatusReport,
   dashboardprojeto: renderDashboardProjeto,
   acessos: renderAcessos,
+  configuracoes: ()=>{renderConsoleSistema();renderAuditoriaLocal();},
 };
 const _navigateOriginal = navigate;
 navigate = function(page){
@@ -3928,6 +4160,7 @@ navigate = function(page){
 carregarState();
 normalizarCronogramas();
 renderProjetosHome();
+renderNotificacoes();
 iniciarAuthPortal();
 </script>
 </body>
