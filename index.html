@@ -192,6 +192,8 @@ body.sidebar-collapsed #btn-sidebar-toggle{display:flex}
 .access-user-list{display:flex;flex-direction:column;gap:8px}.access-user-row{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}.access-user-row summary{list-style:none;cursor:pointer;padding:13px 15px;display:flex;align-items:center;gap:12px}.access-user-row summary::-webkit-details-marker{display:none}.access-user-row summary::after{content:'＋';margin-left:auto;color:var(--ink-mute);font-size:16px}.access-user-row[open] summary::after{content:'−'}.access-user-row summary:hover{background:#f7f9fd}.access-user-details{padding:0 15px 15px;border-top:1px solid var(--line)}
 .multi-select-dropdown{position:relative}.multi-select-dropdown summary{list-style:none;cursor:pointer;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink-soft);font-size:13px}.multi-select-dropdown summary::-webkit-details-marker{display:none}.multi-select-dropdown[open] summary{border-color:var(--blue);border-radius:8px 8px 0 0}.multi-select-options{position:absolute;left:0;right:0;z-index:8;background:#fff;border:1.5px solid var(--blue);border-top:0;border-radius:0 0 8px 8px;padding:8px;box-shadow:var(--shadow-lg);display:grid;grid-template-columns:repeat(2,minmax(200px,1fr));gap:4px 14px;max-height:220px;overflow-y:auto}.multi-select-options label{display:flex!important;align-items:center;justify-content:flex-start;width:100%;min-height:32px;box-sizing:border-box;gap:8px;margin:0!important;padding:6px 8px;border-radius:6px;font-size:11.5px;line-height:1.25;white-space:normal}.multi-select-options label input[type=checkbox]{flex:0 0 auto;width:15px;height:15px;margin:0;order:0}.multi-select-options label:hover{background:#f1f5fb}
 @media(max-width:700px){.multi-select-options{grid-template-columns:1fr;gap:3px}}
+.btn-hapvida-orange{background:var(--orange)!important;border-color:var(--orange)!important;color:#fff!important;box-shadow:0 5px 12px rgba(244,91,31,.22)}.btn-hapvida-orange:hover{filter:brightness(.94)}
+#sol-form-lecom[hidden],#sol-form-projeto[hidden]{display:none!important}
 
 .project-switch{
   margin-left:auto; display:flex; align-items:center; gap:10px; padding:7px 14px 7px 8px;
@@ -1048,7 +1050,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     <div class="page" id="page-lecoms">
       <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
         <div><b style="font-size:14px">Portfólio de LECOMs</b><p style="font-size:12px;color:var(--ink-mute);margin:4px 0 0">Iniciativas, projetos e melhorias priorizados pela TI e pelo negócio.</p></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="baixarModeloLecoms()">Modelo de planilha</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('lecom-importar').click()">Importar</button><button class="btn btn-outline btn-sm" onclick="exportarLecomsXlsx()">Exportar</button><button class="btn btn-outline btn-sm" onclick="abrirOpcoesExportacaoLecom()">PDF</button><button class="btn btn-primary" onclick="abrirModalLecom()">+ Nova LECOM</button><input id="lecom-importar" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarLecoms(this)"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="baixarModeloLecoms()">Modelo de planilha</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('lecom-importar').click()">Importar</button><button class="btn btn-outline btn-sm" onclick="exportarLecomsXlsx()">Exportar</button><button class="btn btn-outline btn-sm" onclick="abrirOpcoesExportacaoLecom()">PDF</button><button class="btn btn-primary" onclick="abrirModalLecom()">+ Novo LECOM</button><input id="lecom-importar" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarLecoms(this)"></div>
       </div>
       <div class="card" style="margin-bottom:16px;padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap"><select id="lecom-filtro-status" onchange="renderLecoms()"><option value="">Todos os status</option><option value="a_iniciar">À iniciar</option><option value="andamento">Em andamento</option><option value="atrasado">Atrasado</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select><select id="lecom-filtro-classificacao" onchange="renderLecoms()"><option value="">Projeto e melhoria</option><option value="projeto">Projeto</option><option value="melhoria">Melhoria</option></select><input id="lecom-busca" oninput="renderLecoms()" placeholder="Buscar iniciativa, ID ou solicitante" style="min-width:230px"></div>
       <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Iniciativa / ID</th><th>Solicitante</th><th>Classificação</th><th>Priorização</th><th>Compromisso</th><th>Responsável TI</th><th>Produção</th><th>Status</th><th></th></tr></thead><tbody id="lecoms-tbody"></tbody></table></div>
@@ -1056,7 +1058,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     <div class="page" id="page-solicitacoes">
       <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
         <div><b style="font-size:14px">Solicitações</b><p style="font-size:12px;color:var(--ink-mute);margin:4px 0 0">Cadastre uma solicitação de LECOM ou um novo projeto.</p></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="solicitacoes-filtro-status" onchange="renderSolicitacoes()" style="padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px"><option value="">Todos os status</option><option value="enviada">Enviada</option><option value="em_analise">Em análise</option><option value="aprovada">Aprovada</option><option value="em_execucao">Em execução</option><option value="concluida">Concluída</option><option value="reprovada">Reprovada</option><option value="cancelada">Cancelada</option></select><button class="btn btn-outline btn-sm" onclick="abrirModalSolicitacao('lecom')">+ Solicitar LECOM</button><button class="btn btn-primary btn-sm" onclick="abrirModalSolicitacao('projeto')">+ Solicitar novo projeto</button></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="solicitacoes-filtro-status" onchange="renderSolicitacoes()" style="padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px"><option value="">Todos os status</option><option value="enviada">Enviada</option><option value="em_analise">Em análise</option><option value="aprovada">Aprovada</option><option value="em_execucao">Em execução</option><option value="concluida">Concluída</option><option value="reprovada">Reprovada</option><option value="cancelada">Cancelada</option></select><button class="btn btn-sm btn-hapvida-orange" onclick="abrirModalSolicitacao('lecom')">+ Solicitar LECOM</button><button class="btn btn-primary btn-sm" onclick="abrirModalSolicitacao('projeto')">+ Solicitar novo projeto</button></div>
       </div>
       <div class="card" style="margin-bottom:16px;padding:13px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span class="badge badge-info" id="solicitacoes-visao-label">Minhas solicitações</span><span style="font-size:12px;color:var(--ink-soft)" id="solicitacoes-resumo">Carregando solicitações…</span></div>
       <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Tipo</th><th>Título da demanda</th><th>Solicitante</th><th>Área</th><th>Data</th><th>Status</th><th></th></tr></thead><tbody id="solicitacoes-tbody"></tbody></table></div>
@@ -1130,10 +1132,10 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
 <div class="modal-overlay" id="modal-exportar-lecom"><div class="modal"><div class="modal-header"><h3>Exportar LECOMs</h3><button class="modal-close" onclick="fecharModal('modal-exportar-lecom')">✕</button></div><div class="modal-body"><div class="field"><label>Conteúdo do PDF</label><select id="lecom-export-tipo" onchange="atualizarOpcoesExportacaoLecom()"><option value="lista">Lista consolidada</option><option value="detalhe">Detalhe de uma LECOM</option></select></div><div class="field" id="lecom-export-item-wrap" style="display:none;margin-top:14px"><label>LECOM</label><select id="lecom-export-item"></select></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-exportar-lecom')">Cancelar</button><button class="btn btn-primary" onclick="prepararPreviewLecom()">Visualizar preview</button></div></div></div>
 <div class="modal-overlay" id="modal-preview-exportacao"><div class="modal modal-lg" style="width:min(1120px,94vw)"><div class="modal-header"><h3 id="preview-exportacao-titulo">Preview do PDF</h3><button class="modal-close" onclick="fecharModal('modal-preview-exportacao')">✕</button></div><div class="modal-body" id="preview-exportacao-conteudo" style="background:var(--paper)"></div><div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-preview-exportacao')">Cancelar</button><button class="btn btn-primary" onclick="confirmarExportacaoPreview()">Exportar PDF</button></div></div></div>
 
-<!-- ═══ MODAL: Nova/Editar LECOM ═══ -->
+<!-- ═══ MODAL: Novo/Editar LECOM ═══ -->
 <div class="modal-overlay" id="modal-lecom">
   <div class="modal modal-lg" style="width:min(1080px,94vw)">
-    <div class="modal-header"><h3 id="modal-lecom-titulo">Nova LECOM</h3><button class="modal-close" onclick="fecharModal('modal-lecom')">✕</button></div>
+    <div class="modal-header"><h3 id="modal-lecom-titulo">Novo LECOM</h3><button class="modal-close" onclick="fecharModal('modal-lecom')">✕</button></div>
     <div class="modal-body"><input type="hidden" id="lc-id"><div class="form-grid">
       <div class="field span2"><label>Iniciativa <span class="req">*</span></label><input id="lc-iniciativa" placeholder="Nome da iniciativa"></div><div class="field"><label>ID</label><input id="lc-codigo" placeholder="Ex: LEC-001"></div><div class="field"><label>Solicitante</label><input id="lc-solicitante"></div>
       <div class="field"><label>Área solicitante</label><input id="lc-area-solicitante"></div><div class="field"><label>Classificação</label><select id="lc-classificacao"><option value="projeto">Projeto</option><option value="melhoria">Melhoria</option></select></div><div class="field"><label>Priorização TI</label><input id="lc-priorizacao-ti" placeholder="Ex: 1º trimestre"></div><div class="field"><label>Priorização negócio</label><input id="lc-priorizacao-negocio" type="number" min="0"></div>
@@ -1152,7 +1154,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
   <div class="modal modal-lg" style="width:min(1080px,94vw)">
     <div class="modal-header"><h3 id="modal-solicitacao-titulo">Solicitar LECOM</h3><button class="modal-close" onclick="fecharModal('modal-solicitacao')">✕</button></div>
     <div class="modal-body"><input type="hidden" id="sol-id"><input type="hidden" id="sol-tipo">
-      <div class="form-grid">
+      <div class="form-grid" id="sol-form-lecom">
         <div class="field"><label>Solicitante <span class="req">*</span></label><input id="sol-solicitante" placeholder="Nome do solicitante"></div>
         <div class="field"><label>Área solicitante <span class="req">*</span></label><input id="sol-area-solicitante" placeholder="Ex: Atendimento"></div>
         <div class="field"><label>Formulário de Segurança da Informação <span class="req">*</span></label><select id="sol-seguranca"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
@@ -1177,6 +1179,17 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <div class="field span2" id="sol-risco-wrap" hidden><label>Descrição e indicador de risco assistencial <span class="req">*</span></label><textarea id="sol-risco-detalhe" rows="2" placeholder="Descreva o risco e informe o indicador"></textarea></div>
         <div class="field span2"><label>Observações</label><textarea id="sol-observacoes" rows="3"></textarea></div>
         <div class="field span2"><label>Anexos</label><input id="sol-anexos" type="file" multiple><small style="display:block;color:var(--ink-mute);margin-top:5px">Os nomes e metadados serão registrados. O armazenamento definitivo no Supabase Storage será conectado posteriormente.</small><div id="sol-anexos-lista" style="font-size:11px;color:var(--ink-soft);margin-top:6px"></div></div>
+      </div>
+      <div class="form-grid" id="sol-form-projeto" hidden>
+        <div class="field span2"><label>Nome do projeto <span class="req">*</span></label><input id="sol-proj-nome" placeholder="Informe o nome do projeto"></div>
+        <div class="field"><label>Solicitante <span class="req">*</span></label><input id="sol-proj-solicitante" placeholder="Nome do solicitante"></div>
+        <div class="field"><label>Data de abertura da solicitação <span class="req">*</span></label><input id="sol-proj-data-abertura" type="date"></div>
+        <div class="field span2"><label>Objetivo <span class="req">*</span></label><textarea id="sol-proj-objetivo" rows="3" placeholder="Qual resultado o projeto pretende alcançar?"></textarea></div>
+        <div class="field span2"><label>Escopo (macro entrega) <span class="req">*</span></label><textarea id="sol-proj-escopo" rows="3" placeholder="Descreva a macro entrega e os limites principais do projeto"></textarea></div>
+        <div class="field"><label>Responsável <span class="req">*</span></label><input id="sol-proj-responsavel" placeholder="Responsável pelo projeto"></div>
+        <div class="field"><label>Data alvo <span class="req">*</span></label><input id="sol-proj-data-alvo" type="date"></div>
+        <div class="field span2"><label>Áreas envolvidas <span class="req">*</span></label><textarea id="sol-proj-areas" rows="2" placeholder="Áreas de negócio e TI envolvidas"></textarea></div>
+        <div class="field span2"><label>Ganhos esperados <span class="req">*</span></label><textarea id="sol-proj-ganhos" rows="3" placeholder="Benefícios e resultados esperados"></textarea></div>
       </div>
     </div>
     <div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-solicitacao')">Cancelar</button><button class="btn btn-primary" onclick="salvarSolicitacao()">Enviar solicitação</button></div>
@@ -1308,13 +1321,16 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
       <div class="form-grid">
         <div class="field span2"><label>Nome do Projeto <span class="req">*</span></label><input type="text" id="mp-nome" placeholder="Ex: Lançamento Novos Produtos — Linha Metais"></div>
         <div class="field"><label>Código de Controle <span class="req">*</span></label><input type="text" id="mp-lecom" placeholder="Ex: CTRL-04471"></div>
-        <div class="field"><label>Gerente do Projeto</label><input type="text" id="mp-gerente"></div>
+        <div class="field"><label>Responsável</label><input type="text" id="mp-gerente"></div>
+        <div class="field"><label>Solicitante</label><input type="text" id="mp-solicitante"></div>
         <div class="field"><label>Data de Início</label><input type="date" id="mp-inicio"></div>
-        <div class="field"><label>Data de Término Prevista</label><input type="date" id="mp-fim"></div>
+        <div class="field"><label>Data alvo</label><input type="date" id="mp-fim"></div>
         <div class="field"><label>Data de abertura</label><input type="date" id="mp-abertura"></div>
         <div class="field span2"><label>Macro entrega</label><textarea id="mp-macro-entrega" rows="2" placeholder="Ex: Implantação nacional"></textarea></div>
         <div class="field span2"><label>Objetivo do projeto</label><textarea id="mp-objetivo" rows="3" placeholder="Descreva o objetivo, resultado esperado e benefício para o negócio."></textarea></div>
         <div class="field span2"><label>Entregáveis</label><textarea id="mp-entregaveis" rows="2" placeholder="Entregáveis principais do projeto"></textarea></div>
+        <div class="field span2"><label>Áreas envolvidas</label><textarea id="mp-areas-envolvidas" rows="2" placeholder="Áreas de negócio e TI envolvidas"></textarea></div>
+        <div class="field span2"><label>Ganhos esperados</label><textarea id="mp-ganhos-esperados" rows="2" placeholder="Benefícios e resultados esperados"></textarea></div>
         <div class="field"><label>Data replanejada</label><input type="date" id="mp-replanejada"></div>
         <div class="field"><label>Data de entrega final</label><input type="date" id="mp-entrega-final"></div>
         <div class="field"><label>Status do portfólio</label><select id="mp-status-portfolio"><option value="a_iniciar">À iniciar</option><option value="andamento">Em andamento</option><option value="atrasado">Atrasado</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select></div>
@@ -1682,12 +1698,18 @@ const MODULO_POR_PAGINA={home:'portfolio',projetos:'portfolio',portfdash:'portfo
 function papelPortal(){return String(perfilPortal?.role||'').trim().toLowerCase();}
 /* A confirmação por RPC usa a função is_admin() protegida por RLS como fonte de verdade. */
 function podeGerenciarAcessos(){ return !!sessaoPortal && (adminPortalConfirmado||papelPortal()==='admin') && perfilPortal?.active!==false; }
-function temPermissaoModulo(modulo){return podeGerenciarAcessos()||modulo==='solicitacoes'&&papelPortal()==='collaborator'||permissoesModuloPortal.has(modulo);}
+function temPermissaoModulo(modulo){
+  if(podeGerenciarAcessos())return true;
+  if(papelPortal()==='collaborator')return modulo==='solicitacoes';
+  return permissoesModuloPortal.has(modulo);
+}
 function atualizarNavegacaoAcessos(){
   const item=document.querySelector('.nav-item[data-page="acessos"]');
   if(!item)return;
+  const colaborador=papelPortal()==='collaborator'&&!podeGerenciarAcessos();
   const bloqueado=!podeGerenciarAcessos();
-  item.classList.toggle('locked',bloqueado);
+  item.style.display=colaborador?'none':'';
+  item.classList.toggle('locked',bloqueado&&!colaborador);
   item.setAttribute('aria-disabled',String(bloqueado));
   item.title=bloqueado?'Disponível apenas para administradores':'';
   const sair=document.getElementById('auth-logout');
@@ -1696,10 +1718,23 @@ function atualizarNavegacaoAcessos(){
     const modulo=MODULO_POR_PAGINA[nav.dataset.page];
     if(!modulo)return;
     const bloqueado=!temPermissaoModulo(modulo);
-    nav.classList.toggle('locked',bloqueado);
+    nav.style.display=colaborador&&nav.dataset.page!=='solicitacoes'?'none':'';
+    nav.classList.toggle('locked',bloqueado&&!colaborador);
     nav.setAttribute('aria-disabled',String(bloqueado));
     nav.title=bloqueado?'Sem permissão para este módulo':'';
   });
+  document.querySelectorAll('.sidebar-section-body,.nav-group-body').forEach(corpo=>{
+    const possuiItemVisivel=[...corpo.querySelectorAll('.nav-item')].some(nav=>nav.style.display!=='none');
+    corpo.style.display=possuiItemVisivel?'':'none';
+    const titulo=corpo.previousElementSibling;
+    if(titulo&&(titulo.classList.contains('sidebar-section')||titulo.classList.contains('nav-group-label')))titulo.style.display=possuiItemVisivel?'':'none';
+  });
+  const rodape=document.querySelector('.sidebar-footer');
+  if(rodape)rodape.style.display=colaborador?'none':'';
+  const busca=document.querySelector('.global-search'),avisos=document.querySelector('.notification-wrap'),seletorProjeto=document.querySelector('.project-switch');
+  if(busca)busca.style.display=colaborador?'none':'';
+  if(avisos)avisos.style.display=colaborador?'none':'';
+  if(seletorProjeto)seletorProjeto.style.display=colaborador?'none':'';
 }
 function mostrarErroAuth(mensagem){const el=document.getElementById('auth-error');if(!el)return;el.textContent=mensagem||'';el.classList.toggle('show',!!mensagem);}
 function mostrarMensagemCadastro(id,mensagem){const el=document.getElementById(id);if(!el)return;el.textContent=mensagem||'';el.classList.toggle('show',!!mensagem);}
@@ -1837,7 +1872,7 @@ async function aplicarSessaoPortal(session){
   if(perfilPortalPendente&&adminPortalConfirmado){perfilPortal={id:sessaoPortal.user.id,full_name:sessaoPortal.user.email,role:'admin',active:true};perfilPortalPendente=false;}
   if(perfilPortal?.active===false){atualizarNavegacaoAcessos();exibirLogin('Este usuário está inativo. Solicite a liberação a um administrador.');return;}
   const permissoesCarregadas=await carregarPermissoesModuloPortal();
-  if(!permissoesCarregadas&&!podeGerenciarAcessos()){
+  if(!permissoesCarregadas&&!podeGerenciarAcessos()&&papelPortal()!=='collaborator'){
     atualizarNavegacaoAcessos();
     exibirLogin('Seu perfil está ativo, mas as permissões por módulo ainda não foram configuradas. Execute a migration da Fase 2 e solicite a liberação ao administrador.');
     return;
@@ -1845,6 +1880,7 @@ async function aplicarSessaoPortal(session){
   atualizarNavegacaoAcessos();
   ocultarLogin();
   renderAcessos();
+  if(papelPortal()==='collaborator')navigate('solicitacoes');
 }
 
 async function iniciarAuthPortal(){
@@ -2065,7 +2101,7 @@ function carregarDadosDemo(){
   });
   STATE.solicitacoes=[
     {id:'sol-demo-001',tipo_solicitacao:'lecom',solicitante:'Mariana Costa',area_solicitante:'Experiência do Cliente',seguranca_informacao:'sim',envolve_ia:'nao',areas_ti:['Digital','Segurança da Informação'],produto_funcionalidade:'Portal e autenticação',titulo:'Evolução do autosserviço do beneficiário',objetivo:'Reduzir o volume de contatos repetitivos e facilitar o acesso digital.',justificativa:'A jornada atual exige múltiplas interações para concluir solicitações simples.',principais_entregas:'Novo fluxo de autenticação, telas de acompanhamento e painel de solicitações.',areas_impactadas:'Experiência do Cliente, Atendimento e Tecnologia',sistemas_impactados:'Portal do beneficiário, CRM e relatórios de atendimento',tipo_demanda:'evolucao',comissao_aprovadora:'eficiencia_operacional',impacto_jornada:'sim',impacto_nips:'sim',impacto_financeiro:'sim',impacto_financeiro_detalhe:'Redução estimada de 12% nos contatos repetitivos; indicador: custo por atendimento.',impacto_compliance:'nao',impacto_compliance_detalhe:'',risco_assistencial:'nao',risco_assistencial_detalhe:'',observacoes:'Solicitação criada para demonstração do fluxo de LECOM.',owner_id:sessaoPortal?.user?.id||'local-user',owner_email:sessaoPortal?.user?.email||'admin@demo.local',status:'em_analise',criado_em:'2026-08-18T10:00:00.000Z',atualizado_em:'2026-08-19T14:00:00.000Z',anexos:[{nome:'mapa-jornada.pdf',tamanho:245760,tipo:'application/pdf'}],admin_descricao:'Em análise pela área Digital e Segurança da Informação.'},
-    {id:'sol-demo-002',tipo_solicitacao:'projeto',solicitante:'Eduardo Ramos',area_solicitante:'Autorizações',seguranca_informacao:'nao',envolve_ia:'sim',areas_ti:['Arquitetura','Insights'],produto_funcionalidade:'Automação e autorização',titulo:'Novo projeto de motor inteligente de autorizações',objetivo:'Aumentar a previsibilidade e reduzir o prazo de análise das autorizações.',justificativa:'O processo atual depende de validações manuais e regras distribuídas.',principais_entregas:'Catálogo de regras, motor de decisão, APIs e cockpit operacional.',areas_impactadas:'Assistencial, Operações, Autorizações e Tecnologia',sistemas_impactados:'Sistema de autorizações, API de regras e painel operacional',tipo_demanda:'transformacao',comissao_aprovadora:'assistencial',impacto_jornada:'sim',impacto_nips:'nao',impacto_financeiro:'nao',impacto_financeiro_detalhe:'',impacto_compliance:'sim',impacto_compliance_detalhe:'Garantir rastreabilidade das decisões; indicador: percentual de decisões auditáveis.',risco_assistencial:'sim',risco_assistencial_detalhe:'Validar regras críticas antes da entrada em produção; indicador: taxa de divergência assistencial.',observacoes:'Projeto demonstrativo com status aprovado.',owner_id:sessaoPortal?.user?.id||'local-user',owner_email:sessaoPortal?.user?.email||'admin@demo.local',status:'aprovada',criado_em:'2026-08-12T09:00:00.000Z',atualizado_em:'2026-08-17T16:00:00.000Z',anexos:[],admin_descricao:'Aprovado para detalhamento técnico e planejamento.'}
+    {id:'sol-demo-002',tipo_solicitacao:'projeto',nome_projeto:'Novo projeto de motor inteligente de autorizações',titulo:'Novo projeto de motor inteligente de autorizações',solicitante:'Eduardo Ramos',data_abertura_solicitacao:'2026-08-12',objetivo:'Aumentar a previsibilidade e reduzir o prazo de análise das autorizações.',escopo_macro_entrega:'Implantar catálogo de regras, motor de decisão, APIs e cockpit operacional.',responsavel:'Eduardo Ramos',areas_envolvidas:'Assistencial, Operações, Autorizações, Arquitetura e Insights',data_alvo:'2026-12-18',ganhos_esperados:'Reduzir o tempo de análise, ampliar a rastreabilidade e diminuir intervenções manuais.',owner_id:sessaoPortal?.user?.id||'local-user',owner_email:sessaoPortal?.user?.email||'admin@demo.local',status:'aprovada',criado_em:'2026-08-12T09:00:00.000Z',atualizado_em:'2026-08-17T16:00:00.000Z',anexos:[],admin_descricao:'Aprovado para detalhamento técnico e planejamento.'}
   ];
   const lecomSeeds=[
     ['Portal de atualização cadastral','2026042','Atendimento','Carlos Moreira','Jornada do Beneficiário','andamento','sim','sim','nao'],['Régua de comunicação preventiva','2026043','Marketing','Carlos Moreira','Régua de Comunicação','conclusao','sim','nao','nao'],['Integração de resultados de exames','2026044','Assistencial','Fernanda Nóbrega','Portal e App','andamento','sim','sim','sim'],['Fila inteligente de SAC','2026045','Operações','Rafael Barini','Call Center','especificacao','nao','sim','nao'],['Automação de reembolso','2026046','Financeiro','Jorge Andrade','Autorização','andamento','sim','nao','nao'],['Notificação de agendamento','2026047','Produtos','Felipe Arantes','WhatsApp e Chatbot','conclusao','sim','nao','nao'],['Gestão de documentos digitais','2026048','Jurídico','Rafael Barini','Jornada Pós-Atendimento','especificacao','nao','nao','nao'],['Assistente virtual de elegibilidade','2026049','Atendimento','Jorge Andrade','Dados, BI e IA','andamento','sim','sim','sim'],['Melhoria na confirmação de consultas','2026050','Operações','Carlos Moreira','Portal e App','conclusao','sim','nao','nao']
@@ -2134,14 +2170,14 @@ function abrirVisualizacaoProjeto(id){
   document.getElementById('modal-projeto-visualizacao-conteudo').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding-bottom:16px;border-bottom:1px solid var(--line)"><div><span class="mono" style="font-size:11px;color:var(--ink-mute)">CÓDIGO DE CONTROLE</span><b style="display:block;color:var(--blue);font-size:16px;margin-top:4px">${esc(p.lecom||'—')}</b></div><span class="badge ${({a_iniciar:'badge-neutral',andamento:'badge-info',atrasado:'badge-danger',concluido:'badge-ok',cancelado:'badge-neutral'})[p.status_portfolio||'a_iniciar']}">${rotuloStatusPortfolio(p.status_portfolio)}</span></div>
     <div style="margin:18px 0"><b style="font-size:13px;color:var(--blue)">Objetivo do projeto</b><p style="margin:7px 0 0;line-height:1.6;color:var(--ink-soft)">${esc(p.objetivo||'Objetivo não informado.')}</p></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div style="padding:14px;border-radius:9px;background:var(--paper)"><b style="font-size:12px;color:var(--blue)">Macro entrega</b><p style="margin:7px 0 0;line-height:1.5">${esc(p.macro_entrega||'—')}</p></div><div style="padding:14px;border-radius:9px;background:var(--paper)"><b style="font-size:12px;color:var(--blue)">Entregáveis</b><p style="margin:7px 0 0;line-height:1.5">${esc(p.entregaveis||'—')}</p></div></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px"><div><small style="color:var(--ink-mute)">Responsável</small><b style="display:block;margin-top:4px">${esc(p.gerente_projeto||'—')}</b></div><div><small style="color:var(--ink-mute)">Data de abertura</small><b style="display:block;margin-top:4px">${fmtData(p.data_abertura)}</b></div><div><small style="color:var(--ink-mute)">Início</small><b style="display:block;margin-top:4px">${fmtData(p.data_inicio)}</b></div><div><small style="color:var(--ink-mute)">Planejada</small><b style="display:block;margin-top:4px">${fmtData(p.data_fim_prevista)}</b></div><div><small style="color:var(--ink-mute)">Replanejada</small><b style="display:block;margin-top:4px">${fmtData(p.data_replanejada)}</b></div><div><small style="color:var(--ink-mute)">Entrega final</small><b style="display:block;margin-top:4px">${fmtData(p.data_entrega_final)}</b></div></div>`;
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div style="padding:14px;border-radius:9px;background:var(--paper)"><b style="font-size:12px;color:var(--blue)">Macro entrega</b><p style="margin:7px 0 0;line-height:1.5">${esc(p.macro_entrega||'—')}</p></div><div style="padding:14px;border-radius:9px;background:var(--paper)"><b style="font-size:12px;color:var(--blue)">Entregáveis</b><p style="margin:7px 0 0;line-height:1.5">${esc(p.entregaveis||'—')}</p></div><div style="padding:14px;border-radius:9px;background:var(--paper)"><b style="font-size:12px;color:var(--blue)">Áreas envolvidas</b><p style="margin:7px 0 0;line-height:1.5">${esc(p.areas_envolvidas||'—')}</p></div><div style="padding:14px;border-radius:9px;background:var(--paper)"><b style="font-size:12px;color:var(--blue)">Ganhos esperados</b><p style="margin:7px 0 0;line-height:1.5">${esc(p.ganhos_esperados||'—')}</p></div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px"><div><small style="color:var(--ink-mute)">Solicitante</small><b style="display:block;margin-top:4px">${esc(p.solicitante||'—')}</b></div><div><small style="color:var(--ink-mute)">Responsável</small><b style="display:block;margin-top:4px">${esc(p.gerente_projeto||'—')}</b></div><div><small style="color:var(--ink-mute)">Data de abertura</small><b style="display:block;margin-top:4px">${fmtData(p.data_abertura)}</b></div><div><small style="color:var(--ink-mute)">Início</small><b style="display:block;margin-top:4px">${fmtData(p.data_inicio)}</b></div><div><small style="color:var(--ink-mute)">Data alvo</small><b style="display:block;margin-top:4px">${fmtData(p.data_fim_prevista)}</b></div><div><small style="color:var(--ink-mute)">Replanejada</small><b style="display:block;margin-top:4px">${fmtData(p.data_replanejada)}</b></div><div><small style="color:var(--ink-mute)">Entrega final</small><b style="display:block;margin-top:4px">${fmtData(p.data_entrega_final)}</b></div></div>`;
   document.getElementById('mpv-abrir').onclick=()=>{fecharModal('modal-projeto-visualizacao');selecionarProjeto(id);};
   document.getElementById('mpv-editar').onclick=()=>{fecharModal('modal-projeto-visualizacao');abrirModalProjeto(id);};abrirModal('modal-projeto-visualizacao');
 }
 
 const PROJETO_COLUNAS = [
-  ['NOME DO PROJETO','nome'],['CÓDIGO DE CONTROLE','lecom'],['DATA DE ABERTURA','data_abertura'],['OBJETIVO DO PROJETO','objetivo'],['MACRO ENTREGA','macro_entrega'],['ENTREGÁVEIS','entregaveis'],['RESPONSÁVEL','gerente_projeto'],['DATA PLANEJADA','data_fim_prevista'],['DATA REPLANEJADA','data_replanejada'],['DATA DE ENTREGA FINAL','data_entrega_final'],['STATUS','status_portfolio'],['DATA DE INÍCIO','data_inicio']
+  ['NOME DO PROJETO','nome'],['CÓDIGO DE CONTROLE','lecom'],['SOLICITANTE','solicitante'],['DATA DE ABERTURA','data_abertura'],['OBJETIVO DO PROJETO','objetivo'],['MACRO ENTREGA','macro_entrega'],['ENTREGÁVEIS','entregaveis'],['RESPONSÁVEL','gerente_projeto'],['ÁREAS ENVOLVIDAS','areas_envolvidas'],['DATA ALVO','data_fim_prevista'],['GANHOS ESPERADOS','ganhos_esperados'],['DATA REPLANEJADA','data_replanejada'],['DATA DE ENTREGA FINAL','data_entrega_final'],['STATUS','status_portfolio'],['DATA DE INÍCIO','data_inicio']
 ];
 function rotuloStatusPortfolio(valor){ return ({a_iniciar:'À iniciar',andamento:'Em andamento',atrasado:'Atrasado',concluido:'Concluído',cancelado:'Cancelado'})[valor] || 'À iniciar'; }
 function renderPortfolioProjetos(){
@@ -2166,18 +2202,21 @@ function abrirModalProjeto(id){
     document.getElementById('mp-nome').value = p.nome || '';
     document.getElementById('mp-lecom').value = p.lecom || '';
     document.getElementById('mp-gerente').value = p.gerente_projeto || '';
+    document.getElementById('mp-solicitante').value = p.solicitante || '';
     document.getElementById('mp-inicio').value = p.data_inicio || '';
     document.getElementById('mp-fim').value = p.data_fim_prevista || '';
     document.getElementById('mp-abertura').value = p.data_abertura || '';
     document.getElementById('mp-macro-entrega').value = p.macro_entrega || '';
     document.getElementById('mp-objetivo').value = p.objetivo || '';
     document.getElementById('mp-entregaveis').value = p.entregaveis || '';
+    document.getElementById('mp-areas-envolvidas').value = p.areas_envolvidas || '';
+    document.getElementById('mp-ganhos-esperados').value = p.ganhos_esperados || '';
     document.getElementById('mp-replanejada').value = p.data_replanejada || '';
     document.getElementById('mp-entrega-final').value = p.data_entrega_final || '';
     document.getElementById('mp-status-portfolio').value = p.status_portfolio || 'a_iniciar';
   }else{
     document.getElementById('modal-projeto-titulo').textContent = 'Novo Projeto';
-    ['mp-nome','mp-lecom','mp-gerente','mp-inicio','mp-fim','mp-abertura','mp-macro-entrega','mp-objetivo','mp-entregaveis','mp-replanejada','mp-entrega-final'].forEach(f => document.getElementById(f).value = '');
+    ['mp-nome','mp-lecom','mp-gerente','mp-solicitante','mp-inicio','mp-fim','mp-abertura','mp-macro-entrega','mp-objetivo','mp-entregaveis','mp-areas-envolvidas','mp-ganhos-esperados','mp-replanejada','mp-entrega-final'].forEach(f => document.getElementById(f).value = '');
     document.getElementById('mp-status-portfolio').value = 'a_iniciar';
   }
   abrirModal('modal-projeto');
@@ -2192,12 +2231,15 @@ function salvarProjeto(){
   const dados = {
     nome, lecom,
     gerente_projeto: document.getElementById('mp-gerente').value.trim(),
+    solicitante: document.getElementById('mp-solicitante').value.trim(),
     data_inicio: document.getElementById('mp-inicio').value,
     data_fim_prevista: document.getElementById('mp-fim').value,
     data_abertura: document.getElementById('mp-abertura').value,
     macro_entrega: document.getElementById('mp-macro-entrega').value.trim(),
     objetivo: document.getElementById('mp-objetivo').value.trim(),
     entregaveis: document.getElementById('mp-entregaveis').value.trim(),
+    areas_envolvidas: document.getElementById('mp-areas-envolvidas').value.trim(),
+    ganhos_esperados: document.getElementById('mp-ganhos-esperados').value.trim(),
     data_replanejada: document.getElementById('mp-replanejada').value,
     data_entrega_final: document.getElementById('mp-entrega-final').value,
     status_portfolio: document.getElementById('mp-status-portfolio').value,
@@ -2685,7 +2727,7 @@ function gerarPdfLecomDetalhe(id){
   const l=STATE.melhorias.find(item=>item.id===id);if(!l||typeof window.jspdf==='undefined'){toast('Biblioteca de PDF indisponível.');return;}const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});let y=30;pdf.setFillColor(0,65,166);pdf.rect(0,0,210,22,'F');pdf.setTextColor(255);pdf.setFontSize(15);pdf.text('Detalhe da LECOM',14,13);pdf.setFontSize(8);pdf.text((l.codigo || '')+' - '+(l.iniciativa || l.titulo || ''),14,18);const secao=(t,c)=>{pdf.setTextColor(0,65,166);pdf.setFontSize(9);pdf.text(t.toUpperCase(),14,y);pdf.setTextColor(58,78,122);pdf.setFontSize(9);const linhas=pdf.splitTextToSize(c,180);pdf.text(linhas,14,y+5);y+=linhas.length*4+13;};secao('Solicitação','Solicitante: '+(l.solicitante||'—')+'\nÁrea solicitante: '+(l.area_solicitante||'—')+'\nClassificação: '+(l.classificacao||'—')+'\nCompromisso: '+(l.compromisso||'—'));secao('Priorização e responsabilidade','TI: '+(l.priorizacao_ti||'—')+' | Negócio: '+(l.priorizacao_negocio||'—')+'\nÁrea TI: '+(l.area_ti||'—')+'\nDiretor TI: '+(l.diretor_ti||'—'));secao('Especificação','Planejada: '+fmtData(l.plan_especificacao)+' | Final: '+fmtData(l.final_especificacao)+' | Status: '+rotuloStatusLecom(l.status_especificacao));secao('Homologação','Planejada: '+fmtData(l.plan_homologacao)+' | Final: '+fmtData(l.final_homologacao)+' | Status: '+rotuloStatusLecom(l.status_homologacao));secao('Produção','Planejada: '+fmtData(l.plan_producao)+' | Final: '+fmtData(l.final_producao)+' | Status: '+rotuloStatusLecom(l.status_producao));finalizarPdfPadrao(pdf,'LECOM_'+(l.codigo || l.id).replace(/[^\w-]/g,'_'));
 }
 function abrirModalLecom(id){
-  const lecom=id ? STATE.melhorias.find(l=>l.id===id) : {}; document.getElementById('lc-id').value=id || ''; document.getElementById('modal-lecom-titulo').textContent=id?'Editar LECOM':'Nova LECOM';
+  const lecom=id ? STATE.melhorias.find(l=>l.id===id) : {}; document.getElementById('lc-id').value=id || ''; document.getElementById('modal-lecom-titulo').textContent=id?'Editar LECOM':'Novo LECOM';
   LECOM_COLUNAS.forEach(([,chave])=>{ const campo=document.getElementById(`lc-${chave.replaceAll('_','-')}`); if(campo) campo.value=valorLecom(lecom,chave); }); abrirModal('modal-lecom');
 }
 function salvarLecom(){
@@ -2809,10 +2851,14 @@ function abrirModalSolicitacao(tipo){
   const titulo=tipo==='projeto'?'Solicitar novo projeto':'Solicitar LECOM';
   document.getElementById('modal-solicitacao-titulo').textContent=titulo;
   document.getElementById('sol-tipo').value=tipo;document.getElementById('sol-id').value='';
+  document.getElementById('sol-form-lecom').hidden=tipo==='projeto';
+  document.getElementById('sol-form-projeto').hidden=tipo!=='projeto';
   ['sol-solicitante','sol-area-solicitante','sol-produto','sol-titulo','sol-objetivo','sol-justificativa','sol-entregas','sol-areas-impactadas','sol-sistemas-impactados','sol-financeiro-detalhe','sol-compliance-detalhe','sol-risco-detalhe','sol-observacoes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['sol-proj-nome','sol-proj-solicitante','sol-proj-data-abertura','sol-proj-objetivo','sol-proj-escopo','sol-proj-responsavel','sol-proj-data-alvo','sol-proj-areas','sol-proj-ganhos'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['sol-seguranca','sol-envolve-ia','sol-impacto-jornada','sol-impacto-nips','sol-impacto-financeiro','sol-impacto-compliance','sol-risco-assistencial'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='nao';});
   document.querySelectorAll('input[name="sol-area-ti"]').forEach(el=>el.checked=false);atualizarAreasTiSolicitacao();const files=document.getElementById('sol-anexos');if(files)files.value='';document.getElementById('sol-anexos-lista').textContent='';alternarCamposCondicionaisSolicitacao();
-  const nome=perfilPortal?.full_name||sessaoPortal?.user?.user_metadata?.full_name||'';document.getElementById('sol-solicitante').value=nome;
+  const nome=perfilPortal?.full_name||sessaoPortal?.user?.user_metadata?.full_name||'';
+  document.getElementById('sol-solicitante').value=nome;document.getElementById('sol-proj-solicitante').value=nome;document.getElementById('sol-proj-data-abertura').value=hojeISO();
   abrirModal('modal-solicitacao');
 }
 function atualizarAreasTiSolicitacao(){const selecionadas=[...document.querySelectorAll('input[name="sol-area-ti"]:checked')].map(el=>el.value),label=document.getElementById('sol-area-ti-label');if(label)label.textContent=selecionadas.length?selecionadas.join(', '):'Selecione uma ou mais áreas TI';}
@@ -2821,13 +2867,18 @@ function alternarCamposCondicionaisSolicitacao(){
 }
 function coletarSolicitacaoFormulario(){
   const v=id=>String(document.getElementById(id)?.value||'').trim();
+  if(document.getElementById('sol-tipo').value==='projeto')return {tipo_solicitacao:'projeto',nome_projeto:v('sol-proj-nome'),titulo:v('sol-proj-nome'),solicitante:v('sol-proj-solicitante'),data_abertura_solicitacao:v('sol-proj-data-abertura'),objetivo:v('sol-proj-objetivo'),escopo_macro_entrega:v('sol-proj-escopo'),responsavel:v('sol-proj-responsavel'),areas_envolvidas:v('sol-proj-areas'),data_alvo:v('sol-proj-data-alvo'),ganhos_esperados:v('sol-proj-ganhos')};
   return {tipo_solicitacao:document.getElementById('sol-tipo').value||'lecom',solicitante:v('sol-solicitante'),area_solicitante:v('sol-area-solicitante'),seguranca_informacao:document.getElementById('sol-seguranca').value,envolve_ia:document.getElementById('sol-envolve-ia').value,areas_ti:[...document.querySelectorAll('input[name="sol-area-ti"]:checked')].map(el=>el.value),produto_funcionalidade:v('sol-produto'),titulo:v('sol-titulo'),objetivo:v('sol-objetivo'),justificativa:v('sol-justificativa'),principais_entregas:v('sol-entregas'),areas_impactadas:v('sol-areas-impactadas'),sistemas_impactados:v('sol-sistemas-impactados'),tipo_demanda:document.getElementById('sol-tipo-demanda').value,comissao_aprovadora:document.getElementById('sol-comissao').value,impacto_jornada:document.getElementById('sol-impacto-jornada').value,impacto_nips:document.getElementById('sol-impacto-nips').value,impacto_financeiro:document.getElementById('sol-impacto-financeiro').value,impacto_financeiro_detalhe:v('sol-financeiro-detalhe'),impacto_compliance:document.getElementById('sol-impacto-compliance').value,impacto_compliance_detalhe:v('sol-compliance-detalhe'),risco_assistencial:document.getElementById('sol-risco-assistencial').value,risco_assistencial_detalhe:v('sol-risco-detalhe'),observacoes:v('sol-observacoes')};
 }
 function salvarSolicitacao(){
   const dados=coletarSolicitacaoFormulario();
-  if(!dados.solicitante||!dados.area_solicitante||!dados.titulo||!dados.objetivo||!dados.justificativa||!dados.areas_ti.length){toast('Preencha os campos obrigatórios, incluindo ao menos uma Área TI.');return;}
-  if(dados.impacto_financeiro==='sim'&&!dados.impacto_financeiro_detalhe||dados.impacto_compliance==='sim'&&!dados.impacto_compliance_detalhe||dados.risco_assistencial==='sim'&&!dados.risco_assistencial_detalhe){toast('Preencha a descrição e o indicador dos impactos selecionados.');return;}
-  const files=[...(document.getElementById('sol-anexos')?.files||[])].map(f=>({nome:f.name,tamanho:f.size,tipo:f.type}));
+  if(dados.tipo_solicitacao==='projeto'){
+    if(!dados.nome_projeto||!dados.solicitante||!dados.data_abertura_solicitacao||!dados.objetivo||!dados.escopo_macro_entrega||!dados.responsavel||!dados.areas_envolvidas||!dados.data_alvo||!dados.ganhos_esperados){toast('Preencha todos os campos obrigatórios da solicitação de projeto.');return;}
+  }else{
+    if(!dados.solicitante||!dados.area_solicitante||!dados.titulo||!dados.objetivo||!dados.justificativa||!dados.areas_ti.length){toast('Preencha os campos obrigatórios, incluindo ao menos uma Área TI.');return;}
+    if(dados.impacto_financeiro==='sim'&&!dados.impacto_financeiro_detalhe||dados.impacto_compliance==='sim'&&!dados.impacto_compliance_detalhe||dados.risco_assistencial==='sim'&&!dados.risco_assistencial_detalhe){toast('Preencha a descrição e o indicador dos impactos selecionados.');return;}
+  }
+  const files=dados.tipo_solicitacao==='lecom'?[...(document.getElementById('sol-anexos')?.files||[])].map(f=>({nome:f.name,tamanho:f.size,tipo:f.type})):[];
   const item={id:uid(),...dados,owner_id:usuarioSolicitacaoAtual(),owner_email:sessaoPortal?.user?.email||'',status:'enviada',criado_em:new Date().toISOString(),atualizado_em:new Date().toISOString(),anexos:files,admin_descricao:''};
   STATE.solicitacoes.unshift(item);salvarState();registrarAuditoria('criar','solicitação',`${item.tipo_solicitacao==='projeto'?'Novo projeto':'LECOM'}: ${item.titulo}`);fecharModal('modal-solicitacao');renderSolicitacoes();toast('Solicitação enviada com sucesso.');
 }
@@ -2836,20 +2887,23 @@ function renderSolicitacoes(){
   const lista=solicitacoesVisiveis(),filtro=document.getElementById('solicitacoes-filtro-status')?.value||'',filtrada=lista.filter(s=>!filtro||s.status===filtro),admin=podeGerenciarAcessos();
   document.getElementById('solicitacoes-visao-label').textContent=admin?'Todas as solicitações':'Minhas solicitações';document.getElementById('solicitacoes-resumo').textContent=`${filtrada.length} solicitação(ões) exibida(s)`;
   if(!filtrada.length){tbody.innerHTML='<tr><td colspan="7"><div class="dtable-empty">Nenhuma solicitação encontrada.</div></td></tr>';return;}
-  tbody.innerHTML=filtrada.map(s=>`<tr style="cursor:pointer" onclick="abrirDetalheSolicitacao('${s.id}')"><td><span class="badge badge-info">${s.tipo_solicitacao==='projeto'?'Novo projeto':'LECOM'}</span></td><td><b>${esc(s.titulo)}</b><small class="mono" style="display:block;color:var(--ink-mute);margin-top:3px">${esc(s.id)}</small></td><td>${esc(s.solicitante)}</td><td>${esc(s.area_solicitante)}</td><td>${fmtData((s.criado_em||'').slice(0,10))}</td><td><span class="badge ${s.status==='concluida'?'badge-ok':s.status==='reprovada'||s.status==='cancelada'?'badge-danger':'badge-warn'}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></td><td class="dtable-actions"><button onclick="event.stopPropagation();abrirDetalheSolicitacao('${s.id}')" title="Visualizar">▣</button></td></tr>`).join('');
+  tbody.innerHTML=filtrada.map(s=>`<tr style="cursor:pointer" onclick="abrirDetalheSolicitacao('${s.id}')"><td><span class="badge badge-info">${s.tipo_solicitacao==='projeto'?'Novo projeto':'LECOM'}</span></td><td><b>${esc(s.nome_projeto||s.titulo)}</b><small class="mono" style="display:block;color:var(--ink-mute);margin-top:3px">${esc(s.id)}</small></td><td>${esc(s.solicitante)}</td><td>${esc(s.tipo_solicitacao==='projeto'?(s.areas_envolvidas||s.areas_impactadas):s.area_solicitante)}</td><td>${fmtData((s.criado_em||'').slice(0,10))}</td><td><span class="badge ${s.status==='concluida'?'badge-ok':s.status==='reprovada'||s.status==='cancelada'?'badge-danger':'badge-warn'}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></td><td class="dtable-actions"><button onclick="event.stopPropagation();abrirDetalheSolicitacao('${s.id}')" title="Visualizar">▣</button></td></tr>`).join('');
 }
 function abrirDetalheSolicitacao(id){
   const s=STATE.solicitacoes.find(x=>x.id===id);if(!s||(!podeGerenciarAcessos()&&(s.owner_id||'local-user')!==usuarioSolicitacaoAtual())){toast('Solicitação não disponível.');return;}
   const linha=(label,val)=>`<div style="border-bottom:1px solid var(--line);padding:9px 0"><small style="display:block;color:var(--ink-mute);font-weight:800;text-transform:uppercase;font-size:10px">${label}</small><span style="display:block;margin-top:4px;white-space:pre-wrap">${esc(val||'—')}</span></div>`;
-  const areas=(s.areas_ti||[]).join(', '),anexos=(s.anexos||[]).map(a=>a.nome).join(', ');
   const admin=podeGerenciarAcessos();
-  document.getElementById('sol-detalhe-conteudo').innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><span class="badge badge-info">${s.tipo_solicitacao==='projeto'?'Solicitação de novo projeto':'Solicitação de LECOM'}</span><h2 style="color:var(--blue);margin:10px 0 4px;font-size:20px">${esc(s.titulo)}</h2><span class="mono" style="font-size:11px;color:var(--ink-mute)">${esc(s.id)} · ${fmtData((s.criado_em||'').slice(0,10))}</span></div><span class="badge ${s.status==='concluida'?'badge-ok':s.status==='reprovada'||s.status==='cancelada'?'badge-danger':'badge-warn'}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></div>${s.projeto_id?`<div style="margin-top:14px;padding:11px 13px;border-radius:8px;background:#eef8f2;color:#17663a;font-size:12px">Projeto criado automaticamente no Portfólio. <button class="btn btn-outline btn-sm" style="margin-left:8px" onclick="fecharModal('modal-solicitacao-detalhe');selecionarProjeto('${s.projeto_id}')">Abrir projeto</button></div>`:''}<div style="display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;margin-top:18px">${linha('Solicitante',s.solicitante)}${linha('Área solicitante',s.area_solicitante)}${linha('E-mail',s.owner_email||'Gerenciado pelo Supabase Auth')}${linha('Área TI',areas)}${linha('Produto / funcionalidade',s.produto_funcionalidade)}${linha('Tipo de demanda',s.tipo_demanda)}${linha('Comissão aprovadora',s.comissao_aprovadora)}${linha('Segurança da informação',s.seguranca_informacao)}${linha('Envolve IA',s.envolve_ia)}${linha('Impacto na jornada',s.impacto_jornada)}${linha('Impacto em NIPS',s.impacto_nips)}${linha('Impacto financeiro',s.impacto_financeiro==='sim'?s.impacto_financeiro_detalhe:'Não')}${linha('Impacto compliance',s.impacto_compliance==='sim'?s.impacto_compliance_detalhe:'Não')}${linha('Risco assistencial',s.risco_assistencial==='sim'?s.risco_assistencial_detalhe:'Não')}</div><div style="margin-top:16px">${linha('Objetivo',s.objetivo)}${linha('Justificativa',s.justificativa)}${linha('Principais entregas',s.principais_entregas)}${linha('Áreas impactadas',s.areas_impactadas)}${linha('Sistemas, telas ou relatórios impactados',s.sistemas_impactados)}${linha('Observações',s.observacoes)}${linha('Anexos',anexos)}</div>${admin?`<div style="margin-top:18px;padding:14px;background:#f6f8fc;border-radius:9px"><b style="font-size:12px">Gestão administrativa</b><div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:10px"><label style="font-size:12px;font-weight:700">Status<select id="sol-status-admin" style="display:block;margin-top:5px;padding:8px;border:1px solid var(--line);border-radius:7px"><option value="enviada">Enviada</option><option value="em_analise">Em análise</option><option value="aprovada">Aprovada</option><option value="em_execucao">Em execução</option><option value="concluida">Concluída</option><option value="reprovada">Reprovada</option><option value="cancelada">Cancelada</option></select></label><input id="sol-admin-descricao" placeholder="Descrição / retorno ao solicitante" style="flex:1;min-width:240px;padding:8px;border:1px solid var(--line);border-radius:7px"><button class="btn btn-primary btn-sm" onclick="salvarStatusSolicitacao('${s.id}')">Atualizar solicitação</button></div></div>`:''}`;
+  const projeto=s.tipo_solicitacao==='projeto',areas=(s.areas_ti||[]).join(', '),anexos=(s.anexos||[]).map(a=>a.nome).join(', ');
+  const resumo=projeto
+    ? `<div style="display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;margin-top:18px">${linha('Solicitante',s.solicitante)}${linha('E-mail',s.owner_email||'Gerenciado pelo Supabase Auth')}${linha('Data de abertura',s.data_abertura_solicitacao?fmtData(s.data_abertura_solicitacao):fmtData((s.criado_em||'').slice(0,10)))}${linha('Responsável',s.responsavel||s.solicitante)}${linha('Áreas envolvidas',s.areas_envolvidas||s.areas_impactadas)}${linha('Data alvo',fmtData(s.data_alvo))}</div><div style="margin-top:16px">${linha('Objetivo',s.objetivo)}${linha('Escopo (macro entrega)',s.escopo_macro_entrega||s.macro_entrega||s.produto_funcionalidade)}${linha('Ganhos esperados',s.ganhos_esperados)}</div>`
+    : `<div style="display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;margin-top:18px">${linha('Solicitante',s.solicitante)}${linha('Área solicitante',s.area_solicitante)}${linha('E-mail',s.owner_email||'Gerenciado pelo Supabase Auth')}${linha('Área TI',areas)}${linha('Produto / funcionalidade',s.produto_funcionalidade)}${linha('Tipo de demanda',s.tipo_demanda)}${linha('Comissão aprovadora',s.comissao_aprovadora)}${linha('Segurança da informação',s.seguranca_informacao)}${linha('Envolve IA',s.envolve_ia)}${linha('Impacto na jornada',s.impacto_jornada)}${linha('Impacto em NIPS',s.impacto_nips)}${linha('Impacto financeiro',s.impacto_financeiro==='sim'?s.impacto_financeiro_detalhe:'Não')}${linha('Impacto compliance',s.impacto_compliance==='sim'?s.impacto_compliance_detalhe:'Não')}${linha('Risco assistencial',s.risco_assistencial==='sim'?s.risco_assistencial_detalhe:'Não')}</div><div style="margin-top:16px">${linha('Objetivo',s.objetivo)}${linha('Justificativa',s.justificativa)}${linha('Principais entregas',s.principais_entregas)}${linha('Áreas impactadas',s.areas_impactadas)}${linha('Sistemas, telas ou relatórios impactados',s.sistemas_impactados)}${linha('Observações',s.observacoes)}${linha('Anexos',anexos)}</div>`;
+  document.getElementById('sol-detalhe-conteudo').innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><span class="badge badge-info">${projeto?'Solicitação de novo projeto':'Solicitação de LECOM'}</span><h2 style="color:var(--blue);margin:10px 0 4px;font-size:20px">${esc(s.nome_projeto||s.titulo)}</h2><span class="mono" style="font-size:11px;color:var(--ink-mute)">${esc(s.id)} · ${fmtData((s.criado_em||'').slice(0,10))}</span></div><span class="badge ${s.status==='concluida'?'badge-ok':s.status==='reprovada'||s.status==='cancelada'?'badge-danger':'badge-warn'}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></div>${s.projeto_id&&admin?`<div style="margin-top:14px;padding:11px 13px;border-radius:8px;background:#eef8f2;color:#17663a;font-size:12px">Projeto criado automaticamente no Portfólio. <button class="btn btn-outline btn-sm" style="margin-left:8px" onclick="fecharModal('modal-solicitacao-detalhe');selecionarProjeto('${s.projeto_id}')">Abrir projeto</button></div>`:''}${resumo}${admin?`<div style="margin-top:18px;padding:14px;background:#f6f8fc;border-radius:9px"><b style="font-size:12px">Gestão administrativa</b><div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:10px"><label style="font-size:12px;font-weight:700">Status<select id="sol-status-admin" style="display:block;margin-top:5px;padding:8px;border:1px solid var(--line);border-radius:7px"><option value="enviada">Enviada</option><option value="em_analise">Em análise</option><option value="aprovada">Aprovada</option><option value="em_execucao">Em execução</option><option value="concluida">Concluída</option><option value="reprovada">Reprovada</option><option value="cancelada">Cancelada</option></select></label><input id="sol-admin-descricao" placeholder="Descrição / retorno ao solicitante" style="flex:1;min-width:240px;padding:8px;border:1px solid var(--line);border-radius:7px"><button class="btn btn-primary btn-sm" onclick="salvarStatusSolicitacao('${s.id}')">Atualizar solicitação</button></div></div>`:''}`;
   if(admin){document.getElementById('sol-status-admin').value=s.status;document.getElementById('sol-admin-descricao').value=s.admin_descricao||'';}
   abrirModal('modal-solicitacao-detalhe');
 }
 function criarProjetoAPartirDaSolicitacao(s){
   if(!s||s.tipo_solicitacao!=='projeto'||s.projeto_id)return null;
-  const projeto={id:uid(),nome:s.titulo,lecom:'SOL-'+String(s.id).replace(/[^a-z0-9]/gi,'').slice(-10).toUpperCase(),gerente_projeto:s.solicitante,patrocinador:s.comissao_aprovadora==='assistencial'?'Comissão Assistencial':'Comissão de Eficiência Operacional',lider_ti:(s.areas_ti||[]).join(', '),direcao_ti:'Experiência do Cliente e Operações',data_inicio:'',data_fim_prevista:'',data_abertura:hojeISO(),macro_entrega:s.produto_funcionalidade||'Projeto aprovado a partir de solicitação',entregaveis:s.principais_entregas||'',data_replanejada:'',data_entrega_final:'',status:'planejamento',status_portfolio:'a_iniciar',objetivo:s.objetivo||'',arquivado:false,criado_em:new Date().toISOString(),solicitacao_id:s.id};
+  const projeto={id:uid(),nome:s.nome_projeto||s.titulo,lecom:'SOL-'+String(s.id).replace(/[^a-z0-9]/gi,'').slice(-10).toUpperCase(),solicitante:s.solicitante||'',gerente_projeto:s.responsavel||s.solicitante||'',areas_envolvidas:s.areas_envolvidas||s.areas_impactadas||'',ganhos_esperados:s.ganhos_esperados||'',patrocinador:'',lider_ti:'',direcao_ti:'Experiência do Cliente e Operações',data_inicio:'',data_fim_prevista:s.data_alvo||'',data_abertura:s.data_abertura_solicitacao||hojeISO(),macro_entrega:s.escopo_macro_entrega||s.produto_funcionalidade||'Projeto aprovado a partir de solicitação',entregaveis:s.principais_entregas||'',data_replanejada:'',data_entrega_final:'',status:'planejamento',status_portfolio:'a_iniciar',objetivo:s.objetivo||'',arquivado:false,criado_em:new Date().toISOString(),solicitacao_id:s.id};
   STATE.projetos.unshift(projeto);s.projeto_id=projeto.id;return projeto;
 }
 function salvarStatusSolicitacao(id){const s=STATE.solicitacoes.find(x=>x.id===id);if(!s||!podeGerenciarAcessos())return;const statusAnterior=s.status;s.status=document.getElementById('sol-status-admin').value;s.admin_descricao=document.getElementById('sol-admin-descricao').value.trim();s.atualizado_em=new Date().toISOString();let projetoCriado=null;if(s.status==='aprovada'&&statusAnterior!=='aprovada'&&s.tipo_solicitacao==='projeto'&&!s.projeto_id)projetoCriado=criarProjetoAPartirDaSolicitacao(s);salvarState();registrarAuditoria('atualizar','solicitação',`${s.titulo}: ${STATUS_SOLICITACAO_LABEL[s.status]}`);if(projetoCriado){registrarAuditoria('criar','projeto',`Projeto criado automaticamente a partir da solicitação ${s.id}: ${projetoCriado.nome}`);renderProjetosHome();renderPortfolioProjetos();toast('Solicitação aprovada e projeto adicionado ao Portfólio.');}else{toast('Solicitação atualizada.');}fecharModal('modal-solicitacao-detalhe');renderSolicitacoes();}
