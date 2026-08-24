@@ -201,7 +201,11 @@ html[data-theme="dark"] [style*="background:#f6f8fc"],html[data-theme="dark"] [s
 .multi-select-dropdown{position:relative}.multi-select-dropdown summary{list-style:none;cursor:pointer;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink-soft);font-size:13px}.multi-select-dropdown summary::-webkit-details-marker{display:none}.multi-select-dropdown[open] summary{border-color:var(--blue);border-radius:8px 8px 0 0}.multi-select-options{position:absolute;left:0;right:0;z-index:8;background:#fff;border:1.5px solid var(--blue);border-top:0;border-radius:0 0 8px 8px;padding:8px;box-shadow:var(--shadow-lg);display:grid;grid-template-columns:repeat(2,minmax(200px,1fr));gap:4px 14px;max-height:220px;overflow-y:auto}.multi-select-options label{display:flex!important;align-items:center;justify-content:flex-start;width:100%;min-height:32px;box-sizing:border-box;gap:8px;margin:0!important;padding:6px 8px;border-radius:6px;font-size:11.5px;line-height:1.25;white-space:normal}.multi-select-options label input[type=checkbox]{flex:0 0 auto;width:15px;height:15px;margin:0;order:0}.multi-select-options label:hover{background:#f1f5fb}
 @media(max-width:700px){.multi-select-options{grid-template-columns:1fr;gap:3px}}
 .btn-hapvida-orange{background:var(--orange)!important;border-color:var(--orange)!important;color:#fff!important;box-shadow:0 5px 12px rgba(244,91,31,.22)}.btn-hapvida-orange:hover{filter:brightness(.94)}
-#sol-form-lecom[hidden],#sol-form-projeto[hidden]{display:none!important}
+.sol-dashboard{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:10px;margin-bottom:16px}.sol-dashboard .card{padding:14px}.sol-dashboard b{display:block;font:800 24px 'Manrope';color:var(--blue)}.sol-dashboard small{display:block;color:var(--ink-mute);font-size:11px;margin-top:3px}.sol-admin-filters{display:grid;grid-template-columns:1.2fr repeat(4,minmax(130px,.8fr));gap:9px;margin-bottom:16px}.sol-admin-filters input,.sol-admin-filters select{width:100%;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px;background:#fff}.pagination{display:flex;align-items:center;justify-content:flex-end;gap:7px;padding:12px 0}.pagination button{min-width:32px;height:30px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);cursor:pointer}.pagination button.active{background:var(--blue);color:#fff;border-color:var(--blue)}.pagination button:disabled{opacity:.45;cursor:not-allowed}.data-state{padding:28px 18px;text-align:center;color:var(--ink-mute);font-size:12.5px}.data-state.error{color:var(--red)}.draft-status{font-size:10.5px;color:var(--ink-mute);margin-right:auto}.timeline{position:relative;margin:18px 0 0;padding-left:20px}.timeline::before{content:'';position:absolute;left:5px;top:5px;bottom:5px;width:2px;background:var(--line)}.timeline-item{position:relative;padding:0 0 16px 12px}.timeline-item::before{content:'';position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid var(--card)}.timeline-item b{font-size:12px}.timeline-item small{display:block;color:var(--ink-mute);margin-top:3px}.timeline-item p{font-size:12px;color:var(--ink-soft);margin:5px 0 0}.notification-unread{font-weight:800}.notification-unread::after{content:'Nova';float:right;color:var(--red);font-size:9px;text-transform:uppercase}
+@media(max-width:900px){.sol-dashboard{grid-template-columns:repeat(2,1fr)}.sol-admin-filters{grid-template-columns:1fr 1fr}}@media(max-width:560px){.sol-admin-filters{grid-template-columns:1fr}}
+#sol-form-lecom[hidden],#sol-form-projeto[hidden],#sol-form-sac[hidden],#sol-form-assuntos[hidden]{display:none!important}
+.sol-category-picker{padding:14px 16px;margin-bottom:16px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+.sol-category-picker label{display:block;font-size:12px;font-weight:800;color:var(--ink-soft);margin-bottom:7px}.sol-category-picker select{width:100%;min-height:44px;font-weight:700;border-color:var(--blue)}
 
 .project-switch{
   margin-left:auto; display:flex; align-items:center; gap:10px; padding:7px 14px 7px 8px;
@@ -701,6 +705,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
           <tbody id="home-tbody"></tbody>
         </table>
       </div>
+      <div class="pagination" id="home-paginacao"></div>
     </div>
 
     <div class="page" id="page-dashboardprojeto">
@@ -1051,6 +1056,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
       <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap"><div><b style="font-size:14px">Portfólio de Projetos</b><p style="font-size:12px;color:var(--ink-mute);margin:4px 0 0">Visão executiva de planejamento, replanejamento e entrega.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="baixarModeloProjetos()">Modelo de planilha</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('projetos-importar').click()">Importar</button><button class="btn btn-outline btn-sm" onclick="exportarProjetosXlsx()">Exportar</button><button class="btn btn-primary" onclick="abrirModalProjeto()">+ Novo Projeto</button></div></div>
       <div class="card" style="margin-bottom:16px;padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap"><select id="projetos-filtro-status" onchange="renderPortfolioProjetos()"><option value="">Todos os status</option><option value="a_iniciar">À iniciar</option><option value="andamento">Em andamento</option><option value="atrasado">Atrasado</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select><input id="projetos-busca" oninput="renderPortfolioProjetos()" placeholder="Buscar projeto ou responsável" style="min-width:250px"></div>
       <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Nome do projeto</th><th>Abertura</th><th>Macro entrega</th><th>Entregáveis</th><th>Responsável</th><th>Planejada</th><th>Replanejada</th><th>Entrega final</th><th>Status</th><th></th></tr></thead><tbody id="projetos-tbody"></tbody></table></div>
+      <div class="pagination" id="projetos-paginacao"></div>
     </div>
     <div class="page" id="page-melhorias">
       <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
@@ -1067,14 +1073,21 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
       </div>
       <div class="card" style="margin-bottom:16px;padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap"><select id="lecom-filtro-status" onchange="renderLecoms()"><option value="">Todos os status</option><option value="a_iniciar">À iniciar</option><option value="andamento">Em andamento</option><option value="atrasado">Atrasado</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select><select id="lecom-filtro-classificacao" onchange="renderLecoms()"><option value="">Projeto e melhoria</option><option value="projeto">Projeto</option><option value="melhoria">Melhoria</option></select><input id="lecom-busca" oninput="renderLecoms()" placeholder="Buscar iniciativa, ID ou solicitante" style="min-width:230px"></div>
       <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Iniciativa / ID</th><th>Solicitante</th><th>Classificação</th><th>Priorização</th><th>Compromisso</th><th>Responsável TI</th><th>Produção</th><th>Status</th><th></th></tr></thead><tbody id="lecoms-tbody"></tbody></table></div>
+      <div class="pagination" id="lecoms-paginacao"></div>
     </div>
     <div class="page" id="page-solicitacoes">
+      <div class="sol-dashboard" id="solicitacoes-dashboard">
+        <div class="card"><b id="sol-kpi-total">0</b><small>Solicitações cadastradas</small></div><div class="card"><b id="sol-kpi-pendentes">0</b><small>Pendentes de análise</small></div><div class="card"><b id="sol-kpi-atendimento">0</b><small>Em atendimento</small></div><div class="card"><b id="sol-kpi-concluidas">0</b><small>Concluídas</small></div>
+      </div>
       <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
         <div><b style="font-size:14px">Solicitações</b><p style="font-size:12px;color:var(--ink-mute);margin:4px 0 0">Cadastre uma solicitação de LECOM ou um novo projeto.</p></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="solicitacoes-filtro-status" onchange="renderSolicitacoes()" style="padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px"><option value="">Todos os status</option><option value="enviada">Enviada</option><option value="em_analise">Em análise</option><option value="aprovada">Aprovada</option><option value="em_execucao">Em execução</option><option value="concluida">Concluída</option><option value="reprovada">Reprovada</option><option value="cancelada">Cancelada</option></select><button class="btn btn-sm btn-hapvida-orange" onclick="abrirModalSolicitacao('lecom')">+ Solicitar LECOM</button><button class="btn btn-primary btn-sm" onclick="abrirModalSolicitacao('projeto')">+ Solicitar novo projeto</button></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-sm btn-hapvida-orange" onclick="abrirModalSolicitacao()">+ Nova Solicitação</button></div>
       </div>
+      <div class="card sol-admin-filters" id="solicitacoes-filtros" style="padding:13px 16px"><input id="sol-filtro-solicitante" oninput="reiniciarPaginaSolicitacoes()" placeholder="Filtrar por solicitante"><select id="sol-filtro-tipo" onchange="reiniciarPaginaSolicitacoes()"><option value="">Todos os tipos</option><option value="lecom">LECOM</option><option value="projeto">Projeto</option><option value="sac">Parametrização de tela SAC</option><option value="assuntos">Atualização/Criação de Assuntos</option></select><select id="solicitacoes-filtro-status" onchange="reiniciarPaginaSolicitacoes()"><option value="">Todos os status</option><option value="enviada">Enviada</option><option value="em_analise">Em análise</option><option value="aprovada">Aprovada</option><option value="em_execucao">Em execução</option><option value="concluida">Concluída</option><option value="reprovada">Reprovada</option><option value="cancelada">Cancelada</option></select><input id="sol-filtro-inicio" type="date" onchange="reiniciarPaginaSolicitacoes()" title="Data inicial"><input id="sol-filtro-fim" type="date" onchange="reiniciarPaginaSolicitacoes()" title="Data final"></div>
+      <div class="sol-dashboard" id="solicitacoes-sla" style="display:none"><div class="card"><b id="sol-kpi-media-analise">—</b><small>Tempo médio até análise</small></div><div class="card"><b id="sol-kpi-media-atendimento">—</b><small>Tempo médio de atendimento</small></div><div class="card"><b id="sol-kpi-vencidas">0</b><small>Fora do prazo de análise</small></div><div class="card"><b id="sol-kpi-prazo">5 dias</b><small>Prazo operacional de análise</small></div></div>
       <div class="card" style="margin-bottom:16px;padding:13px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span class="badge badge-info" id="solicitacoes-visao-label">Minhas solicitações</span><span style="font-size:12px;color:var(--ink-soft)" id="solicitacoes-resumo">Carregando solicitações…</span></div>
       <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Tipo</th><th>Título da demanda</th><th>Solicitante</th><th>Área</th><th>Data</th><th>Status</th><th></th></tr></thead><tbody id="solicitacoes-tbody"></tbody></table></div>
+      <div class="pagination" id="solicitacoes-paginacao"></div>
     </div>
     <div class="page" id="page-configuracoes">
       <div class="card" style="max-width:760px">
@@ -1086,6 +1099,9 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <div style="font-weight:800;font-size:15px;margin-bottom:6px">Aparência</div>
         <p style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0">Escolha o tema de visualização do portal. Relatórios e PDFs permanecem no padrão institucional claro.</p>
         <div class="setting-row"><div><b style="font-size:13px">Modo escuro</b><small id="theme-mode-status" style="display:block;color:var(--ink-mute);margin-top:4px">Desativado</small></div><label class="setting-switch" aria-label="Ativar ou desativar modo escuro"><input id="theme-mode-toggle" type="checkbox" onchange="alternarTemaPortal(this.checked)"><span></span></label></div>
+      </div>
+      <div class="card" id="backup-admin-card" style="max-width:760px;margin-top:16px;display:none">
+        <div style="font-weight:800;font-size:15px;margin-bottom:6px">Backup e restauração</div><p style="font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0 0 14px">Exporte uma cópia JSON dos dados locais do portal ou restaure um backup previamente gerado. Recurso exclusivo para administradores.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" onclick="exportarBackupPortal()">Gerar backup</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('backup-restaurar-input').click()">Restaurar backup</button><input id="backup-restaurar-input" type="file" accept="application/json,.json" hidden onchange="restaurarBackupPortal(this)"></div>
       </div>
       <div class="card" style="max-width:760px;margin-top:16px">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><div style="font-weight:800;font-size:15px">Console do sistema</div><p style="font-size:12px;color:var(--ink-soft);margin:5px 0 0">Registro local de erros e eventos importantes. Útil para identificar falhas de exportação.</p></div><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="copiarLogsSistema()">Copiar logs</button><button class="btn btn-outline btn-sm" onclick="limparLogsSistema()">Limpar</button></div></div>
@@ -1166,12 +1182,13 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
   </div>
 </div>
 
-<!-- ═══ MODAL: Solicitar LECOM / novo projeto ═══ -->
+<!-- ═══ MODAL: Nova solicitação ═══ -->
 <div class="modal-overlay" id="modal-solicitacao">
   <div class="modal modal-lg" style="width:min(1080px,94vw)">
-    <div class="modal-header"><h3 id="modal-solicitacao-titulo">Solicitar LECOM</h3><button class="modal-close" onclick="fecharModal('modal-solicitacao')">✕</button></div>
+    <div class="modal-header"><h3 id="modal-solicitacao-titulo">Nova Solicitação</h3><button class="modal-close" onclick="fecharModal('modal-solicitacao')">✕</button></div>
     <div class="modal-body"><input type="hidden" id="sol-id"><input type="hidden" id="sol-tipo">
-      <div class="form-grid" id="sol-form-lecom">
+      <div class="sol-category-picker"><label for="sol-categoria">Qual solicitação deseja abrir? <span class="req">*</span></label><select id="sol-categoria" onchange="selecionarCategoriaSolicitacao(this.value)"><option value="">Selecione uma categoria</option><option value="lecom">Solicitar LECOM</option><option value="projeto">Solicitar Projeto</option><option value="sac">Solicitar Parametrização de tela SAC</option><option value="assuntos">Solicitar Atualização/Criação de Assuntos</option></select></div>
+      <div class="form-grid" id="sol-form-lecom" hidden>
         <div class="field"><label>Solicitante <span class="req">*</span></label><input id="sol-solicitante" placeholder="Nome do solicitante"></div>
         <div class="field"><label>Área solicitante <span class="req">*</span></label><input id="sol-area-solicitante" placeholder="Ex: Atendimento"></div>
         <div class="field"><label>Formulário de Segurança da Informação <span class="req">*</span></label><select id="sol-seguranca"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
@@ -1195,7 +1212,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <div class="field span2" id="sol-compliance-wrap" hidden><label>Descrição e indicador de impacto compliance <span class="req">*</span></label><textarea id="sol-compliance-detalhe" rows="2" placeholder="Descreva o impacto e informe o indicador"></textarea></div>
         <div class="field span2" id="sol-risco-wrap" hidden><label>Descrição e indicador de risco assistencial <span class="req">*</span></label><textarea id="sol-risco-detalhe" rows="2" placeholder="Descreva o risco e informe o indicador"></textarea></div>
         <div class="field span2"><label>Observações</label><textarea id="sol-observacoes" rows="3"></textarea></div>
-        <div class="field span2"><label>Anexos</label><input id="sol-anexos" type="file" multiple><small style="display:block;color:var(--ink-mute);margin-top:5px">Os nomes e metadados serão registrados. O armazenamento definitivo no Supabase Storage será conectado posteriormente.</small><div id="sol-anexos-lista" style="font-size:11px;color:var(--ink-soft);margin-top:6px"></div></div>
+        <div class="field span2"><label>Anexos</label><input id="sol-anexos" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" onchange="validarAnexosSolicitacao(this)"><small style="display:block;color:var(--ink-mute);margin-top:5px">Até 5 arquivos de 10 MB cada: PDF, Word, Excel, PNG ou JPG.</small><div id="sol-anexos-lista" style="font-size:11px;color:var(--ink-soft);margin-top:6px"></div></div>
       </div>
       <div class="form-grid" id="sol-form-projeto" hidden>
         <div class="field span2"><label>Nome do projeto <span class="req">*</span></label><input id="sol-proj-nome" placeholder="Informe o nome do projeto"></div>
@@ -1208,8 +1225,25 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <div class="field span2"><label>Áreas envolvidas <span class="req">*</span></label><textarea id="sol-proj-areas" rows="2" placeholder="Áreas de negócio e TI envolvidas"></textarea></div>
         <div class="field span2"><label>Ganhos esperados <span class="req">*</span></label><textarea id="sol-proj-ganhos" rows="3" placeholder="Benefícios e resultados esperados"></textarea></div>
       </div>
+      <div class="form-grid" id="sol-form-sac" hidden>
+        <div class="field span2"><label>Tela que deseja parametrizar <span class="req">*</span></label><input id="sol-sac-tela" placeholder="Informe o nome ou caminho da tela SAC"></div>
+        <div class="field"><label>Login SIGO da pessoa que precisa de acesso <span class="req">*</span></label><input id="sol-sac-login" placeholder="Ex: usuario.sigo"></div>
+        <div class="field"><label>Área de negócio que visualizará os registros <span class="req">*</span></label><input id="sol-sac-area" placeholder="Ex: Atendimento, Operações"></div>
+        <div class="field span2"><label>Validação do gestor da área <span class="req">*</span></label><input id="sol-sac-anexo" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" onchange="validarAnexoGestorSolicitacao(this,5)"><small style="display:block;color:var(--ink-mute);margin-top:5px">Obrigatório: 1 arquivo de até 5 MB em PDF, Word, PNG ou JPG.</small><div id="sol-sac-anexo-lista" style="font-size:11px;color:var(--ink-soft);margin-top:6px"></div></div>
+      </div>
+      <div class="form-grid" id="sol-form-assuntos" hidden>
+        <div class="field span2"><label>Assunto a ser criado ou alterado</label><textarea id="sol-assunto" rows="2" placeholder="Explique a solicitação"></textarea></div>
+        <div class="field span2"><label>Obrigatoriedade a ser parametrizada ou alterada no assunto</label><textarea id="sol-assunto-obrigatoriedade" rows="2" placeholder="Explique a solicitação"></textarea></div>
+        <div class="field span2"><label>Motivo a ser criado ou alterado</label><textarea id="sol-assunto-motivo" rows="2" placeholder="Explique a solicitação"></textarea></div>
+        <div class="field span2"><label>Tipo de Atendimento a ser criado ou alterado</label><textarea id="sol-assunto-atendimento" rows="2" placeholder="Explique a solicitação"></textarea></div>
+        <div class="field span2"><label>Relacionamento a ser criado ou alterado</label><textarea id="sol-assunto-relacionamento" rows="2" placeholder="Explique a solicitação"></textarea></div>
+        <div class="field span2"><label>Parâmetro de Especialidade × Cidade a ser criado ou alterado</label><textarea id="sol-assunto-especialidade-cidade" rows="2" placeholder="Explique a solicitação"></textarea></div>
+        <div class="field span2"><label>Outra solicitação não descrita acima</label><textarea id="sol-assunto-outra" rows="2" placeholder="Explique a solicitação"></textarea></div>
+        <div class="field span2"><small style="color:var(--ink-mute)">Preencha pelo menos um dos campos acima.</small></div>
+        <div class="field span2"><label>Validação do gestor da área <span class="req">*</span></label><input id="sol-assunto-anexo" type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" onchange="validarAnexoGestorSolicitacao(this,5)"><small style="display:block;color:var(--ink-mute);margin-top:5px">Obrigatório: 1 arquivo de até 5 MB em PDF, Word, PNG ou JPG.</small><div id="sol-assunto-anexo-lista" style="font-size:11px;color:var(--ink-soft);margin-top:6px"></div></div>
+      </div>
     </div>
-    <div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-solicitacao')">Cancelar</button><button class="btn btn-primary" onclick="salvarSolicitacao()">Enviar solicitação</button></div>
+    <div class="modal-footer"><span id="sol-rascunho-status" class="draft-status">Rascunho não salvo</span><button class="btn btn-outline" onclick="fecharModal('modal-solicitacao')">Cancelar</button><button class="btn btn-primary" onclick="salvarSolicitacao()">Enviar solicitação</button></div>
   </div>
 </div>
 <div class="modal-overlay" id="modal-solicitacao-detalhe"><div class="modal modal-lg" style="width:min(980px,94vw)"><div class="modal-header"><h3>Detalhes da solicitação</h3><button class="modal-close" onclick="fecharModal('modal-solicitacao-detalhe')">✕</button></div><div class="modal-body" id="sol-detalhe-conteudo"></div><div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-solicitacao-detalhe')">Fechar</button></div></div></div>
@@ -1645,16 +1679,22 @@ function buscarGlobal(valor){
 document.addEventListener('click',e=>{if(!e.target.closest('#busca-global')&&!e.target.closest('#busca-global-resultados'))fecharBuscaGlobal();});
 function listaNotificacoesPortal(){
   const hoje=hojeISO(), itens=[];
+  if(papelPortal()==='collaborator'&&!podeGerenciarAcessos()){
+    solicitacoesVisiveis().forEach(s=>{const atualizado=s.updated_at||s.atualizado_em||s.created_at||s.criado_em,visto=localStorage.getItem(chavePreferencia(`sol_vista_${s.id}`))||'';if(s.status!=='enviada'&&atualizado>visto)itens.push({nivel:'warn',texto:`${s.request_code||'Solicitação'}: ${STATUS_SOLICITACAO_LABEL[s.status]||s.status}${s.admin_descricao?' — '+s.admin_descricao:''}`,pagina:'solicitacoes',solicitacao:s.id,naoLida:true});});
+    return itens.slice(0,20);
+  }
   STATE.tarefas.filter(t=>isAtrasada(t)).forEach(t=>itens.push({nivel:'erro',texto:'Atividade atrasada: '+t.nome,projeto:t.projeto_id,pagina:'cronograma'}));
   STATE.tarefas.filter(t=>estaVencendoEmBreve(t.data_fim)&&!['concluido','cancelado'].includes(t.status)&&!isAtrasada(t)).forEach(t=>itens.push({nivel:'warn',texto:'Prazo próximo: '+t.nome,projeto:t.projeto_id,pagina:'cronograma'}));
   STATE.encaminhamentos.filter(e=>e.prazo&&e.prazo<hoje&&!['Concluído','Cancelado'].includes(e.status)).forEach(e=>itens.push({nivel:'erro',texto:'On Demand vencido: '+e.tema,projeto:e.projeto_id,pagina:'encaminhamentos'}));
   STATE.riscos.filter(r=>r.status!=='Encerrado'&&nivelRisco(r.probabilidade,r.impacto).label==='Alto').forEach(r=>itens.push({nivel:'erro',texto:'Risco alto: '+r.descricao,projeto:r.projeto_id,pagina:'riscos'}));
   return itens.slice(0,20);
 }
+function marcarSolicitacaoVista(id){const s=STATE.solicitacoes.find(x=>x.id===id);if(!s)return;try{localStorage.setItem(chavePreferencia(`sol_vista_${id}`),s.updated_at||s.atualizado_em||new Date().toISOString());}catch(e){}renderNotificacoes();}
+function abrirNotificacaoPortal(pagina,projetoId,solicitacaoId){fecharNotificacoes();if(projetoId)definirProjetoAtivo(STATE.projetos.find(p=>p.id===projetoId)||null);navigate(pagina);if(solicitacaoId){marcarSolicitacaoVista(solicitacaoId);abrirDetalheSolicitacao(solicitacaoId);}}
 function renderNotificacoes(){
   const count=document.getElementById('notification-count'),pop=document.getElementById('notification-popover');if(!count||!pop)return;
   const itens=listaNotificacoesPortal();count.textContent=itens.length;count.style.display=itens.length?'grid':'none';
-  pop.innerHTML='<h4>Alertas e notificações</h4>'+(itens.length?itens.map(n=>`<div class="notification-item" style="border-left:3px solid ${n.nivel==='erro'?'var(--red)':'var(--orange)'};cursor:pointer" onclick="fecharNotificacoes();definirProjetoAtivo('${n.projeto}');navigate('${n.pagina}')">${esc(n.texto)}</div>`).join(''):'<div class="notification-item" style="color:var(--ink-mute)">Nenhuma pendência crítica encontrada.</div>');
+  pop.innerHTML='<h4>Alertas e notificações</h4>'+(itens.length?itens.map(n=>`<div class="notification-item ${n.naoLida?'notification-unread':''}" style="border-left:3px solid ${n.nivel==='erro'?'var(--red)':'var(--orange)'};cursor:pointer" onclick="abrirNotificacaoPortal('${n.pagina}','${n.projeto||''}','${n.solicitacao||''}')">${esc(n.texto)}</div>`).join(''):'<div class="notification-item" style="color:var(--ink-mute)">Nenhuma pendência crítica encontrada.</div>');
 }
 function alternarNotificacoes(){const el=document.getElementById('notification-popover');if(!el)return;renderNotificacoes();el.classList.toggle('open');}
 function fecharNotificacoes(){document.getElementById('notification-popover')?.classList.remove('open');}
@@ -1754,7 +1794,7 @@ function atualizarNavegacaoAcessos(){
   if(rodape)rodape.style.display=colaborador?'none':'';
   const busca=document.querySelector('.global-search'),avisos=document.querySelector('.notification-wrap'),seletorProjeto=document.querySelector('.project-switch');
   if(busca)busca.style.display=colaborador?'none':'';
-  if(avisos)avisos.style.display=colaborador?'none':'';
+  if(avisos)avisos.style.display='';
   if(seletorProjeto)seletorProjeto.style.display=colaborador?'none':'';
   atualizarSaudacaoUsuario();
 }
@@ -1927,6 +1967,7 @@ async function aplicarSessaoPortal(session){
   aplicarTemaSalvo();
   reiniciarTemporizadorInatividade();
   await carregarSolicitacoesSupabase();
+  iniciarAtualizacoesSolicitacoes();
   await carregarHistoricoStatusSupabase();
   renderAcessos();
   if(papelPortal()==='collaborator')navigate('solicitacoes');
@@ -2009,6 +2050,7 @@ async function iniciarAuthPortal(){
 async function sairDoPortal(){
   if(!supabasePortal)return;
   clearTimeout(temporizadorInatividade);
+  encerrarAtualizacoesSolicitacoes();
   await supabasePortal.auth.signOut();
   exibirLogin();
 }
@@ -2060,6 +2102,7 @@ function atualizarControlesConfiguracao(){
   const demoStatus=document.getElementById('demo-mode-status'),temaStatus=document.getElementById('theme-mode-status');
   if(demoStatus)demoStatus.textContent=demo?'Ativado — exibindo dados fictícios':'Desativado — exibindo dados de produção';
   if(temaStatus)temaStatus.textContent=escuro?'Ativado':'Desativado';
+  const backupCard=document.getElementById('backup-admin-card');if(backupCard)backupCard.style.display=podeGerenciarAcessos()?'block':'none';
 }
 function alternarTemaPortal(ativar,silencioso=false){
   document.documentElement.dataset.theme=ativar?'dark':'light';
@@ -2083,6 +2126,15 @@ function alternarModoDemonstracao(ativar){
     }
     definirProjetoAtivo(STATE.projetos.find(p=>!p.arquivado)||null);atualizarPortalCompleto();atualizarControlesConfiguracao();
   }catch(e){registrarLogSistema('erro','Modo demonstração',e);toast('Não foi possível alterar o modo demonstração.');atualizarControlesConfiguracao();}
+}
+function dadosBackupPortal(){return {schema:'portal-projetos-backup',version:1,exported_at:new Date().toISOString(),exported_by:sessaoPortal?.user?.email||'local',state:JSON.parse(JSON.stringify(STATE))};}
+function exportarBackupPortal(){
+  if(!podeGerenciarAcessos()){toast('Apenas administradores podem gerar backups.');return;}
+  const blob=new Blob([JSON.stringify(dadosBackupPortal(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`PORTAL_PROJETOS_BACKUP_${hojeISO()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);registrarAuditoria('exportar','backup','Backup administrativo gerado.');toast('Backup gerado com sucesso.');
+}
+function restaurarBackupPortal(input){
+  if(!podeGerenciarAcessos()){toast('Apenas administradores podem restaurar backups.');input.value='';return;}const arquivo=input.files?.[0];if(!arquivo)return;
+  const leitor=new FileReader();leitor.onload=()=>{try{const pacote=JSON.parse(leitor.result);if(pacote.schema!=='portal-projetos-backup'||pacote.version!==1||!pacote.state||!Array.isArray(pacote.state.projetos)||!Array.isArray(pacote.state.solicitacoes))throw new Error('Arquivo de backup incompatível.');if(!confirm(`Restaurar o backup de ${new Date(pacote.exported_at).toLocaleString('pt-BR')}? Os dados locais atuais serão substituídos.`))return;localStorage.setItem(chavePreferencia('backup_pre_restauracao'),JSON.stringify(dadosBackupPortal()));Object.keys(STATE).forEach(k=>delete STATE[k]);Object.assign(STATE,pacote.state);salvarState();definirProjetoAtivo(STATE.projetos.find(p=>!p.arquivado)||null);atualizarPortalCompleto();registrarAuditoria('restaurar','backup',`Backup de ${pacote.exported_at} restaurado.`);toast('Backup restaurado com sucesso.');}catch(e){registrarLogSistema('erro','Restauração de backup',e);toast(e.message||'Não foi possível restaurar o backup.');}finally{input.value='';}};leitor.readAsText(arquivo);
 }
 
 /* ═══ utilitários compartilhados por todos os módulos ═══ */
@@ -2184,21 +2236,44 @@ function carregarDadosDemo(silencioso=false){
   });
   STATE.solicitacoes=[
     {id:'sol-demo-001',tipo_solicitacao:'lecom',solicitante:'Mariana Costa',area_solicitante:'Experiência do Cliente',seguranca_informacao:'sim',envolve_ia:'nao',areas_ti:['Digital','Segurança da Informação'],produto_funcionalidade:'Portal e autenticação',titulo:'Evolução do autosserviço do beneficiário',objetivo:'Reduzir o volume de contatos repetitivos e facilitar o acesso digital.',justificativa:'A jornada atual exige múltiplas interações para concluir solicitações simples.',principais_entregas:'Novo fluxo de autenticação, telas de acompanhamento e painel de solicitações.',areas_impactadas:'Experiência do Cliente, Atendimento e Tecnologia',sistemas_impactados:'Portal do beneficiário, CRM e relatórios de atendimento',tipo_demanda:'evolucao',comissao_aprovadora:'eficiencia_operacional',impacto_jornada:'sim',impacto_nips:'sim',impacto_financeiro:'sim',impacto_financeiro_detalhe:'Redução estimada de 12% nos contatos repetitivos; indicador: custo por atendimento.',impacto_compliance:'nao',impacto_compliance_detalhe:'',risco_assistencial:'nao',risco_assistencial_detalhe:'',observacoes:'Solicitação criada para demonstração do fluxo de LECOM.',owner_id:sessaoPortal?.user?.id||'local-user',owner_email:sessaoPortal?.user?.email||'admin@demo.local',status:'em_analise',criado_em:'2026-08-18T10:00:00.000Z',atualizado_em:'2026-08-19T14:00:00.000Z',anexos:[{nome:'mapa-jornada.pdf',tamanho:245760,tipo:'application/pdf'}],admin_descricao:'Em análise pela área Digital e Segurança da Informação.'},
-    {id:'sol-demo-002',tipo_solicitacao:'projeto',nome_projeto:'Novo projeto de motor inteligente de autorizações',titulo:'Novo projeto de motor inteligente de autorizações',solicitante:'Eduardo Ramos',data_abertura_solicitacao:'2026-08-12',objetivo:'Aumentar a previsibilidade e reduzir o prazo de análise das autorizações.',escopo_macro_entrega:'Implantar catálogo de regras, motor de decisão, APIs e cockpit operacional.',responsavel:'Eduardo Ramos',areas_envolvidas:'Assistencial, Operações, Autorizações, Arquitetura e Insights',data_alvo:'2026-12-18',ganhos_esperados:'Reduzir o tempo de análise, ampliar a rastreabilidade e diminuir intervenções manuais.',owner_id:sessaoPortal?.user?.id||'local-user',owner_email:sessaoPortal?.user?.email||'admin@demo.local',status:'aprovada',criado_em:'2026-08-12T09:00:00.000Z',atualizado_em:'2026-08-17T16:00:00.000Z',anexos:[],admin_descricao:'Aprovado para detalhamento técnico e planejamento.'}
+    {id:'sol-demo-002',tipo_solicitacao:'projeto',nome_projeto:'Novo projeto de motor inteligente de autorizações',titulo:'Novo projeto de motor inteligente de autorizações',solicitante:'Eduardo Ramos',data_abertura_solicitacao:'2026-08-12',objetivo:'Aumentar a previsibilidade e reduzir o prazo de análise das autorizações.',escopo_macro_entrega:'Implantar catálogo de regras, motor de decisão, APIs e cockpit operacional.',responsavel:'Eduardo Ramos',areas_envolvidas:'Assistencial, Operações, Autorizações, Arquitetura e Insights',data_alvo:'2026-12-18',ganhos_esperados:'Reduzir o tempo de análise, ampliar a rastreabilidade e diminuir intervenções manuais.',owner_id:sessaoPortal?.user?.id||'local-user',owner_email:sessaoPortal?.user?.email||'admin@demo.local',status:'aprovada',criado_em:'2026-08-12T09:00:00.000Z',atualizado_em:'2026-08-17T16:00:00.000Z',anexos:[],admin_descricao:'Aprovado para detalhamento técnico e planejamento.'},
+    {id:'sol-demo-003',tipo_solicitacao:'sac',titulo:'Parametrização SAC — Consulta de protocolos',solicitante:'Paula Mendes',tela_sac:'Consulta de protocolos',login_sigo:'paula.mendes',area_negocio_sac:'Relacionamento com o Beneficiário',objetivo:'Liberar acesso à consulta de protocolos para o time de relacionamento.',owner_id:sessaoPortal?.user?.id||'local-user',owner_email:sessaoPortal?.user?.email||'admin@demo.local',status:'em_execucao',criado_em:'2026-08-16T11:00:00.000Z',atualizado_em:'2026-08-20T10:30:00.000Z',anexos:[{nome:'validacao-gestor.pdf',tamanho:180000,tipo:'application/pdf'}],admin_descricao:'Acesso em parametrização pela equipe SIGO.'},
+    {id:'sol-demo-004',tipo_solicitacao:'assuntos',titulo:'Atualização/Criação de Assuntos',solicitante:'Carla Reis',assunto_descricao:'Criar o assunto Segunda via de carteirinha digital.',obrigatoriedade_descricao:'Tornar obrigatórios CPF e canal de retorno.',motivo_descricao:'Criar motivo Carteirinha não recebida.',tipo_atendimento_descricao:'Associar ao tipo Atendimento Digital.',relacionamento_descricao:'Relacionar ao assunto Cadastro do Beneficiário.',especialidade_cidade_descricao:'Não se aplica.',outra_solicitacao_descricao:'Disponibilizar o assunto para os canais SAC e WhatsApp.',objetivo:'Atualizar a árvore de assuntos para registrar corretamente demandas de carteirinha.',owner_id:sessaoPortal?.user?.id||'local-user',owner_email:sessaoPortal?.user?.email||'admin@demo.local',status:'enviada',criado_em:'2026-08-20T13:00:00.000Z',atualizado_em:'2026-08-20T13:00:00.000Z',anexos:[{nome:'aprovacao-gestor.docx',tamanho:92000,tipo:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}],admin_descricao:''}
   ];
   const lecomSeeds=[
     ['Portal de atualização cadastral','2026042','Atendimento','Carlos Moreira','Jornada do Beneficiário','andamento','sim','sim','nao'],['Régua de comunicação preventiva','2026043','Marketing','Carlos Moreira','Régua de Comunicação','conclusao','sim','nao','nao'],['Integração de resultados de exames','2026044','Assistencial','Fernanda Nóbrega','Portal e App','andamento','sim','sim','sim'],['Fila inteligente de SAC','2026045','Operações','Rafael Barini','Call Center','especificacao','nao','sim','nao'],['Automação de reembolso','2026046','Financeiro','Jorge Andrade','Autorização','andamento','sim','nao','nao'],['Notificação de agendamento','2026047','Produtos','Felipe Arantes','WhatsApp e Chatbot','conclusao','sim','nao','nao'],['Gestão de documentos digitais','2026048','Jurídico','Rafael Barini','Jornada Pós-Atendimento','especificacao','nao','nao','nao'],['Assistente virtual de elegibilidade','2026049','Atendimento','Jorge Andrade','Dados, BI e IA','andamento','sim','sim','sim'],['Melhoria na confirmação de consultas','2026050','Operações','Carlos Moreira','Portal e App','conclusao','sim','nao','nao']
   ];
   lecomSeeds.forEach((s,i)=>STATE.melhorias.push({id:'l'+(i+2),iniciativa:s[0],titulo:s[0],codigo:s[1],solicitante:['Juliana Lima','Mateus Silva','Carla Reis'][i%3],area_solicitante:s[2],classificacao:i%3===0?'projeto':'melhoria',priorizacao_ti:(i%2?'4º trimestre':'3º trimestre'),priorizacao_negocio:String(i+1),compromisso:s[5],area_ti:'Tecnologia e Produtos',diretor_ti:s[3],area_classificacao:s[4],impacto_jornada:s[6],impacto_nips:s[7],impacto_financeiro:i%2?'nao':'sim',risco_assistencial:s[8],envolve_ia:i===7?'sim':'nao',plan_especificacao:'2026-08-01',final_especificacao:'2026-08-25',status_especificacao:i%4===0?'atrasado':(i%2?'concluido':'andamento'),plan_homologacao:'2026-09-01',final_homologacao:'2026-09-22',status_homologacao:i<3?'andamento':'a_iniciar',plan_producao:'2026-10-05',final_producao:'2026-11-14',status_producao:i===3?'atrasado':(i===1?'concluido':'a_iniciar')}));
-  const sequenciasDemo={lecom:0,projeto:0};STATE.solicitacoes.forEach(s=>{sequenciasDemo[s.tipo_solicitacao]=(sequenciasDemo[s.tipo_solicitacao]||0)+1;s.request_code=(s.tipo_solicitacao==='projeto'?'PROJ':'LEC')+String(sequenciasDemo[s.tipo_solicitacao]).padStart(4,'0');});
+  const sequenciasDemo={lecom:0,projeto:0,sac:0,assuntos:0},prefixosDemo={lecom:'LEC',projeto:'PROJ',sac:'SAC',assuntos:'ASS'};STATE.solicitacoes.forEach(s=>{sequenciasDemo[s.tipo_solicitacao]=(sequenciasDemo[s.tipo_solicitacao]||0)+1;s.request_code=(prefixosDemo[s.tipo_solicitacao]||'SOL')+String(sequenciasDemo[s.tipo_solicitacao]).padStart(4,'0');});
   STATE.statusReportHistory=Object.entries(STATE.statusReports).map(([projeto_id,relatorio],indice)=>({id:'sr-demo-'+(indice+1),projeto_id,...relatorio,autor_nome:'Equipe de demonstração',created_at:relatorio.atualizado_em||new Date().toISOString()}));
   normalizarCronogramas(); salvarState(); definirProjetoAtivo(STATE.projetos[0]); renderProjetosHome(); navigate('home'); if(!silencioso)toast('Dados de demonstração carregados.');
 }
 function esc(str){ return (str||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function fmtData(iso){ if(!iso) return '—'; const [a,m,d]=iso.split('-'); return `${d}/${m}/${a}`; }
 
+let solicitacaoComAlteracoes=false,rascunhoTimer=null,fechamentoSolicitacaoLiberado=false;
+function chaveRascunhoSolicitacao(tipo=document.getElementById('sol-tipo')?.value||'lecom'){return chavePreferencia(`rascunho_solicitacao_${tipo}`);}
+function coletarRascunhoSolicitacao(){
+  const modal=document.getElementById('modal-solicitacao'),dados={tipo:document.getElementById('sol-tipo')?.value||'lecom',campos:{},areasTi:[]};
+  modal.querySelectorAll('input[id],select[id],textarea[id]').forEach(el=>{if(el.type!=='file'&&el.type!=='hidden')dados.campos[el.id]=el.value;});
+  dados.areasTi=[...modal.querySelectorAll('input[name="sol-area-ti"]:checked')].map(el=>el.value);return dados;
+}
+function salvarRascunhoSolicitacao(){
+  if(!document.getElementById('modal-solicitacao')?.classList.contains('open'))return;
+  try{localStorage.setItem(chaveRascunhoSolicitacao(),JSON.stringify({...coletarRascunhoSolicitacao(),salvoEm:new Date().toISOString()}));const el=document.getElementById('sol-rascunho-status');if(el)el.textContent=`Rascunho salvo às ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;}catch(e){registrarLogSistema('erro','Rascunho de solicitação',e);}
+}
+function agendarRascunhoSolicitacao(){solicitacaoComAlteracoes=true;clearTimeout(rascunhoTimer);rascunhoTimer=setTimeout(salvarRascunhoSolicitacao,500);}
+function restaurarRascunhoSolicitacao(tipo){
+  try{const raw=localStorage.getItem(chaveRascunhoSolicitacao(tipo));if(!raw)return false;const dados=JSON.parse(raw);Object.entries(dados.campos||{}).forEach(([id,valor])=>{const el=document.getElementById(id);if(el)el.value=valor;});document.querySelectorAll('input[name="sol-area-ti"]').forEach(el=>el.checked=(dados.areasTi||[]).includes(el.value));atualizarAreasTiSolicitacao();alternarCamposCondicionaisSolicitacao();solicitacaoComAlteracoes=true;const status=document.getElementById('sol-rascunho-status');if(status)status.textContent='Rascunho restaurado automaticamente';return true;}catch(e){registrarLogSistema('erro','Restauração de rascunho',e);return false;}
+}
+function limparRascunhoSolicitacao(tipo){try{localStorage.removeItem(chaveRascunhoSolicitacao(tipo));}catch(e){}solicitacaoComAlteracoes=false;clearTimeout(rascunhoTimer);}
 function abrirModal(id){ document.getElementById(id).classList.add('open'); }
-function fecharModal(id){ document.getElementById(id).classList.remove('open'); }
+function fecharModal(id){
+  if(id==='modal-solicitacao'&&solicitacaoComAlteracoes&&!fechamentoSolicitacaoLiberado){salvarRascunhoSolicitacao();if(!confirm('Existem alterações ainda não enviadas. O rascunho foi salvo. Deseja fechar o formulário?'))return;}
+  document.getElementById(id).classList.remove('open');if(id==='modal-solicitacao')fechamentoSolicitacaoLiberado=false;
+}
+document.getElementById('modal-solicitacao')?.addEventListener('input',agendarRascunhoSolicitacao);document.getElementById('modal-solicitacao')?.addEventListener('change',agendarRascunhoSolicitacao);
+window.addEventListener('beforeunload',e=>{if(solicitacaoComAlteracoes){e.preventDefault();e.returnValue='';}});
 document.querySelectorAll('.modal-overlay').forEach(ov => {
   ov.addEventListener('click', e => { if(e.target === ov) fecharModal(ov.id); });
 });
@@ -2222,14 +2297,17 @@ function renderProjetosHome(){
 
   if(!lista.length){
     tbody.innerHTML = `<tr><td colspan="7"><div class="dtable-empty"><span class="icon">📁</span>${STATE.projetos.length ? 'Nenhum projeto encontrado com esse filtro.' : 'Nenhum projeto cadastrado ainda. Clique em "+ Novo Projeto".'}</div></td></tr>`;
+    renderPaginacao('home-paginacao',0,1,'irPaginaHome');
     return;
   }
+
+  const totalPaginas=Math.max(1,Math.ceil(lista.length/ITENS_POR_PAGINA));paginaHome=Math.min(paginaHome,totalPaginas);const pagina=lista.slice((paginaHome-1)*ITENS_POR_PAGINA,paginaHome*ITENS_POR_PAGINA);
 
   const statusBadge = { planejamento:'badge-info', execucao:'badge-warn', encerrado:'badge-ok', cancelado:'badge-danger', suspenso:'badge-neutral' };
   const statusLabel = { planejamento:'Planejamento', execucao:'Em execução', encerrado:'Encerrado', cancelado:'Cancelado', suspenso:'Suspenso' };
 
   const classesPortfolio={a_iniciar:'badge-neutral',andamento:'badge-info',atrasado:'badge-danger',concluido:'badge-ok',cancelado:'badge-neutral'};
-  tbody.innerHTML = lista.map(p => `
+  tbody.innerHTML = pagina.map(p => `
     <tr style="cursor:pointer" onclick="abrirVisualizacaoProjeto('${p.id}')" title="Clique para visualizar o projeto">
       <td><b>${esc(p.nome)}</b><small class="mono" style="display:block;color:var(--ink-mute);margin-top:3px">${esc(p.lecom || '—')}</small></td>
       <td>${fmtData(p.data_abertura)}</td>
@@ -2247,6 +2325,7 @@ function renderProjetosHome(){
       </td>
     </tr>
   `).join('');
+  renderPaginacao('home-paginacao',lista.length,paginaHome,'irPaginaHome');
 }
 
 function abrirVisualizacaoProjeto(id){
@@ -2268,9 +2347,11 @@ function rotuloStatusPortfolio(valor){ return ({a_iniciar:'À iniciar',andamento
 function renderPortfolioProjetos(){
   const status=document.getElementById('projetos-filtro-status')?.value || '', busca=(document.getElementById('projetos-busca')?.value || '').toLowerCase(), tbody=document.getElementById('projetos-tbody'); if(!tbody) return;
   const lista=STATE.projetos.filter(p=>(!status || (p.status_portfolio || 'a_iniciar')===status) && (!busca || (p.nome+' '+(p.gerente_projeto || '')+' '+(p.lecom || '')).toLowerCase().includes(busca)));
-  if(!lista.length){tbody.innerHTML='<tr><td colspan="10"><div class="dtable-empty">'+(STATE.projetos.length ? 'Nenhum projeto encontrado para estes filtros.' : 'Nenhum projeto cadastrado. Importe uma planilha ou cadastre o primeiro projeto.')+'</div></td></tr>';return;}
+  if(!lista.length){tbody.innerHTML='<tr><td colspan="10"><div class="dtable-empty">'+(STATE.projetos.length ? 'Nenhum projeto encontrado para estes filtros.' : 'Nenhum projeto cadastrado. Importe uma planilha ou cadastre o primeiro projeto.')+'</div></td></tr>';renderPaginacao('projetos-paginacao',0,1,'irPaginaPortfolio');return;}
   const classes={a_iniciar:'badge-neutral',andamento:'badge-info',atrasado:'badge-danger',concluido:'badge-ok',cancelado:'badge-neutral'};
-  tbody.innerHTML=lista.map(p=>'<tr><td><b>'+esc(p.nome)+'</b><small class="mono" style="display:block;color:var(--ink-mute);margin-top:3px">'+esc(p.lecom || '—')+'</small></td><td>'+fmtData(p.data_abertura)+'</td><td>'+esc(p.macro_entrega || '—')+'</td><td style="max-width:180px">'+esc(p.entregaveis || '—')+'</td><td>'+esc(p.gerente_projeto || '—')+'</td><td>'+fmtData(p.data_fim_prevista)+'</td><td>'+fmtData(p.data_replanejada)+'</td><td>'+fmtData(p.data_entrega_final)+'</td><td><span class="badge '+classes[p.status_portfolio || 'a_iniciar']+'">'+rotuloStatusPortfolio(p.status_portfolio)+'</span></td><td class="dtable-actions"><button onclick="selecionarProjeto(\''+p.id+'\')" title="Abrir">↗</button><button onclick="abrirModalProjeto(\''+p.id+'\')" title="Editar">✎</button></td></tr>').join('');
+  const totalPaginas=Math.max(1,Math.ceil(lista.length/ITENS_POR_PAGINA));paginaPortfolio=Math.min(paginaPortfolio,totalPaginas);const pagina=lista.slice((paginaPortfolio-1)*ITENS_POR_PAGINA,paginaPortfolio*ITENS_POR_PAGINA);
+  tbody.innerHTML=pagina.map(p=>'<tr><td><b>'+esc(p.nome)+'</b><small class="mono" style="display:block;color:var(--ink-mute);margin-top:3px">'+esc(p.lecom || '—')+'</small></td><td>'+fmtData(p.data_abertura)+'</td><td>'+esc(p.macro_entrega || '—')+'</td><td style="max-width:180px">'+esc(p.entregaveis || '—')+'</td><td>'+esc(p.gerente_projeto || '—')+'</td><td>'+fmtData(p.data_fim_prevista)+'</td><td>'+fmtData(p.data_replanejada)+'</td><td>'+fmtData(p.data_entrega_final)+'</td><td><span class="badge '+classes[p.status_portfolio || 'a_iniciar']+'">'+rotuloStatusPortfolio(p.status_portfolio)+'</span></td><td class="dtable-actions"><button onclick="selecionarProjeto(\''+p.id+'\')" title="Abrir">↗</button><button onclick="abrirModalProjeto(\''+p.id+'\')" title="Editar">✎</button></td></tr>').join('');
+  renderPaginacao('projetos-paginacao',lista.length,paginaPortfolio,'irPaginaPortfolio');
 }
 function linhasProjetos(incluirDados=true){return [PROJETO_COLUNAS.map(([r])=>r),...(incluirDados?STATE.projetos.map(p=>PROJETO_COLUNAS.map(([,c])=>p[c] || '')):[])];}
 function exportarProjetosXlsx(){if(typeof XLSX==='undefined'){toast('Biblioteca de Excel indisponível.');return;}const aba=XLSX.utils.aoa_to_sheet(linhasProjetos());aba['!cols']=PROJETO_COLUNAS.map(([r])=>({wch:Math.max(16,Math.min(32,r.length+3))}));const livro=XLSX.utils.book_new();XLSX.utils.book_append_sheet(livro,aba,'Projetos');XLSX.writeFile(livro,'PORTFOLIO_PROJETOS.xlsx');}
@@ -2786,9 +2867,11 @@ function renderLecoms(){
   const status=document.getElementById('lecom-filtro-status')?.value || '', classificacao=document.getElementById('lecom-filtro-classificacao')?.value || '', busca=normalizarTextoLecom(document.getElementById('lecom-busca')?.value);
   const lista=STATE.melhorias.filter(l => (!status || l.status_producao===status) && (!classificacao || l.classificacao===classificacao) && (!busca || normalizarTextoLecom(`${l.iniciativa || l.titulo} ${l.codigo} ${l.solicitante}`).includes(busca)));
   const tbody=document.getElementById('lecoms-tbody'); if(!tbody) return;
-  if(!lista.length){ tbody.innerHTML=`<tr><td colspan="9"><div class="dtable-empty">${STATE.melhorias.length ? 'Nenhuma LECOM encontrada para estes filtros.' : 'Nenhuma LECOM cadastrada. Importe uma planilha ou registre a primeira iniciativa.'}</div></td></tr>`; return; }
+  if(!lista.length){ tbody.innerHTML=`<tr><td colspan="9"><div class="dtable-empty">${STATE.melhorias.length ? 'Nenhuma LECOM encontrada para estes filtros.' : 'Nenhuma LECOM cadastrada. Importe uma planilha ou registre a primeira iniciativa.'}</div></td></tr>`; renderPaginacao('lecoms-paginacao',0,1,'irPaginaLecoms');return; }
   const classe={a_iniciar:'badge-neutral',andamento:'badge-info',atrasado:'badge-danger',concluido:'badge-ok',cancelado:'badge-neutral'};
-  tbody.innerHTML=lista.map(l => `<tr style="cursor:pointer" onclick="abrirDetalheLecom('${l.id}')"><td><b>${esc(l.iniciativa || l.titulo || '—')}</b><small style="display:block;color:var(--ink-mute);margin-top:3px">${esc(l.codigo || 'Sem ID')}</small></td><td>${esc(l.solicitante || '—')}<small style="display:block;color:var(--ink-mute);margin-top:3px">${esc(l.area_solicitante || '')}</small></td><td>${esc(l.classificacao || '—')}</td><td>${esc(l.priorizacao_ti || '—')}<small style="display:block;color:var(--ink-mute)">Negócio: ${esc(l.priorizacao_negocio || '—')}</small></td><td>${esc(l.compromisso || '—')}</td><td>${esc(l.area_ti || '—')}</td><td>${fmtData(l.final_producao)}<small style="display:block;color:var(--ink-mute)">${fmtData(l.plan_producao)}</small></td><td><span class="badge ${classe[l.status_producao] || 'badge-neutral'}">${rotuloStatusLecom(l.status_producao)}</span></td><td class="dtable-actions"><button onclick="event.stopPropagation();abrirModalLecom('${l.id}')" title="Editar">✎</button><button onclick="event.stopPropagation();excluirLecom('${l.id}')" title="Excluir">×</button></td></tr>`).join('');
+  const totalPaginas=Math.max(1,Math.ceil(lista.length/ITENS_POR_PAGINA));paginaLecoms=Math.min(paginaLecoms,totalPaginas);const pagina=lista.slice((paginaLecoms-1)*ITENS_POR_PAGINA,paginaLecoms*ITENS_POR_PAGINA);
+  tbody.innerHTML=pagina.map(l => `<tr style="cursor:pointer" onclick="abrirDetalheLecom('${l.id}')"><td><b>${esc(l.iniciativa || l.titulo || '—')}</b><small style="display:block;color:var(--ink-mute);margin-top:3px">${esc(l.codigo || 'Sem ID')}</small></td><td>${esc(l.solicitante || '—')}<small style="display:block;color:var(--ink-mute);margin-top:3px">${esc(l.area_solicitante || '')}</small></td><td>${esc(l.classificacao || '—')}</td><td>${esc(l.priorizacao_ti || '—')}<small style="display:block;color:var(--ink-mute)">Negócio: ${esc(l.priorizacao_negocio || '—')}</small></td><td>${esc(l.compromisso || '—')}</td><td>${esc(l.area_ti || '—')}</td><td>${fmtData(l.final_producao)}<small style="display:block;color:var(--ink-mute)">${fmtData(l.plan_producao)}</small></td><td><span class="badge ${classe[l.status_producao] || 'badge-neutral'}">${rotuloStatusLecom(l.status_producao)}</span></td><td class="dtable-actions"><button onclick="event.stopPropagation();abrirModalLecom('${l.id}')" title="Editar">✎</button><button onclick="event.stopPropagation();excluirLecom('${l.id}')" title="Excluir">×</button></td></tr>`).join('');
+  renderPaginacao('lecoms-paginacao',lista.length,paginaLecoms,'irPaginaLecoms');
 }
 function seloClassificacaoLecom(valor,compacto=false){
   const projeto=String(valor||'').toLowerCase()==='projeto',rotulo=projeto?'Projeto':'Melhoria',cor=projeto?'#0b4ca8':'#a75a00',fundo=projeto?'#e8f0ff':'#fff2df',icone=projeto?'▣':'✦';
@@ -2931,66 +3014,129 @@ async function gerarPdfLecoms(){
 function abrirPreviewLecomLista(){const r=resumoExecutivoLecom();abrirPreviewExportacao('Visão geral de LECOMs',painelLecomHtml(r),gerarPdfLecoms);converterRoscasLecomParaCanvas(document.getElementById('preview-exportacao-conteudo'),r);}
 
 const STATUS_SOLICITACAO_LABEL={enviada:'Enviada',em_analise:'Em análise',aprovada:'Aprovada',em_execucao:'Em execução',concluida:'Concluída',reprovada:'Reprovada',cancelada:'Cancelada'};
+const TIPOS_SOLICITACAO={lecom:{label:'LECOM',titulo:'Solicitar LECOM',prefixo:'LEC'},projeto:{label:'Novo projeto',titulo:'Solicitar Projeto',prefixo:'PROJ'},sac:{label:'Parametrização de tela SAC',titulo:'Solicitar Parametrização de tela SAC',prefixo:'SAC'},assuntos:{label:'Atualização/Criação de Assuntos',titulo:'Solicitar Atualização/Criação de Assuntos',prefixo:'ASS'}};
+function rotuloTipoSolicitacao(tipo){return TIPOS_SOLICITACAO[tipo]?.label||'Solicitação';}
 function usuarioSolicitacaoAtual(){return sessaoPortal?.user?.id||'local-user';}
 function solicitacoesVisiveis(){return podeGerenciarAcessos()?STATE.solicitacoes.slice():STATE.solicitacoes.filter(s=>(s.owner_id||'local-user')===usuarioSolicitacaoAtual());}
 function codigoSolicitacaoLocal(tipo){
-  const prefixo=tipo==='projeto'?'PROJ':'LEC',maior=STATE.solicitacoes.filter(s=>s.tipo_solicitacao===tipo).map(s=>Number(String(s.request_code||'').replace(/\D/g,''))||0).reduce((a,b)=>Math.max(a,b),0);
+  const prefixo=TIPOS_SOLICITACAO[tipo]?.prefixo||'SOL',maior=STATE.solicitacoes.filter(s=>s.tipo_solicitacao===tipo).map(s=>Number(String(s.request_code||'').replace(/\D/g,''))||0).reduce((a,b)=>Math.max(a,b),0);
   return prefixo+String(maior+1).padStart(4,'0');
 }
 function mapearSolicitacaoSupabase(linha){return {...linha,id:linha.id,request_code:linha.request_code||'',criado_em:linha.created_at||linha.criado_em,atualizado_em:linha.updated_at||linha.atualizado_em};}
+let canalSolicitacoesPortal=null,timerSincronizacaoSolicitacoes=null;
+function encerrarAtualizacoesSolicitacoes(){if(canalSolicitacoesPortal&&supabasePortal)supabasePortal.removeChannel(canalSolicitacoesPortal);canalSolicitacoesPortal=null;clearInterval(timerSincronizacaoSolicitacoes);timerSincronizacaoSolicitacoes=null;}
+function iniciarAtualizacoesSolicitacoes(){
+  encerrarAtualizacoesSolicitacoes();if(!supabasePortal||!sessaoPortal)return;
+  try{canalSolicitacoesPortal=supabasePortal.channel(`solicitacoes-${sessaoPortal.user.id}`).on('postgres_changes',{event:'UPDATE',schema:'public',table:'solicitacoes'},payload=>{const atual=STATE.solicitacoes.find(s=>s.id===payload.new.id);if(atual)Object.assign(atual,mapearSolicitacaoSupabase(payload.new));else if(podeGerenciarAcessos()||payload.new.owner_id===sessaoPortal.user.id)STATE.solicitacoes.unshift(mapearSolicitacaoSupabase(payload.new));salvarState();renderSolicitacoes();renderNotificacoes();}).subscribe();}catch(e){registrarLogSistema('info','Notificações','Canal em tempo real indisponível; sincronização periódica mantida.');}
+  timerSincronizacaoSolicitacoes=setInterval(()=>{if(document.visibilityState==='visible')carregarSolicitacoesSupabase();},60000);
+}
+function estadoTabelaHtml(tipo,mensagem){const icone=tipo==='loading'?'◌':tipo==='error'?'!':'—';return `<tr><td colspan="7"><div class="data-state ${tipo}"><b style="display:block;font-size:18px;margin-bottom:7px">${icone}</b>${esc(mensagem)}</div></td></tr>`;}
 async function carregarSolicitacoesSupabase(){
   if(!supabasePortal||!sessaoPortal)return false;
+  const tbody=document.getElementById('solicitacoes-tbody');if(tbody)tbody.innerHTML=estadoTabelaHtml('loading','Carregando solicitações…');
   try{
     const {data,error}=await supabasePortal.from('solicitacoes').select('*').order('created_at',{ascending:false});
-    if(error)throw error;STATE.solicitacoes=(data||[]).map(mapearSolicitacaoSupabase);salvarState();renderSolicitacoes();registrarLogSistema('info','Solicitações',`${STATE.solicitacoes.length} solicitação(ões) sincronizada(s) com o Supabase.`);return true;
-  }catch(e){registrarLogSistema('erro','Sincronização de solicitações',e);return false;}
+    if(error)throw error;STATE.solicitacoes=(data||[]).map(mapearSolicitacaoSupabase);
+    if(STATE.solicitacoes.length){try{const ids=STATE.solicitacoes.map(s=>s.id),{data:eventos,error:erroEventos}=await supabasePortal.from('solicitacao_events').select('*').in('solicitacao_id',ids).order('created_at',{ascending:true});if(!erroEventos)(eventos||[]).forEach(ev=>{const s=STATE.solicitacoes.find(x=>x.id===ev.solicitacao_id);if(s){s.historico=s.historico||[];s.historico.push(ev);}});}catch(e){}}
+    salvarState();renderSolicitacoes();registrarLogSistema('info','Solicitações',`${STATE.solicitacoes.length} solicitação(ões) sincronizada(s) com o Supabase.`);return true;
+  }catch(e){registrarLogSistema('erro','Sincronização de solicitações',e);if(!STATE.solicitacoes.length&&tbody)tbody.innerHTML=estadoTabelaHtml('error','Não foi possível carregar as solicitações. Tente novamente.');else renderSolicitacoes();return false;}
 }
-function abrirModalSolicitacao(tipo){
-  const titulo=tipo==='projeto'?'Solicitar novo projeto':'Solicitar LECOM';
-  document.getElementById('modal-solicitacao-titulo').textContent=titulo;
-  document.getElementById('sol-tipo').value=tipo;document.getElementById('sol-id').value='';
-  document.getElementById('sol-form-lecom').hidden=tipo==='projeto';
-  document.getElementById('sol-form-projeto').hidden=tipo!=='projeto';
+function abrirModalSolicitacao(tipo=''){
+  document.getElementById('modal-solicitacao-titulo').textContent='Nova Solicitação';
+  document.getElementById('sol-tipo').value='';document.getElementById('sol-id').value='';document.getElementById('sol-categoria').value='';
+  ['lecom','projeto','sac','assuntos'].forEach(chave=>document.getElementById(`sol-form-${chave}`).hidden=true);
   ['sol-solicitante','sol-area-solicitante','sol-produto','sol-titulo','sol-objetivo','sol-justificativa','sol-entregas','sol-areas-impactadas','sol-sistemas-impactados','sol-financeiro-detalhe','sol-compliance-detalhe','sol-risco-detalhe','sol-observacoes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['sol-proj-nome','sol-proj-solicitante','sol-proj-data-abertura','sol-proj-objetivo','sol-proj-escopo','sol-proj-responsavel','sol-proj-data-alvo','sol-proj-areas','sol-proj-ganhos'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['sol-sac-tela','sol-sac-login','sol-sac-area','sol-assunto','sol-assunto-obrigatoriedade','sol-assunto-motivo','sol-assunto-atendimento','sol-assunto-relacionamento','sol-assunto-especialidade-cidade','sol-assunto-outra'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['sol-seguranca','sol-envolve-ia','sol-impacto-jornada','sol-impacto-nips','sol-impacto-financeiro','sol-impacto-compliance','sol-risco-assistencial'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='nao';});
-  document.querySelectorAll('input[name="sol-area-ti"]').forEach(el=>el.checked=false);atualizarAreasTiSolicitacao();const files=document.getElementById('sol-anexos');if(files)files.value='';document.getElementById('sol-anexos-lista').textContent='';alternarCamposCondicionaisSolicitacao();
+  document.querySelectorAll('input[name="sol-area-ti"]').forEach(el=>el.checked=false);atualizarAreasTiSolicitacao();['sol-anexos','sol-sac-anexo','sol-assunto-anexo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});['sol-anexos-lista','sol-sac-anexo-lista','sol-assunto-anexo-lista'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='';});alternarCamposCondicionaisSolicitacao();
   const nome=perfilPortal?.full_name||sessaoPortal?.user?.user_metadata?.full_name||'';
   document.getElementById('sol-solicitante').value=nome;document.getElementById('sol-proj-solicitante').value=nome;document.getElementById('sol-proj-data-abertura').value=hojeISO();
-  abrirModal('modal-solicitacao');
+  solicitacaoComAlteracoes=false;const statusRascunho=document.getElementById('sol-rascunho-status');if(statusRascunho)statusRascunho.textContent='Selecione uma categoria para iniciar';abrirModal('modal-solicitacao');if(tipo){document.getElementById('sol-categoria').value=tipo;selecionarCategoriaSolicitacao(tipo);}
+}
+function selecionarCategoriaSolicitacao(tipo){
+  document.getElementById('sol-tipo').value=tipo;['lecom','projeto','sac','assuntos'].forEach(chave=>document.getElementById(`sol-form-${chave}`).hidden=chave!==tipo);document.getElementById('modal-solicitacao-titulo').textContent=TIPOS_SOLICITACAO[tipo]?.titulo||'Nova Solicitação';
+  if(!tipo){solicitacaoComAlteracoes=false;return;}const restaurado=restaurarRascunhoSolicitacao(tipo);solicitacaoComAlteracoes=restaurado;if(!restaurado){const status=document.getElementById('sol-rascunho-status');if(status)status.textContent='Rascunho não salvo';}else toast('Rascunho recuperado.');
 }
 function atualizarAreasTiSolicitacao(){const selecionadas=[...document.querySelectorAll('input[name="sol-area-ti"]:checked')].map(el=>el.value),label=document.getElementById('sol-area-ti-label');if(label)label.textContent=selecionadas.length?selecionadas.join(', '):'Selecione uma ou mais áreas TI';}
 function alternarCamposCondicionaisSolicitacao(){
   [['sol-impacto-financeiro','sol-financeiro-wrap'],['sol-impacto-compliance','sol-compliance-wrap'],['sol-risco-assistencial','sol-risco-wrap']].forEach(([campo,wrap])=>{const ativo=document.getElementById(campo)?.value==='sim',box=document.getElementById(wrap);if(box)box.hidden=!ativo;});
 }
+const ANEXOS_EXTENSOES=['pdf','doc','docx','xls','xlsx','png','jpg','jpeg'],ANEXO_MAX_BYTES=10*1024*1024,ANEXO_MAX_QTD=5;
+function validarAnexosSolicitacao(input,mostrarMensagem=true){
+  const arquivos=[...(input?.files||[])],lista=document.getElementById('sol-anexos-lista'),erros=[];
+  if(arquivos.length>ANEXO_MAX_QTD)erros.push(`Selecione no máximo ${ANEXO_MAX_QTD} arquivos.`);
+  arquivos.forEach(f=>{const ext=(f.name.split('.').pop()||'').toLowerCase();if(!ANEXOS_EXTENSOES.includes(ext))erros.push(`${f.name}: formato não permitido.`);if(f.size>ANEXO_MAX_BYTES)erros.push(`${f.name}: excede 10 MB.`);});
+  if(erros.length){if(lista)lista.innerHTML=`<span style="color:var(--red)">${erros.map(esc).join('<br>')}</span>`;if(mostrarMensagem)toast('Revise os anexos selecionados.');return false;}
+  if(lista)lista.textContent=arquivos.length?arquivos.map(f=>`${f.name} · ${(f.size/1048576).toFixed(1)} MB`).join(' | '):'Nenhum anexo selecionado.';return true;
+}
+function validarAnexoGestorSolicitacao(input,maxMb=5,mostrarMensagem=true){
+  const arquivo=input?.files?.[0],lista=document.getElementById(input?.id==='sol-sac-anexo'?'sol-sac-anexo-lista':'sol-assunto-anexo-lista'),permitidas=['pdf','doc','docx','png','jpg','jpeg'];let erro='';
+  if((input?.files?.length||0)>1)erro='Selecione somente um arquivo.';else if(arquivo&&!permitidas.includes((arquivo.name.split('.').pop()||'').toLowerCase()))erro='Formato não permitido.';else if(arquivo&&arquivo.size>maxMb*1024*1024)erro=`O arquivo excede ${maxMb} MB.`;
+  if(erro){if(lista)lista.innerHTML=`<span style="color:var(--red)">${esc(erro)}</span>`;if(mostrarMensagem)toast(erro);return false;}if(lista)lista.textContent=arquivo?`${arquivo.name} · ${(arquivo.size/1048576).toFixed(1)} MB`:'Nenhum arquivo selecionado.';return true;
+}
+async function enviarAnexosSolicitacaoSupabase(solicitacaoId,arquivos){
+  if(!supabasePortal||!sessaoPortal||!arquivos.length)return arquivos.map(f=>({nome:f.name,tamanho:f.size,tipo:f.type}));const enviados=[];
+  for(const arquivo of arquivos){const nomeSeguro=arquivo.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]/g,'_'),caminho=`${sessaoPortal.user.id}/${solicitacaoId}/${Date.now()}-${nomeSeguro}`,{error}=await supabasePortal.storage.from('solicitacoes').upload(caminho,arquivo,{upsert:false,contentType:arquivo.type||'application/octet-stream'});if(error)throw error;enviados.push({nome:arquivo.name,tamanho:arquivo.size,tipo:arquivo.type,path:caminho});}
+  return enviados;
+}
 function coletarSolicitacaoFormulario(){
   const v=id=>String(document.getElementById(id)?.value||'').trim();
-  if(document.getElementById('sol-tipo').value==='projeto')return {tipo_solicitacao:'projeto',nome_projeto:v('sol-proj-nome'),titulo:v('sol-proj-nome'),solicitante:v('sol-proj-solicitante'),data_abertura_solicitacao:v('sol-proj-data-abertura'),objetivo:v('sol-proj-objetivo'),escopo_macro_entrega:v('sol-proj-escopo'),responsavel:v('sol-proj-responsavel'),areas_envolvidas:v('sol-proj-areas'),data_alvo:v('sol-proj-data-alvo'),ganhos_esperados:v('sol-proj-ganhos')};
+  const tipo=document.getElementById('sol-tipo').value,nome=perfilPortal?.full_name||sessaoPortal?.user?.user_metadata?.full_name||sessaoPortal?.user?.email||'Usuário';
+  if(!tipo)return {tipo_solicitacao:''};
+  if(tipo==='projeto')return {tipo_solicitacao:'projeto',nome_projeto:v('sol-proj-nome'),titulo:v('sol-proj-nome'),solicitante:v('sol-proj-solicitante'),data_abertura_solicitacao:v('sol-proj-data-abertura'),objetivo:v('sol-proj-objetivo'),escopo_macro_entrega:v('sol-proj-escopo'),responsavel:v('sol-proj-responsavel'),areas_envolvidas:v('sol-proj-areas'),data_alvo:v('sol-proj-data-alvo'),ganhos_esperados:v('sol-proj-ganhos')};
+  if(tipo==='sac')return {tipo_solicitacao:'sac',solicitante:nome,titulo:`Parametrização SAC — ${v('sol-sac-tela')}`,tela_sac:v('sol-sac-tela'),login_sigo:v('sol-sac-login'),area_negocio_sac:v('sol-sac-area'),objetivo:`Liberar acesso à tela ${v('sol-sac-tela')} para o login ${v('sol-sac-login')}.`};
+  if(tipo==='assuntos'){const textos=[v('sol-assunto'),v('sol-assunto-obrigatoriedade'),v('sol-assunto-motivo'),v('sol-assunto-atendimento'),v('sol-assunto-relacionamento'),v('sol-assunto-especialidade-cidade'),v('sol-assunto-outra')];return {tipo_solicitacao:'assuntos',solicitante:nome,titulo:'Atualização/Criação de Assuntos',objetivo:textos.find(Boolean)||'Atualização ou criação de parametrização de assuntos.',assunto_descricao:textos[0],obrigatoriedade_descricao:textos[1],motivo_descricao:textos[2],tipo_atendimento_descricao:textos[3],relacionamento_descricao:textos[4],especialidade_cidade_descricao:textos[5],outra_solicitacao_descricao:textos[6]};}
   return {tipo_solicitacao:document.getElementById('sol-tipo').value||'lecom',solicitante:v('sol-solicitante'),area_solicitante:v('sol-area-solicitante'),seguranca_informacao:document.getElementById('sol-seguranca').value,envolve_ia:document.getElementById('sol-envolve-ia').value,areas_ti:[...document.querySelectorAll('input[name="sol-area-ti"]:checked')].map(el=>el.value),produto_funcionalidade:v('sol-produto'),titulo:v('sol-titulo'),objetivo:v('sol-objetivo'),justificativa:v('sol-justificativa'),principais_entregas:v('sol-entregas'),areas_impactadas:v('sol-areas-impactadas'),sistemas_impactados:v('sol-sistemas-impactados'),tipo_demanda:document.getElementById('sol-tipo-demanda').value,comissao_aprovadora:document.getElementById('sol-comissao').value,impacto_jornada:document.getElementById('sol-impacto-jornada').value,impacto_nips:document.getElementById('sol-impacto-nips').value,impacto_financeiro:document.getElementById('sol-impacto-financeiro').value,impacto_financeiro_detalhe:v('sol-financeiro-detalhe'),impacto_compliance:document.getElementById('sol-impacto-compliance').value,impacto_compliance_detalhe:v('sol-compliance-detalhe'),risco_assistencial:document.getElementById('sol-risco-assistencial').value,risco_assistencial_detalhe:v('sol-risco-detalhe'),observacoes:v('sol-observacoes')};
 }
 async function salvarSolicitacao(){
   const dados=coletarSolicitacaoFormulario();
+  if(!dados.tipo_solicitacao){toast('Selecione primeiro uma categoria de solicitação.');return;}
   if(dados.tipo_solicitacao==='projeto'){
     if(!dados.nome_projeto||!dados.solicitante||!dados.data_abertura_solicitacao||!dados.objetivo||!dados.escopo_macro_entrega||!dados.responsavel||!dados.areas_envolvidas||!dados.data_alvo||!dados.ganhos_esperados){toast('Preencha todos os campos obrigatórios da solicitação de projeto.');return;}
-  }else{
+  }else if(dados.tipo_solicitacao==='lecom'){
     if(!dados.solicitante||!dados.area_solicitante||!dados.titulo||!dados.objetivo||!dados.justificativa||!dados.areas_ti.length){toast('Preencha os campos obrigatórios, incluindo ao menos uma Área TI.');return;}
     if(dados.impacto_financeiro==='sim'&&!dados.impacto_financeiro_detalhe||dados.impacto_compliance==='sim'&&!dados.impacto_compliance_detalhe||dados.risco_assistencial==='sim'&&!dados.risco_assistencial_detalhe){toast('Preencha a descrição e o indicador dos impactos selecionados.');return;}
+  }else if(dados.tipo_solicitacao==='sac'){
+    const anexo=document.getElementById('sol-sac-anexo');if(!dados.tela_sac||!dados.login_sigo||!dados.area_negocio_sac){toast('Preencha todos os campos da parametrização de tela SAC.');return;}if(!anexo?.files?.length){toast('Anexe a validação do gestor da área.');return;}if(!validarAnexoGestorSolicitacao(anexo,5))return;
+  }else if(dados.tipo_solicitacao==='assuntos'){
+    const preenchidos=['assunto_descricao','obrigatoriedade_descricao','motivo_descricao','tipo_atendimento_descricao','relacionamento_descricao','especialidade_cidade_descricao','outra_solicitacao_descricao'].some(c=>dados[c]),anexo=document.getElementById('sol-assunto-anexo');if(!preenchidos){toast('Descreva pelo menos um item da solicitação de assuntos.');return;}if(!anexo?.files?.length){toast('Anexe a validação do gestor da área.');return;}if(!validarAnexoGestorSolicitacao(anexo,5))return;
   }
-  const files=dados.tipo_solicitacao==='lecom'?[...(document.getElementById('sol-anexos')?.files||[])].map(f=>({nome:f.name,tamanho:f.size,tipo:f.type})):[];
+  const inputAnexos=document.getElementById('sol-anexos');if(dados.tipo_solicitacao==='lecom'&&!validarAnexosSolicitacao(inputAnexos))return;
+  const inputTipo=dados.tipo_solicitacao==='lecom'?inputAnexos:dados.tipo_solicitacao==='sac'?document.getElementById('sol-sac-anexo'):dados.tipo_solicitacao==='assuntos'?document.getElementById('sol-assunto-anexo'):null,arquivosOriginais=[...(inputTipo?.files||[])],files=arquivosOriginais.map(f=>({nome:f.name,tamanho:f.size,tipo:f.type}));
   const agora=new Date().toISOString(),base={...dados,owner_id:usuarioSolicitacaoAtual(),owner_email:sessaoPortal?.user?.email||'',status:'enviada',anexos:files,admin_descricao:''};
   let item=null;
   if(supabasePortal&&sessaoPortal){
-    try{const {data,error}=await supabasePortal.from('solicitacoes').insert(base).select('*').single();if(error)throw error;item=mapearSolicitacaoSupabase(data);}catch(e){registrarLogSistema('erro','Envio de solicitação ao Supabase',e);}
+    try{const {data,error}=await supabasePortal.from('solicitacoes').insert(base).select('*').single();if(error)throw error;item=mapearSolicitacaoSupabase(data);if(arquivosOriginais.length){try{const anexosRemotos=await enviarAnexosSolicitacaoSupabase(item.id,arquivosOriginais),{data:atualizada,error:erroAnexos}=await supabasePortal.from('solicitacoes').update({anexos:anexosRemotos}).eq('id',item.id).select('*').single();if(erroAnexos)throw erroAnexos;item=mapearSolicitacaoSupabase(atualizada);}catch(erroUpload){registrarLogSistema('erro','Upload de anexos da solicitação',erroUpload);toast('Solicitação criada, mas o anexo não pôde ser enviado. Consulte o administrador.');}}}catch(e){registrarLogSistema('erro','Envio de solicitação ao Supabase',e);}
   }
   if(!item){item={id:uid(),request_code:codigoSolicitacaoLocal(dados.tipo_solicitacao),...base,criado_em:agora,atualizado_em:agora};toast('Solicitação salva no cache local. A sincronização com o Supabase está pendente.');}
-  STATE.solicitacoes.unshift(item);salvarState();registrarAuditoria('criar','solicitação',`${item.request_code||item.id} · ${item.tipo_solicitacao==='projeto'?'Novo projeto':'LECOM'}: ${item.titulo}`);fecharModal('modal-solicitacao');renderSolicitacoes();if(item.created_at||item.request_code)toast('Solicitação enviada com sucesso.');
+  item.historico=item.historico||[{id:uid(),event_type:'created',old_status:null,new_status:'enviada',description:'Solicitação enviada.',actor_name:item.solicitante,created_at:agora}];
+  STATE.solicitacoes.unshift(item);salvarState();registrarAuditoria('criar','solicitação',`${item.request_code||item.id} · ${rotuloTipoSolicitacao(item.tipo_solicitacao)}: ${item.titulo}`);limparRascunhoSolicitacao(item.tipo_solicitacao);fechamentoSolicitacaoLiberado=true;fecharModal('modal-solicitacao');renderSolicitacoes();if(item.created_at||item.request_code)toast('Solicitação enviada com sucesso.');
+}
+let paginaSolicitacoes=1,paginaHome=1,paginaPortfolio=1,paginaLecoms=1;const ITENS_POR_PAGINA=10;
+function reiniciarPaginaSolicitacoes(){paginaSolicitacoes=1;renderSolicitacoes();}
+function renderPaginacao(id,total,pagina,onChange){const el=document.getElementById(id);if(!el)return;const paginas=Math.max(1,Math.ceil(total/ITENS_POR_PAGINA));pagina=Math.min(pagina,paginas);if(paginas<=1){el.innerHTML='';return;}let html=`<button ${pagina===1?'disabled':''} onclick="${onChange}(${pagina-1})">‹</button>`;for(let p=Math.max(1,pagina-2);p<=Math.min(paginas,pagina+2);p++)html+=`<button class="${p===pagina?'active':''}" onclick="${onChange}(${p})">${p}</button>`;html+=`<button ${pagina===paginas?'disabled':''} onclick="${onChange}(${pagina+1})">›</button>`;el.innerHTML=html;}
+function irPaginaSolicitacoes(p){paginaSolicitacoes=Math.max(1,p);renderSolicitacoes();}
+function irPaginaHome(p){paginaHome=Math.max(1,p);renderProjetosHome();}
+function irPaginaPortfolio(p){paginaPortfolio=Math.max(1,p);renderPortfolioProjetos();}
+function irPaginaLecoms(p){paginaLecoms=Math.max(1,p);renderLecoms();}
+function diasEntreDatas(a,b){if(!a||!b)return null;return Math.max(0,Math.round((new Date(b)-new Date(a))/86400000));}
+function renderIndicadoresSolicitacoes(lista,admin){
+  const pendentes=lista.filter(s=>['enviada','em_analise'].includes(s.status)).length,atendimento=lista.filter(s=>['aprovada','em_execucao'].includes(s.status)).length,concluidas=lista.filter(s=>s.status==='concluida').length;
+  document.getElementById('sol-kpi-total').textContent=lista.length;document.getElementById('sol-kpi-pendentes').textContent=pendentes;document.getElementById('sol-kpi-atendimento').textContent=atendimento;document.getElementById('sol-kpi-concluidas').textContent=concluidas;
+  const sla=document.getElementById('solicitacoes-sla');sla.style.display=admin?'grid':'none';if(!admin)return;
+  const temposAnalise=lista.map(s=>{const inicio=s.created_at||s.criado_em,evento=(s.historico||[]).find(e=>e.new_status==='em_analise');const fim=evento?.created_at||(s.status!=='enviada'?(s.updated_at||s.atualizado_em):null);return diasEntreDatas(inicio,fim);}).filter(v=>v!==null),temposAtendimento=lista.filter(s=>['concluida','reprovada','cancelada'].includes(s.status)).map(s=>diasEntreDatas(s.created_at||s.criado_em,s.updated_at||s.atualizado_em)).filter(v=>v!==null),media=v=>v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1)+' dias':'—',agora=Date.now(),vencidas=lista.filter(s=>s.status==='enviada'&&(agora-new Date(s.created_at||s.criado_em).getTime())/86400000>5).length;
+  document.getElementById('sol-kpi-media-analise').textContent=media(temposAnalise);document.getElementById('sol-kpi-media-atendimento').textContent=media(temposAtendimento);document.getElementById('sol-kpi-vencidas').textContent=vencidas;
 }
 function renderSolicitacoes(){
-  const tbody=document.getElementById('solicitacoes-tbody');if(!tbody)return;
-  const lista=solicitacoesVisiveis(),filtro=document.getElementById('solicitacoes-filtro-status')?.value||'',filtrada=lista.filter(s=>!filtro||s.status===filtro),admin=podeGerenciarAcessos();
-  document.getElementById('solicitacoes-visao-label').textContent=admin?'Todas as solicitações':'Minhas solicitações';document.getElementById('solicitacoes-resumo').textContent=`${filtrada.length} solicitação(ões) exibida(s)`;
-  if(!filtrada.length){tbody.innerHTML='<tr><td colspan="7"><div class="dtable-empty">Nenhuma solicitação encontrada.</div></td></tr>';return;}
-  tbody.innerHTML=filtrada.map(s=>`<tr style="cursor:pointer" onclick="abrirDetalheSolicitacao('${s.id}')"><td><span class="badge badge-info">${s.tipo_solicitacao==='projeto'?'Novo projeto':'LECOM'}</span></td><td><b>${esc(s.nome_projeto||s.titulo)}</b><small class="mono" style="display:block;color:var(--ink-mute);margin-top:3px">${esc(s.request_code||s.id)}</small></td><td>${esc(s.solicitante)}</td><td>${esc(s.tipo_solicitacao==='projeto'?(s.areas_envolvidas||s.areas_impactadas):s.area_solicitante)}</td><td>${fmtData((s.criado_em||s.created_at||'').slice(0,10))}</td><td><span class="badge ${s.status==='concluida'?'badge-ok':s.status==='reprovada'||s.status==='cancelada'?'badge-danger':'badge-warn'}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></td><td class="dtable-actions"><button onclick="event.stopPropagation();abrirDetalheSolicitacao('${s.id}')" title="Visualizar">▣</button></td></tr>`).join('');
+  const tbody=document.getElementById('solicitacoes-tbody');if(!tbody)return;const admin=podeGerenciarAcessos(),lista=solicitacoesVisiveis();
+  const solicitante=(document.getElementById('sol-filtro-solicitante')?.value||'').toLocaleLowerCase('pt-BR'),tipo=document.getElementById('sol-filtro-tipo')?.value||'',status=document.getElementById('solicitacoes-filtro-status')?.value||'',inicio=document.getElementById('sol-filtro-inicio')?.value||'',fim=document.getElementById('sol-filtro-fim')?.value||'';
+  const filtrada=lista.filter(s=>{const data=(s.criado_em||s.created_at||'').slice(0,10);return(!solicitante||String(s.solicitante||'').toLocaleLowerCase('pt-BR').includes(solicitante))&&(!tipo||s.tipo_solicitacao===tipo)&&(!status||s.status===status)&&(!inicio||data>=inicio)&&(!fim||data<=fim);});
+  const filtroSolicitante=document.getElementById('sol-filtro-solicitante');if(filtroSolicitante)filtroSolicitante.style.display=admin?'':'none';renderIndicadoresSolicitacoes(lista,admin);
+  const totalPaginas=Math.max(1,Math.ceil(filtrada.length/ITENS_POR_PAGINA));paginaSolicitacoes=Math.min(paginaSolicitacoes,totalPaginas);const pagina=filtrada.slice((paginaSolicitacoes-1)*ITENS_POR_PAGINA,paginaSolicitacoes*ITENS_POR_PAGINA);
+  document.getElementById('solicitacoes-visao-label').textContent=admin?'Todas as solicitações':'Minhas solicitações';document.getElementById('solicitacoes-resumo').textContent=`${filtrada.length} solicitação(ões) encontrada(s) · página ${paginaSolicitacoes} de ${totalPaginas}`;
+  if(!filtrada.length){tbody.innerHTML=estadoTabelaHtml('empty','Nenhuma solicitação encontrada para os filtros selecionados.');renderPaginacao('solicitacoes-paginacao',0,1,'irPaginaSolicitacoes');return;}
+  tbody.innerHTML=pagina.map(s=>{const area=s.tipo_solicitacao==='projeto'?(s.areas_envolvidas||s.areas_impactadas):s.tipo_solicitacao==='sac'?s.area_negocio_sac:s.area_solicitante;return `<tr style="cursor:pointer" onclick="abrirDetalheSolicitacao('${s.id}')"><td><span class="badge badge-info">${esc(rotuloTipoSolicitacao(s.tipo_solicitacao))}</span></td><td><b>${esc(s.nome_projeto||s.titulo)}</b><small class="mono" style="display:block;color:var(--ink-mute);margin-top:3px">${esc(s.request_code||s.id)}</small></td><td>${esc(s.solicitante)}</td><td>${esc(area||'—')}</td><td>${fmtData((s.criado_em||s.created_at||'').slice(0,10))}</td><td><span class="badge ${s.status==='concluida'?'badge-ok':s.status==='reprovada'||s.status==='cancelada'?'badge-danger':'badge-warn'}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></td><td class="dtable-actions"><button onclick="event.stopPropagation();abrirDetalheSolicitacao('${s.id}')" title="Visualizar">▣</button></td></tr>`}).join('');renderPaginacao('solicitacoes-paginacao',filtrada.length,paginaSolicitacoes,'irPaginaSolicitacoes');
 }
 function abrirDetalheSolicitacao(id){
   const s=STATE.solicitacoes.find(x=>x.id===id);if(!s||(!podeGerenciarAcessos()&&(s.owner_id||'local-user')!==usuarioSolicitacaoAtual())){toast('Solicitação não disponível.');return;}
@@ -2999,9 +3145,14 @@ function abrirDetalheSolicitacao(id){
   const projeto=s.tipo_solicitacao==='projeto',areas=(s.areas_ti||[]).join(', '),anexos=(s.anexos||[]).map(a=>a.nome).join(', ');
   const resumo=projeto
     ? `<div style="display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;margin-top:18px">${linha('Solicitante',s.solicitante)}${linha('E-mail',s.owner_email||'Gerenciado pelo Supabase Auth')}${linha('Data de abertura',s.data_abertura_solicitacao?fmtData(s.data_abertura_solicitacao):fmtData((s.criado_em||'').slice(0,10)))}${linha('Responsável',s.responsavel||s.solicitante)}${linha('Áreas envolvidas',s.areas_envolvidas||s.areas_impactadas)}${linha('Data alvo',fmtData(s.data_alvo))}</div><div style="margin-top:16px">${linha('Objetivo',s.objetivo)}${linha('Escopo (macro entrega)',s.escopo_macro_entrega||s.macro_entrega||s.produto_funcionalidade)}${linha('Ganhos esperados',s.ganhos_esperados)}</div>`
+    : s.tipo_solicitacao==='sac'
+    ? `<div style="display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;margin-top:18px">${linha('Solicitante',s.solicitante)}${linha('E-mail',s.owner_email||'Gerenciado pelo Supabase Auth')}${linha('Tela SAC',s.tela_sac)}${linha('Login SIGO',s.login_sigo)}${linha('Área de negócio',s.area_negocio_sac)}${linha('Validação do gestor',anexos)}</div>`
+    : s.tipo_solicitacao==='assuntos'
+    ? `<div style="margin-top:18px">${linha('Solicitante',s.solicitante)}${linha('E-mail',s.owner_email||'Gerenciado pelo Supabase Auth')}${linha('Assunto a criar ou alterar',s.assunto_descricao)}${linha('Obrigatoriedade',s.obrigatoriedade_descricao)}${linha('Motivo',s.motivo_descricao)}${linha('Tipo de Atendimento',s.tipo_atendimento_descricao)}${linha('Relacionamento',s.relacionamento_descricao)}${linha('Especialidade × Cidade',s.especialidade_cidade_descricao)}${linha('Outra solicitação',s.outra_solicitacao_descricao)}${linha('Validação do gestor',anexos)}</div>`
     : `<div style="display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;margin-top:18px">${linha('Solicitante',s.solicitante)}${linha('Área solicitante',s.area_solicitante)}${linha('E-mail',s.owner_email||'Gerenciado pelo Supabase Auth')}${linha('Área TI',areas)}${linha('Produto / funcionalidade',s.produto_funcionalidade)}${linha('Tipo de demanda',s.tipo_demanda)}${linha('Comissão aprovadora',s.comissao_aprovadora)}${linha('Segurança da informação',s.seguranca_informacao)}${linha('Envolve IA',s.envolve_ia)}${linha('Impacto na jornada',s.impacto_jornada)}${linha('Impacto em NIPS',s.impacto_nips)}${linha('Impacto financeiro',s.impacto_financeiro==='sim'?s.impacto_financeiro_detalhe:'Não')}${linha('Impacto compliance',s.impacto_compliance==='sim'?s.impacto_compliance_detalhe:'Não')}${linha('Risco assistencial',s.risco_assistencial==='sim'?s.risco_assistencial_detalhe:'Não')}</div><div style="margin-top:16px">${linha('Objetivo',s.objetivo)}${linha('Justificativa',s.justificativa)}${linha('Principais entregas',s.principais_entregas)}${linha('Áreas impactadas',s.areas_impactadas)}${linha('Sistemas, telas ou relatórios impactados',s.sistemas_impactados)}${linha('Observações',s.observacoes)}${linha('Anexos',anexos)}</div>`;
-  document.getElementById('sol-detalhe-conteudo').innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><span class="badge badge-info">${projeto?'Solicitação de novo projeto':'Solicitação de LECOM'}</span><h2 style="color:var(--blue);margin:10px 0 4px;font-size:20px">${esc(s.nome_projeto||s.titulo)}</h2><span class="mono" style="font-size:11px;color:var(--ink-mute)">${esc(s.id)} · ${fmtData((s.criado_em||'').slice(0,10))}</span></div><span class="badge ${s.status==='concluida'?'badge-ok':s.status==='reprovada'||s.status==='cancelada'?'badge-danger':'badge-warn'}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></div>${s.projeto_id&&admin?`<div style="margin-top:14px;padding:11px 13px;border-radius:8px;background:#eef8f2;color:#17663a;font-size:12px">Projeto criado automaticamente no Portfólio. <button class="btn btn-outline btn-sm" style="margin-left:8px" onclick="fecharModal('modal-solicitacao-detalhe');selecionarProjeto('${s.projeto_id}')">Abrir projeto</button></div>`:''}${resumo}${admin?`<div style="margin-top:18px;padding:14px;background:#f6f8fc;border-radius:9px"><b style="font-size:12px">Gestão administrativa</b><div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:10px"><label style="font-size:12px;font-weight:700">Status<select id="sol-status-admin" style="display:block;margin-top:5px;padding:8px;border:1px solid var(--line);border-radius:7px"><option value="enviada">Enviada</option><option value="em_analise">Em análise</option><option value="aprovada">Aprovada</option><option value="em_execucao">Em execução</option><option value="concluida">Concluída</option><option value="reprovada">Reprovada</option><option value="cancelada">Cancelada</option></select></label><input id="sol-admin-descricao" placeholder="Descrição / retorno ao solicitante" style="flex:1;min-width:240px;padding:8px;border:1px solid var(--line);border-radius:7px"><button class="btn btn-primary btn-sm" onclick="salvarStatusSolicitacao('${s.id}')">Atualizar solicitação</button></div></div>`:''}`;
-  const codigoDetalhe=document.querySelector('#sol-detalhe-conteudo .mono');if(codigoDetalhe)codigoDetalhe.textContent=`${s.request_code||s.id} · ${fmtData((s.criado_em||s.created_at||'').slice(0,10))}`;
+  document.getElementById('sol-detalhe-conteudo').innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><span class="badge badge-info">${esc(rotuloTipoSolicitacao(s.tipo_solicitacao))}</span><h2 style="color:var(--blue);margin:10px 0 4px;font-size:20px">${esc(s.nome_projeto||s.titulo)}</h2><span class="mono" style="font-size:11px;color:var(--ink-mute)">${esc(s.id)} · ${fmtData((s.criado_em||'').slice(0,10))}</span></div><span class="badge ${s.status==='concluida'?'badge-ok':s.status==='reprovada'||s.status==='cancelada'?'badge-danger':'badge-warn'}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></div>${s.projeto_id&&admin?`<div style="margin-top:14px;padding:11px 13px;border-radius:8px;background:#eef8f2;color:#17663a;font-size:12px">Projeto criado automaticamente no Portfólio. <button class="btn btn-outline btn-sm" style="margin-left:8px" onclick="fecharModal('modal-solicitacao-detalhe');selecionarProjeto('${s.projeto_id}')">Abrir projeto</button></div>`:''}${resumo}${admin?`<div style="margin-top:18px;padding:14px;background:#f6f8fc;border-radius:9px"><b style="font-size:12px">Gestão administrativa</b><div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:10px"><label style="font-size:12px;font-weight:700">Status<select id="sol-status-admin" style="display:block;margin-top:5px;padding:8px;border:1px solid var(--line);border-radius:7px"><option value="enviada">Enviada</option><option value="em_analise">Em análise</option><option value="aprovada">Aprovada</option><option value="em_execucao">Em execução</option><option value="concluida">Concluída</option><option value="reprovada">Reprovada</option><option value="cancelada">Cancelada</option></select></label><input id="sol-admin-descricao" placeholder="Descrição / retorno ao solicitante" style="flex:1;min-width:240px;padding:8px;border:1px solid var(--line);border-radius:7px"><button class="btn btn-primary btn-sm" onclick="salvarStatusSolicitacao('${s.id}')">Atualizar solicitação</button></div></div>`:''}`;
+  const historico=(s.historico||[]).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))),historicoHtml=`<div style="margin-top:20px;border-top:1px solid var(--line);padding-top:16px"><b style="font-size:13px;color:var(--blue)">Linha do tempo da solicitação</b><div class="timeline">${(historico.length?historico:[{event_type:'created',new_status:'enviada',description:'Solicitação enviada.',actor_name:s.solicitante,created_at:s.created_at||s.criado_em}]).map(ev=>`<div class="timeline-item"><b>${esc(ev.description||STATUS_SOLICITACAO_LABEL[ev.new_status]||'Alteração registrada')}</b><small>${new Date(ev.created_at||Date.now()).toLocaleString('pt-BR')} · ${esc(ev.actor_name||ev.actor_email||'Usuário')}</small>${ev.old_status&&ev.new_status?`<p>${esc(STATUS_SOLICITACAO_LABEL[ev.old_status]||ev.old_status)} → ${esc(STATUS_SOLICITACAO_LABEL[ev.new_status]||ev.new_status)}</p>`:''}</div>`).join('')}</div></div>`;document.getElementById('sol-detalhe-conteudo').insertAdjacentHTML('beforeend',historicoHtml);
+  const codigoDetalhe=document.querySelector('#sol-detalhe-conteudo .mono');if(codigoDetalhe)codigoDetalhe.textContent=`${s.request_code||s.id} · ${fmtData((s.criado_em||s.created_at||'').slice(0,10))}`;marcarSolicitacaoVista(s.id);
   if(admin){document.getElementById('sol-status-admin').value=s.status;document.getElementById('sol-admin-descricao').value=s.admin_descricao||'';}
   abrirModal('modal-solicitacao-detalhe');
 }
@@ -3015,6 +3166,7 @@ async function salvarStatusSolicitacao(id){
   const statusAnterior=s.status,novoStatus=document.getElementById('sol-status-admin').value,descricao=document.getElementById('sol-admin-descricao').value.trim();
   if(supabasePortal&&sessaoPortal){try{const {data,error}=await supabasePortal.from('solicitacoes').update({status:novoStatus,admin_descricao:descricao}).eq('id',id).select('*').single();if(error)throw error;Object.assign(s,mapearSolicitacaoSupabase(data));}catch(e){registrarLogSistema('erro','Atualização de solicitação no Supabase',e);toast('Não foi possível atualizar a solicitação no Supabase.');return;}}
   else{s.status=novoStatus;s.admin_descricao=descricao;s.atualizado_em=new Date().toISOString();}
+  s.historico=s.historico||[];s.historico.push({id:uid(),event_type:'status_changed',old_status:statusAnterior,new_status:novoStatus,description:descricao||`Status alterado para ${STATUS_SOLICITACAO_LABEL[novoStatus]||novoStatus}.`,actor_name:perfilPortal?.full_name||sessaoPortal?.user?.email||'Administrador',created_at:new Date().toISOString()});
   let projetoCriado=null;if(s.status==='aprovada'&&statusAnterior!=='aprovada'&&s.tipo_solicitacao==='projeto'&&!s.projeto_id)projetoCriado=criarProjetoAPartirDaSolicitacao(s);
   salvarState();registrarAuditoria('atualizar','solicitação',`${s.request_code||s.id} · ${s.titulo}: ${STATUS_SOLICITACAO_LABEL[s.status]}`);
   if(projetoCriado){registrarAuditoria('criar','projeto',`Projeto criado automaticamente a partir da solicitação ${s.request_code||s.id}: ${projetoCriado.nome}`);renderProjetosHome();renderPortfolioProjetos();toast('Solicitação aprovada e projeto adicionado ao Portfólio.');}else toast('Solicitação atualizada.');
