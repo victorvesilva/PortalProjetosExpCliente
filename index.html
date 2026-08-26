@@ -631,7 +631,8 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     <div class="nav-item nav-item-sub" data-page="statusreport"><span class="icon">📈</span> Status Report</div>
     <div class="nav-item nav-item-sub" data-page="riscos"><span class="icon">⚠️</span> Riscos</div>
     <div class="nav-item nav-item-sub" data-page="pontosfocais"><span class="icon">🎯</span> Pontos Focais</div>
-    <div class="nav-item nav-item-sub" data-page="encaminhamentos"><span class="icon">✅</span> On Demand</div>
+    <div class="nav-item nav-item-sub" data-page="encaminhamentos"><span class="icon">✅</span> Encaminhamentos</div>
+    <div class="nav-item nav-item-sub" data-page="ondemand"><span class="icon">▤</span> On Demand</div>
   </div>
 
   <!-- ENCERRAMENTO -->
@@ -780,7 +781,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         </div>
         <div class="form-grid">
           <div class="field"><label>Nome do Projeto <span class="req">*</span></label><input type="text" id="tap-nome" placeholder="Ex: Lançamento Novos Produtos — Linha Metais"></div>
-          <div class="field"><label>LECOM <span class="req">*</span></label><input type="text" id="tap-lecom" inputmode="numeric" pattern="[0-9]+" placeholder="Ex: 89479874"></div>
+          <div class="field"><label>Código Interno</label><input type="text" id="tap-lecom" readonly aria-readonly="true" title="Código de controle gerado automaticamente para o projeto"></div>
           <div class="field"><label>Direção de Negócios</label><input type="text" id="tap-patrocinador"></div>
           <div class="field"><label>PMO/Gerente de Projetos <span class="req">*</span></label><input type="text" id="tap-gerente"></div>
           <div class="field"><label>Líder TI</label><input type="text" id="tap-lider"></div>
@@ -986,12 +987,12 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     <div class="page" id="page-encaminhamentos">
       <div class="empty-state" id="enc-empty">
         <div class="icon">✅</div><h3>Nenhum projeto selecionado</h3>
-        <p>Selecione um projeto na Central de Comando para ver ou cadastrar itens On Demand.</p>
+        <p>Selecione um projeto na Central de Comando para ver ou cadastrar encaminhamentos.</p>
         <button class="btn btn-primary" onclick="navigate('home')">Ir para Central de Comando</button>
       </div>
       <div id="enc-conteudo" style="display:none">
       <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:14px">
-        <button class="btn btn-outline btn-sm" onclick="abrirPreviewEncaminhamentos()">Exportar PDF</button><button class="btn btn-primary" onclick="abrirModalEncaminhamento()">+ Novo On Demand</button>
+        <button class="btn btn-outline btn-sm" onclick="abrirPreviewEncaminhamentos()">Exportar PDF</button><button class="btn btn-primary" onclick="abrirModalEncaminhamento()">+ Novo Encaminhamento</button>
       </div>
       <div class="dtable-wrap">
         <table class="dtable">
@@ -1000,6 +1001,11 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         </table>
       </div>
       </div>
+    </div>
+    <div class="page" id="page-ondemand">
+      <div class="card" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><b style="font-size:15px">On Demand</b><p style="font-size:12px;color:var(--ink-mute);margin:4px 0 0">Kanban operacional para demandas independentes de projeto.</p></div><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="alternarVisaoOnDemand()" id="ond-view-btn">Visão em lista</button><button class="btn btn-primary btn-sm" onclick="abrirModalOnDemand()">+ Nova atividade</button></div></div>
+      <div class="card" style="margin-bottom:14px;padding:12px;display:flex;gap:8px;flex-wrap:wrap"><input id="ond-busca" placeholder="Buscar código, título ou responsável" oninput="renderOnDemand()" style="min-width:240px"><select id="ond-prioridade" onchange="renderOnDemand()"><option value="">Todas as prioridades</option><option value="critica">Crítica</option><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div>
+      <div id="ond-kanban" style="display:grid;grid-template-columns:repeat(6,minmax(220px,1fr));gap:12px;overflow:auto;padding-bottom:8px"></div><div id="ond-lista" class="dtable-wrap" style="display:none"><table class="dtable"><thead><tr><th>Código</th><th>Atividade</th><th>Responsável</th><th>Prioridade</th><th>Prazo</th><th>Etapa</th><th></th></tr></thead><tbody id="ond-tbody"></tbody></table></div>
     </div>
     <div class="page" id="page-tep">
       <div class="empty-state" id="tep-empty">
@@ -1055,7 +1061,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
       <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Projeto</th><th>Status</th><th>Saúde</th><th>Cronograma</th><th>Riscos</th><th>On Demand</th><th>Próximo marco</th><th></th></tr></thead><tbody id="portf-tbody"></tbody></table></div>
     </div>
     <div class="page" id="page-projetos">
-      <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap"><div><b style="font-size:14px">Portfólio de Projetos</b><p style="font-size:12px;color:var(--ink-mute);margin:4px 0 0">Visão executiva de planejamento, replanejamento e entrega.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="baixarModeloProjetos()">Modelo de planilha</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('projetos-importar').click()">Importar</button><button class="btn btn-outline btn-sm" onclick="exportarProjetosXlsx()">Exportar</button><button class="btn btn-primary" onclick="abrirModalProjeto()">+ Novo Projeto</button></div></div>
+      <div class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap"><div><b style="font-size:14px">Portfólio de Projetos</b><p style="font-size:12px;color:var(--ink-mute);margin:4px 0 0">Visão executiva de planejamento, replanejamento e entrega.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="baixarModeloProjetos()">Modelo de planilha</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('projetos-importar').click()">Importar</button><button class="btn btn-outline btn-sm" onclick="exportarProjetosXlsx()">Exportar</button><button class="btn btn-outline btn-sm" onclick="abrirPreviewPortfolioExecutivo()">PDF executivo</button><button class="btn btn-primary" onclick="abrirModalProjeto()">+ Novo Projeto</button></div></div>
       <div class="card" style="margin-bottom:16px;padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap"><select id="projetos-filtro-status" onchange="renderPortfolioProjetos()"><option value="">Todos os status</option><option value="a_iniciar">À iniciar</option><option value="andamento">Em andamento</option><option value="atrasado">Atrasado</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select><input id="projetos-busca" oninput="renderPortfolioProjetos()" placeholder="Buscar projeto ou responsável" style="min-width:250px"></div>
       <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Nome do projeto</th><th>Abertura</th><th>Macro entrega</th><th>Entregáveis</th><th>Responsável</th><th>Planejada</th><th>Replanejada</th><th>Entrega final</th><th>Status</th><th></th></tr></thead><tbody id="projetos-tbody"></tbody></table></div>
       <div class="pagination" id="projetos-paginacao"></div>
@@ -1138,11 +1144,14 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <div class="field"><label>Área</label><input type="text" id="mt-area"></div>
         <div class="field"><label>Responsável</label><input type="text" id="mt-responsavel"></div>
         <div class="field"><label>Data de início <span class="req">*</span></label><input type="date" id="mt-inicio"></div>
-        <div class="field"><label>Data de Fim <span class="req">*</span></label><input type="date" id="mt-fim"></div>
+        <div class="field"><label>Data de Fim <span class="req">*</span></label><input type="date" id="mt-fim" onchange="atualizarCamposAtrasoTarefa()"></div>
+        <div class="field"><label>Baseline de início</label><input type="date" id="mt-baseline-inicio" title="Data originalmente aprovada para o início"></div>
+        <div class="field"><label>Baseline de entrega</label><input type="date" id="mt-baseline-fim" title="Data originalmente aprovada para a entrega"></div>
         <div class="field"><label>Status</label>
-          <select id="mt-status"><option value="a_iniciar">À iniciar</option><option value="andamento">Em andamento</option><option value="atrasado">Atrasado</option><option value="impedido">Impedido</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select>
+          <select id="mt-status" onchange="atualizarCamposAtrasoTarefa()"><option value="a_iniciar">À iniciar</option><option value="andamento">Em andamento</option><option value="atrasado">Atrasado</option><option value="impedido">Impedido</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option></select>
         </div>
         <div class="field"><label>Depende de (IDs separados por vírgula)</label><input type="text" id="mt-dep" placeholder="Ex: 3, 7"></div>
+        <div class="field span2" id="mt-atraso-campos" style="display:none"><label>Justificativa de atraso <span class="req">*</span></label><textarea id="mt-justificativa-atraso" rows="2" placeholder="Explique o motivo do atraso e as ações de recuperação."></textarea><label style="display:block;margin-top:10px">Data de replanejamento <span class="req">*</span></label><input type="date" id="mt-data-replanejamento"></div>
         <div class="field span2"><label>Observações</label><textarea id="mt-obs" rows="2"></textarea></div>
       </div>
     </div>
@@ -1455,7 +1464,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
 <div class="modal-overlay" id="modal-encaminhamento">
   <div class="modal">
     <div class="modal-header">
-      <h3 id="modal-enc-titulo">Novo On Demand</h3>
+      <h3 id="modal-enc-titulo">Novo Encaminhamento</h3>
       <button class="modal-close" onclick="fecharModal('modal-encaminhamento')">✕</button>
     </div>
     <div class="modal-body">
@@ -1464,18 +1473,22 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <div class="field span2"><label>Tema <span class="req">*</span></label><input type="text" id="me-tema" placeholder="Ex: Integração Azure DevOps"></div>
         <div class="field span2"><label>Ação <span class="req">*</span></label><textarea id="me-acao" rows="3" placeholder="Descreva a ação a ser executada..."></textarea></div>
         <div class="field"><label>Responsável</label><input type="text" id="me-responsavel"></div>
-        <div class="field"><label>Prazo</label><input type="date" id="me-prazo"></div>
+        <div class="field"><label>Prazo</label><input type="date" id="me-prazo" onchange="atualizarCamposAtrasoEncaminhamento()"></div>
         <div class="field"><label>Status</label>
-          <select id="me-status"><option>À iniciar</option><option>Em andamento</option><option>Atrasado</option><option>Concluído</option><option>Cancelado</option></select>
+          <select id="me-status" onchange="atualizarCamposAtrasoEncaminhamento()"><option>À iniciar</option><option>Em andamento</option><option>Atrasado</option><option>Concluído</option><option>Cancelado</option></select>
         </div>
+        <div class="field span2" id="me-atraso-campos" style="display:none"><label>Justificativa de atraso <span class="req">*</span></label><textarea id="me-justificativa-atraso" rows="2" placeholder="Explique o atraso e as ações de recuperação."></textarea><label style="display:block;margin-top:10px">Data de replanejamento <span class="req">*</span></label><input type="date" id="me-data-replanejamento"></div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="fecharModal('modal-encaminhamento')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarEncaminhamento()">Salvar On Demand</button>
+      <button class="btn btn-primary" onclick="salvarEncaminhamento()">Salvar Encaminhamento</button>
     </div>
   </div>
 </div>
+
+<!-- ═══ MODAL: On Demand ═══ -->
+<div class="modal-overlay" id="modal-ondemand"><div class="modal"><div class="modal-header"><h3 id="ond-modal-titulo">Nova atividade On Demand</h3><button class="modal-close" onclick="fecharModal('modal-ondemand')">✕</button></div><div class="modal-body"><input type="hidden" id="ond-id"><div class="form-grid"><div class="field"><label>Código</label><input id="ond-codigo" readonly placeholder="Gerado automaticamente"></div><div class="field"><label>Prioridade</label><select id="ond-prioridade-form"><option value="media">Média</option><option value="baixa">Baixa</option><option value="alta">Alta</option><option value="critica">Crítica</option></select></div><div class="field span2"><label>Título <span class="req">*</span></label><input id="ond-titulo" placeholder="Descreva a atividade"></div><div class="field span2"><label>Descrição</label><textarea id="ond-descricao" rows="3"></textarea></div><div class="field"><label>Responsável</label><input id="ond-responsavel"></div><div class="field"><label>Área responsável</label><input id="ond-area"></div><div class="field"><label>Projeto relacionado</label><select id="ond-projeto"><option value="">Não relacionado a projeto</option></select></div><div class="field"><label>Prazo</label><input id="ond-prazo" type="date"></div><div class="field span2"><label>Etiquetas</label><input id="ond-tags" placeholder="Ex.: Digital, Integração, Prioridade executiva"></div><div class="field span2"><label>Comentário da movimentação</label><textarea id="ond-comentario" rows="2" placeholder="Registrado no histórico ao salvar."></textarea></div></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-ondemand')">Cancelar</button><button class="btn btn-primary" onclick="salvarOnDemand()">Salvar atividade</button></div></div></div>
 
 <script>
 const HAPVIDA_LOGO_EMBUTIDA='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQACAMAAABIw9uxAAAAw1BMVEVHcEzxRx3xRx30chbxRx3xRx3xRx3xRx3xRx3xRx3xRx3xRx30chb0chb0chbvLyz0chbvLyzxRx3vLyzvLyzxRx3xRx30chbxRx30chbvLyz0chbvLyz6sgvvLyzvLyzvLyz0chb0chbvLyz0chb6sgvxRx3vLyz0chbvLyz6sgv6sgv6sgvvLyz0chbvLyz6sgvvLyz6sgv0chb6sgv6sgv6sgv0chb6sgv6sgv6sgv6sgv6sgvxRx3vLyz0chb6sgtys3iKAAAAPXRSTlMAnzAQQL+AEO/PYCBA74AQv+/fgJ9Qj59wz2AwQO+/IN9gIDDfEK+vr8+/gECPcFAgcJ9QYN8wj4+vz3BQ6XMSqAAAAAlwSFlzAAALEwAACxMBAJqcGAAAALRlWElmSUkqAAgAAAAGABIBAwABAAAAAQAAABoBBQABAAAAVgAAABsBBQABAAAAXgAAACgBAwABAAAAAgAAABMCAwABAAAAAQAAAGmHBAABAAAAZgAAAAAAAABIAAAAAQAAAEgAAAABAAAABgAAkAcABAAAADAyMTABkQcABAAAAAECAwAAoAcABAAAADAxMDABoAMAAQAAAP//AAACoAQAAQAAAAAEAAADoAQAAQAAAAAEAAAAAAAAb1PP8wAAIABJREFUeJzt3el6VLuuqOH0LSEdCQFCEQKE0Pc9rJn7v6pVTSrVV4bHkC3J/t5/e5/9nElcJZctyfbCAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAO7p6eHh+9ardb+/8actf+Xh4cPT59p/xMByDt9eNh6NR71U+237h1+YB4A8rD74fDlWaXQH9G69+lU+58OoIlnn+rE/tAs8O7DrvbfAKCGJ59eTuz063jFJAA48+Feo1/+ca1PJAUAH3YfvpQM/mtn75gDAOviRD9zAODAh3si2/45c8DhE+2/EcA0Tw5F9/2ztB5q/6EAxn2It/Qft/+OZQBgyO6nJD/+Ay9pEgKMeHIYeec/zSt2AoABT+6lj/6uM6YAQJla+DMFANpUw58pANC0+045/DuYAgAVGqm/aVpUBIDUPiQu/M3zkr4AIKUnLe2gH3XIiWEgld1D7YCfcMY+AEjj1NDqf+AliwAgvt10Tf9h9qkHALF9MJL7n6bFIgCIaVe782e+/Q/aAwRkzObufxiZACAWe8n/SWdcGwbEsNvSDu5qPmkPFJChU8PZv1FsAwBpn7TDOgDbAECU8ez/OFoCAEFPqj3sa8g77SEDsvHMzfZ/gEQAIOOhdjDX8ooZABDgKf03bJ9UINCYr/TfMGYAoCm/8U8xAGjI7NnfipgBgPp23ZX/xjEDAHX5j39mAKCuHOKfGQCoJ4/4ZwYA6sgl/pkBgBpa2nErhxkACOS5/j+BqwKBIFnFPz2BQBCv/f+zMAMA1fk8/zfPGWcDgYqeaYdrBJwOBqp54vD+j9vd0x5WwIV8GgBGHWoPLOCB8wOAs1EMBG7l4fmfeigFALc51Q7TiEgEAvPtZpkA7CMRCMzV0o7RuDgVAMyRbwKghzQAMFvOCYCeV9pDDJi1e6Ydn/HxZhgwQ15HAGc41R5lwKYP2rGZBMeCgGnyrgAOsAkApihiA9DBJgCYkH8FoO9Me6gBc0qoAPRxLhAYk3sL0Ign2qMN2PJEOyaTamkPN2BLSzsm0+JqAGBIGS0AAzQDAEMKygD2kAcEbuT2DMDt9lkCANdK6QEcxt0gwLWiSoB9lAKBrhIXACwBgGvvtGNRB0sAYKG0HqABlgDAQrELAJYAwEKpGYAOlgBAmSWAHpYAKF65CwCWAECBTYBDaAdE6Yo7BTCMEwEoXGnHAEedaQ8/oKulHYO6eCsQRSu1CaiPq4FQtGKbgPqoBKJkBdcAe3glBAV7qB1/6va1PwJAz0vt+NPH9aAoVukpwI6X2h8CoKXoLsA+ugFRqlfawWcBrQAoFDuADvYAKBQ7gC72ACgTO4Au9gAoEjuAHvYAKBJdQNfYA6BEdAFdoxcIJdKOOzO4GQwFOtWOOzPOtD8KIL3iTwIPcCYY5aEIeOOT9mcBpLarHXWGUAhEccq+DXQUlwKgOKQAhjzT/jSAxFraQWcJ3cAojXbMmUInAApDF8CwV9ofB5AWR4FHaH8cQFr3tEPOllPtzwNIqqUdcrbQCoSyaEecMbwPgqI80444Y3gjEEWhCDCKXkAU5VA74qzhViCUhCLAGMoAKElLO+CsoRkYJSn+WfBxh9qfCJCQdryZw5UAKAhVwHHUAVEQqoDjzrQ/EiAdrgOaoP2RAOnQBjBB+yMB0mECmEAjAMpBH9AEJgCUo6UdbvYwAaAcLe1ws4dWQJSjpR1u9tAKiHLwLNgEJgCUQzvaDGICQDm0o80gJgCUQzvaDGICQDm0o80gJgCUQzvaDOJeYJRDO9oM4jwwyqEdbQZxIwjKoR1tBpEDQDm0o80gJgCUQzvaDGICQDm0o80gJgCUQzvaDGICQDnOtMPNHiYAlKOlHW72MAGgHC3tcLOHCQDlaGmHmz1cCYZytLTDzR4mAJTjnXa42cMEgHLwLsAEJgCUgwlggvZHAqTzSTvc7NH+SIB0eB14gvZHAqTDBDDulfZHAqTzTDvezOFCIJREO97MYQJASbTjzRzuBEVJOA44hqMAKElLO+Cs+aT9iQAJtbQDzhoaAVESWgHHMAGgJEwAY3a1PxEgoYfaAWeN9gcCpEQr4Kgz7Q8ESOmJdsQZQx8QyqIdccbc0/48gKT2tUPOFvqAUJaWdsjZQh8QyvJSO+RsoQ0AZaERYMQz7c8DSIpLwUZofxxAWjQCDDvT/jiAtGgEGEYbAEqjHXOm0AaA0rzSDjpLaANAaVraQWfJB+1PA0iM5wGH0AaA0tAIMET7wwBSow44sK/9YQCpUQccoAqI8mhHnSE8CoDyUAe8QRUQ5eE84A2KACgPZYAbT7Q/CyA5Lga+of1RAOlRB+x7pf1RAAq0486Ml9qfBKCAF4KvUQRAiVragWcFR4FQIsoA17gQECWiDHBN+4MANFAG6KEIgDJpR54RFAFQJsoAXRQBUCZOA3RxEgBlogzQxUkAlOmDdujZoP0xADqeaYeeCVwHhFJpx54JXAeEUrW0g8+CT9qfAqDknnbwWUARAKXijfD/kQNEuWgGphEYJdOOPgNoBEa5uBqcRmAUjGZgcoAoGM3A/9vV/gwANWQBz7Q/AkDPrnb8qSMHiJIVfyUAOUCUrPgsIDlAlKz4LCA5QJSs9CzgmfYHAGgqPQtIDhBlKzwLSA4QZSs8C0gOEGUr/EQwOUCUrews4Jn28APKtGNQ1T3t0QeUFX0imPsAUbqi7wUkB4jSFf1IuPbgA9pKfh2EN0EA7ShUxJsgQEs7DPU81B57QF3BBwJ5Fxgo943gfe2hB/SVeyCQo4BAwQcCOQoIFNwKRBsQUHArkPbAAxaU2gpEGxDQsa8dijpoAwI6Cr0V6IP2uAMmFNoKxG1AQEeZtwKdaQ87YIR2LKrgNiCgp6UdjBo4CQT0vNMORg2cBAJ6SjwPxEkgNLK9srJysjaw1f6f17X/UTWVeB6Ik0CoY31la21xdfPfLKurx2tHS9r/ylAFXg3MhcAItLJ1vLoxM/JHHayuHW1r/4OrKzAJ8Ex7zOHIdjv2K4b+kI3VtRXtf3k15SUBSAGgovWtxYPw4L/hYhIoLwlACgBVLK3N3u5XXwlcbFlPDxZ3KYjXFMDSykon5bw6cNz+H4/8JqAtOzpu8tM/avPEdEqguEtBvKUA1ldO2lE/9yt20J4LVtzln81aEoz+nlXD64DSLgXxlALYPlqrnHxu21w8cbDpNG77RDr6exaPtP+yGZ5oR2RiXlIAK2sXAbE/sHnsqQhlzdGFdOAPHKzZ/GAKSwJ4SAEsnTT7Hh4cH9ldctq1HunHf2DR4gqtsCSA+RSAUP5p1XbqyZ7t41orrtCPZUv775xQVieA8RTA0aLgt9B4+tmU7UW5cZ/vwNoUUFYngOUUwIpk9PcwB1SSLvw7rE0BRR0HMJsC2F6LtAG9sJp+NiNt+HfYmgKKOg5gNAWwEjH7/G/DaPrZhvXk4d+xaSgdWFISwGQKYH0rdvbZZvrZhLUUqb9pVs3MyiUlAQymANbTfAUNpp8NOIo+9c5xbKVWW1ASwNx1gNvyib9ZbG08LdiucdBX0saJ9gj0FJQEMHYdYOL0E1PACLXV/8CqiRMc5bwOcKY91CMSLf6HMQXcWBI47SvAxD5AOy6TMfUigM4PkKX0s6Y1jcGf5sBAmbalHZipGEoBxM/8z2In/azHyM9/z4X6IuCTdmCmYuZRwCXV9NOa+jdO2Yn+7n/YhvYi4Jl2YCbySnmc+9aPlb9xFpadetZjdl3Vo70I2NcOzTTe6Y5y35aB35+LcvcBS5q1/1mUFwGFHAk+VR3ka9rF52tWatDJnWiP/Ayqi4BC7gVTHOEbZrLPZSYDdTr/KzlQrM+UcS+YgT5gU9nnjfKaAtYtjf+EY72BKaIbWP8osJ2f/x7t3FNqSwayL/NsqjUGFtENrH0U2NTPf8+BiVbUVI6Mx79iZqaEI8FnSmPbZ+3nv6egXOCW9lhXobUo047OBHT7gA3+/PcslrINsDkBT9jQyQW+1A7P+D6oDOw1Y71nwzbLqAbYTf+PW9MYngK6gRX7gNdt1P5n2CghEeAn/v/9W1VYlOVfCGylH9Q+88mn/OuBnuJfZxuQ/QNBakVA9c7/ClRWnQn5iv9/Gh9I9oVArSKg2ezfiEWl0UnDXfwrbANyLwSeJR7PPsPZvxE59wQ5jH+FFg3tCI1Mpwho8OTpLJvZzgAu4/9f8haNzAuBKkVAkydPZ8l1BnBS/58ibYtG5oVAjSKg1ZOnM+Q5A7jo/5shaYtG3oVAhSKgo+X/tRxngCPtQW0k6T0hWRcC0xcBfWT/R+U3A1g//3erhPXArAuByV8EsXDvV7jcZoB1l5/CiHTlmZzfBzlLNYh9XjPPm6kHKi6Hq7AJ6S4JyPhq0MTXgW77/eJl1RHkdRoelawxOOOrQdNeB7rieeGZ0QzguQAwIlFHQL5Xg+6nGcBrzqp/47K5ImRJeyTlpJmVd7XjNJqUbYCG752tKJOzgeueurBukyY729IO1FgSvgnoePvfl8n9AO7aMOZK8qFk2wyYrg3Q9fa/7yCHYqDzjdiEFJe459oMmO5BgEy+dRkUA913AE1KkJzJ9HmAZG2A7rf/fYpPVAjxvxObFD8VmGkzYKI2QNvPzoTx/nyw3yOA80RPBeb5TniiV8GzWnRu+L4qOKMK4IjoXYFZHgg6jDxoPT6b/2fynQbIaC02KnYxIMs9QJLbALNbc3pOA2SSi50qbjEgx5sBz6KO2LVs0n8Diq9VN7Sd12JsTNwDwhkeCEpwECin9N8Nv90AebUATYhaDMjwQFD8HYCrq/+q87oJWNEeuNhiFgPy2wOcxRusa1l0/03jdBOQ53Q8LOZdgdntAaIfBMrm0OkEn5uA7NKxU0QsBmS3B4h9H7iDh79q87gJyOAWsAriXRKS2x4g8lUA/g//zuXwXGAJC4COWOXA3C4FiLsDyDL9P2Q16ujFsK09ZMnEOhuU2QtBUXcAHq/+DuPucpC8V2QjIpUD87oYLOoOIKvu/+k2nOUBy1kA/Is1A+S1B4i5A8is+3+69A/VN1LQAuBfrIaArPYAEXcA+Zb/Rrg6FljUAuBfpBkgpz1AxB1AzuW/Ya6uCS9rAfAvzvngnPYA8XYA5XzVHJUC17XHKr0YLUEZ7QFi7QDWV7U/+HQclQJL6QEYFmEGyGcPEGsHkHv5f5SbIwFlNAGOk39CPJ89QKQdQP7l/xFulgCFpGUniDdrZHMeIM4OoIDy/ygvS4D8jwHOID0D5HIeIM4OoLj491IIyP4egNmkZ4BMzgRH2QEU0f4zxkcvQDmFmUnCc3Qme4AYdwEVuc90sQQosAY4RPYjymMPcCY6Jj1Fxv+/fx5OBOR8FXAFsjNAFnuACLeBltL+N87DiYCySjOTRGeALN4HkN8BFLvLPBAfSnGlHQOYdCG4TsvhjbAzueG4Vmz8e3grsNTF2RDJo0EZvBEm/iZwwfH/70J6MMUV2wQwRHAGyGAPIPwmcFntvxOsVwJzfQ40jNwM8EQ7fBsTfhO48Pg3nwZkB9AlNwO80g7gph5KjURX6fFvPg3IDqBHbAb4pB3ATe0KDURX8fFv/VoAagB9UjOA9yOBL2WGoYf4t94NWHgX0DCpGcD5tSCSBwHLO/4zxYbggMor6IKWWwnNAL6vBZE8CEj8d5luBdAeHFOEZgDX7cCCbcDEf4/lhwKPtAfHFpkZwPWRQLk2YOL/muU6AEXAUSIzgOd2YLkmAOL/huE6AEnaMSIzgON2YLE2YOJ/wHAvkPbQ2CMxAzhuBZBqAiD+h2wKDaq8gi8Dm0lgBvDbDizVBED8jzB7LUiJ7wHcSmAGcNsKINQEQPyPMlsIpAtgmuYzgNdWAKEmAOJ/jNlCIB/UVM1nAKetADJNAMT/OKtJAA4CzNB4BnB6K4DITQDE/ySjSQBygLM0nQF8pgFbEl8q4n8Ko0kAcoAzNZ0BXN4KIHETAPE/jdFOgAvtcTGs4QzgMQ24L9AEQPxPZfSZUPoA52h2jHvXYRpQ4EEw4n86o0eCtYfFtmYzgMMTQc3PARH/s5i8GpQiwHyNZgB/J4KanwMi/mcymQWkCHCLRjOAuzRg4xQg93/NZjILWOh7jQGafGze0oCNU4DE/xwm3wehCnirrfqj6y0N2DQFSPzPY7IXsOQXm6pqMAM46wZs2AVI/M/XbHTj4ChQBfVnAF/dgA27AIn/W1gsAzABVFH/PqeWdlCHaJgCpKfsFivNxjcKijZVbNSeATylARseBGY3eZuTZgMchfaYOFF/BnB0N+Bho28S8X8ri3VA7THx4qDusYBD7bCurlEKkPi/ncEHwmgErKruwSA/zwQ2qgHST1KBweNANAJWVreK6+ZAwGmD7xHxXwUTgGs1F3Cn2oFdUZNjAMR/NQ2GOBImgAA1ZwAnBwIa1ACXtD8ZL+oPcSxMACHqlXF8VAIb1AA5AFhV/TGOhQkgSL2WQBeVwPo1QOK/MnutgEwAYWr1crmoBNauAdIAXJ29VkAmgDC1GoI8nAmsXQMk/gMwAbi3UacdwEElsPZVYBwACMAE4F+dhiD7ZwJrnwOkATAEE0AG6tzrYv6h0LoPgnKfTBAmgBzUaAew3gx0VvPrQwNQGCaALNRoB2hph/h8NZuAjrQ/CW+YAPIQfr+z7Wagmk1ANACEsjcB0MRZR41ioOlmoHpNQOvEfyh7EwD3AdQSXgy0vASodxk4DQDhmAByEV4MNNwMVG8BwG2S4ZgAshFcCjDcD1yrC5gGgBoMTgCs42oKvd/Nbj9wrS7gE+3xd8ngBMBCrq7Qk4FmlwB1FgAUAGuxdxqQVu7aQksBVpcAdRYAFADrqTHUsdHLWVtoKcDokaAaCwAKgDWFD3V0TAD1BV4TavNIUI0FAAXAusLHOjpaARsILAWYXALUOAdMAaAmg7cCMwE0EpYItLgEeBn+lWHRWJfFCYBGgEbCEoEGlwDhjwFQAKjN4MtACwsH2qPiWlgi0N4SIPwiEAoA9Vl8G5BGgGbCEoHmlgDBC4B1fjDqs/g68MKx9qg4F7Sss7YECM8A8HvRgMFGQC51aSwoEWhsCRDcA8DPRRO135iPiTJAQ0EdgbbaAYN7APi1aCR0uNPQHhX3DkISgaZOBIQuAEgANlL3fenIaOtqKuSeYEtLgNAFAAnAZky2AbCtExCS3TW0BAhdAJAAbMZkFZB9nYSA9K6dJUDoRUB0ADYUfpdsEtva45KBkH4gK7cDht4ESAdgUyaLAG1kdpoL2d4ZuSA4cAGwzdekqbABT4c7QQQE7O8+aId+11ngAoBccVNGc4Bc7yYjIA3Q0g7+jsDHgDgC3Nhx2IinQxJAQkA3gIWXAl+FfUfIFDdnNAe4wIFAGQHdAAYagsNOAdEBJMDgjaDXWN6JqN4NoH8mKOwUEHeACTgIDct0KPCICDgUoN4NFNYDxC+EAJO3gVzTHptMVO/13lUuBYaVAEkASAh9RyIlCoEyqud5dbuBwnqA6AAQEfyaZEJM8UKq1wJbmhNAWAmQBIAEo0cBe9a1RycX1VuCnynGf9hFgBwWE2G2C6CLPYCQ6rXAd3oTQNBTAFwYI8PqQYAe9gBSKnd76J0KfBfyzeAVMBkb4UGZEh+zlOqbAK08YFgGkLWhDMtFwA4qvVKqH/lo6UwAH0K+F5wTEWK3D7iHnZ6Yyg2BOv2AQRlAKoBCjO8AFjgPIGejcs+3Rj/gflAPIJeACbG+A+C+J0HVNwGv0k8An/hSaLC+A6AVQFLlps/0zQBBp4CXtAcyG/Z3AKQBBVWvBCRvBghqAaAFUIrtLqAe0oByKrcDpT4UFHQIiA2AGNtdQNeY7+VU3vKlvRyIDYAO0+cAbtANKKf6/WBJNwFsAHRYPgk8hEqgnOqbvoSVACoAOkJejdDEEkBQ5V1fukpAUAsQGwA5HlKAXSwB5FTf9n1KFP+0AGmxexvoGBq/BVW/IrSVZgLgDICSkMejlbEEkFN945fmYHDQW+CcARAU8GSMNrIAgqq3f6eoBb7iELASsy+CTcMSQFD1mT9+LXA/qALIPfGCHC0AWAKICpj6W7EngKBrQNf5HZBj+D2QaUj+Cqre/xE7DRCUAKAFQJKTJqA+TgQICmgAidsNEPYSKI/FCvLRBTyEQ4GC1qqPe8xugLAOAFaBklxlADooAAmqfjlQ1BeDgxKAZAAluSoB9LABFBRyE1S0QwFh7wBRCZLkbgGwwCkwUQFLgFh3AwQ9A8APgChHTYAD5AEFhSwBn0UpBbwM+/R5IUKSm1MAI3gMTlDIGjBGKSCsA5AksKiAJLAl9IEICsoCyT8WFBr/nAIWVP1aGGPYBAgKSgNJzwCBBUBKgKLs3wU+C5sAOWGFINl2gLATAAtM/aIclgD71qkEyAmrBEm2AwTHPwsAQSFNIOawFZQT+EMgNwOExz9nwQRVvxHGIm6EkRPYDCI1A4THPz1AghxvALq4EkJM6FdB5naAGvHPAkCO6w1AB2kAOaHvwkjUAmrEPwsAQb43AB1LtIRJCX4buvkM8Cq0/rfAAkCSyx7gMXwfxAQvB08bdgWH9v90sQAQ4+UpkPk4FiIl/GWIZ41OBoVdAHSNCV+Ox0OAU9AXLqTGD8Juq378Bz0BdoOkjxinZwAmkAiUUudiuLrFgP3TWh82TYBivFcABzgWJKTW1bAfaiUCWnW2/ws0AcpxewZoCkoBQmptCutsA+ot/+n9lLMRWvU1jRlARnAlsOdT4CKgVaP630O+R4qze8Bvw9ZQRN260O7LgPDfr/vz397saQ9QNnJJAN6gOiSi9u/CaeXLQu/V3P13UPIVUnOpZxkzgIQGD0Q8rNQTcK9G798A2V4Z7t4BqYIZQEKTwyEPb10FNAt/3gIQsplRAWAIM4CAZqdDTucdEj47bBb+nP0Ukmn8t2cAagGNNV0c7j6cng88e1c783+DFKCIvAqAI6gGNidwQPz0sDWSD3h172HT3/4urn+RkHH8MwMIkDohfnr64fDw8NPpqUjsd9HyLSDr+F9Y2OZL0pDdDnG6AAVkHv+cDGrObIaIW+Cbyz7+F+gWbcrsOxE0ATR2UED8kytqyGqTGDuAxrKt/41ZIRXYQK0zwQnQBtxUKfFPKrAZozdF85k2tFhM/C+QMGrCZhKALqCGwm98dO2IbUBdNr8pNHo3k9n5/9ttc3lUTTY7ASjuNFFC+W/CCYuAerQ/uKkoAjawaTSvExmLgHosflu2tQfFM5ubuhRYBNRh8b0IUgC1bdjM6qbBIqAGi/fFUdapq9Dl/40jNo+hLK4Ymchrsjibp7W+xj4gjMUygPaYOHVgcTuX3DYlpCAGJwBygLUcl9T8N88SK8gAG9of1yTefahhk5//gRWmgOq0P6xJnAQKtsHufxRTQGXaH9UkJoBQF4Un/6dhCqhI+4OaxCcXhuTfdEwBlWh/TJP43EJsFHfyp7olKgK30/6QJtHMUd3GGrn/ebaP6Qu4hfZHNEl7RPwg/G+3fsIPylzaH9Ak7RFxY5HcXyVHbCrn0P50JmmPiA8ba4R/ZduL7ARmMNgJqD0kHrD4D7S+xT2TUzEBOHRwQviHW2IZMIXB04DaQ2LdKoW/mlgGTDLYQ6o9JLYt0vbTxPYxRYERBr9OfEIzkfkTcER70BCDm0mKNjOw9hfCVuDGpvZnMcWF9qCYtLFY4m3f0WzTH9RlMAfIacApNrcMLtWcWyIdYDIFwKXA4zaO2fnHUXxl0OB9QLwNPuai5Ju+4zsqeg6wuAOgDjhk84Qf/+gKngNsfrsoA/QcHJP3S+Rosch8gME+4I4T7XGxYGORpX9SJeYELaYAF7gXvO2Ckr+CpZOy+gOMLgAWFsr6GCZcUPNTs31SUBuK2R1myXsAol/beilJQZslgI517aHRQvQbsbSW/yr0wPB3rcjjGkS/KdtbF3kvBIxmALuKSwNuLBL9Bq0c57sQMHgRwJCilgAHVPzsWt/KMyOwqD2w861nOejTbNLtY95SfqUBi8eAR5RRCLig09eLlazSgpv2N5zZ9wO3F/72PwUMWT/KJSXgIP4z3wSsnrDwdymLSWDRQfy311zawxQLP/3OeZ8E7DYAjcryYpALfvqzsH605nSTuuGn5JRbLXDz2HLvBYKtrPnrFVr1lHbOaAY4OGbdn6WlrUVH+4GNE+3xCpPHDHCwuOVp2kWo9ZW1VRdLgQt330P3eQCCvxTbW8fGswKbHnegRy5m1ukI/uIsnZjdEBw4vWNm2+qAzrd5fETwF2rlxN5aYNVP7n+Cu4dCVtdWSPiVbmnLUF7A+atSS34WAQeL1PlxY31lTX9LsHni/+foxMxcOsfqGpU+TLF0tHahNQ3k8rDE+rHSAFazebzFDz/mWmqvBhKnBlYzif6ubaM9AZuLJx6rK9CxvrK1tppiHtjMr/Nse83YRmD1mNhHLZ15YHE10kskG9lmode31DMqPe0hZs2P5rbbE8Gx4Ipg82JtJaNl/xRLx8rLgNXFXKdXKFpaOVprrwlqVw5XV9dOMg/9G1rvNnRCv5AhhqLtlc5k0FkYrM7dJGy0/98v2v+HKwV+K9O+27CxekzoQ1F7ThjGCnQhzbUsG+0f/SPyfIBN6ytrF1Eyqe0dVXtlpf3nAbhVp91SqOt6s/2Lf0LgA/6sHNWsp2yutrf47ZU+ZT3Av/VeDnWxk0OdsjDY7P7vF9v/F+2Y58ceAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGx4dKft/d1JT9v/+0fa/zoNy+0//GlvDO7vXbsek/edwTrX/gcCjZzfudP+Mre/1jv/VbC3d789GeT/rT9vT4P39x5UGZLOoOz9uHv3S5k7jSkOAAATdElEQVQzJHx61P2G71X7hk96cHn3S57TwPKdu5cVA3/auLQnyPfMBDBrub2gvaz2a3+rnb27d7T/HlGP3l8+FxmZ9tBctldKy9p/EHCjG/kyX+9he+/z+L07f3opMy2Ojk57pZTXJAl/7rz/sSf0yzbV8x/e54Dz9/VX/VUGaK+9HND+G1GgR1/uRg39wVf8vePl7pfLFEP03/Ns8yYwqPOzn+R73Xff55d7+X2SGbJvZ+/HU+/rJRj36On9qCvaWRxOAct3I2z8b9eeBfyNFRw4/5L4d3/UD2cbgadJf/1HdWoozoYLpskVsRp8q79oj0KAc825sufBfZYCEHDnrv6Xuee+m1+1pyqr/0k7l5lUUqHDTvB3PXDybb6vPVDDmARQy6P3poK/a8fDV3k5TekvxM4l2wEEOH9638gidoyDGWBZpUxyu+c/vrjZQkHTox9Gv8Id9mcAU+v/Mbk0VyOW5S9Gf/pvPDD+M3ZXe4Bu8fwHncOYbvmpvd3rpPvawzTXHe3hqWDnvqeKKtLwEf0dpn/B1Nslqtm5ZA7AgJ/ob3uuPVpzWN8ADGEdgGtfLOetpniqPWAzLRtPoIzZcX/YGo2d33Wyah14oD1mMz3VHppgDzwftkZjic6rCzP7u2W4fjrbfbPDibiWNU+sNXFXe+RmWNYemJr27G6qEI3SeXUJe9pjN8MX7YGp7TlTQGmsHFirRXvwZvihPS4NPKcmUJIvThf/14zuWu2dngqxZ7rBAoIMXFfRjNGvqssc4BA/Fy6gCUfdKjMY3bFqD0tjrm5dQj2PvP9O/We2DKA9LAIuWQRkzv/P/39MABGxCMjasvfdfw8TQETe7l9GdXc81/6GGP2VymR0H3B9WKbea3+1pBitAuSxvGpvA4yOL5pxduhvDqNf0FwmALNlFjSQyfa/S3ssZ8giwdpj+94lhLN6WW0dVq8E8XcaeDZmgLzkFP//XWqP5gyPtAdGEm2BOckq/v97rz2cs2RSBuixfv8yqssr/q2eBVpYcHm9ykxWT10jVGbxv6M9njNlU2ftIQ+Qh8zi3/D38lx7aITZHWkEyKj+12W0D7Ajs6nWas81QuTT/9OzYzg5ldkegI6gDORUnO6yvC7NbQ9gOOGKajw8VhfGaB9wT27bLdPrLdzO2Vs1FVhtA+zJbr1FMdC37H6R7HYB9WQ34ZII9Cy7pJT5JWlGB4L6TO+5ME9Wzek9llOAHV5fB5rjufE5FzPlVpZuM39bTW5V17Yf2mOKejJcjlpfAORYCWQT4NR5fgkp+wuALJcAtisvmCG/CoCDBUCeSwAqAQ7l1wLkYgHg+43QGXZcDDxG+H7/cyof2aj8mq98LL0wIr+eNPM9AH0ZJl99rL0wJMMFgPEmwIEMx56OYGcyXAD4yUXnmH6hFOhLhj9Cjr6CeV0O2GX1KmZMleECwNM3kBYM6MpvAeAlA9iTYR6QQoAjGW5C3WQAezI8huFqBi5cfntQb1noDA9iOpuCS5ZfN6p8K9rHv29ev77q+Pb685u30v/fZ7gJ8FOFKV5+94AI//p8//ntasyvry9k/xv5bQIclWEKl10KUHQD8OLNRPRfzwGi64D8NgGkAZ3I7qsnWQH4+Pnx9PDv7ga+yv2H8luH2X2TDSOyO44m9xbQi5+zo783BQiuArI7j234TSYMyW0HIHcI8M+cX/++1x+l/mvZHQtkD+BCbjUAsYfqP76+PfzbHv8R+u8tfNEeOmHsAVzIbO+5I/U6VZWff+FFQG6bMeoAHmS29RR6n/LFr6rh31kE/JX5j+ZWC+RqMA+0vyWyhPad32eU/mb5KfOfzexUkLd+zCLldQ5AKAHwt/Lyv++XTF9QXp/GfyJjgqiy6kEVagH+Ghr+bb9lZoCsPg6SAA5kdRBIpvL8uUb8X109/i7yH8/q8yAJYF9OXQAy37d68S81AyznlAj0dCtLoXJ6nVLm61Y3/qVmgEcZJQI5EWheRlknmQRg/fiXmgEy+kjIApqXTxuQTAKwSfxLzQAZ3dBIFtC6fLLOIh2AzeJfagbI58FQobYsRJNNH6DIV+1Pw/i/uvomUg3M5lOhDGBdLl81kW9anfr/OJF+gGxKARwItE77GyJE5Iv2XSD+r65+SfxTcukJphnYOu1viIwHEkPxPbj/dzqRcwGZFAOZAIzLow1ApAD44rdM/F9diVwUlsnlABJDgXiyqDnL3AEYcv73FhQDb0iMBOLJYQKQuQLkjVz8Xz0WKQVkUaGVGAjEk8EEIBP/bwXj/+rqtcQ/KYt2AJGBQDQZTAAiJwBfCCUA+95I/KNymAFExgHR+J8AZHrNqt3/GUDmunD/XRoiw4Bo3E8AMvEvmQDokUkD+G8IkhgFxON9ApB5BFCmA2iUSD+Q/xlAZBQQjfMJQKbT9EXgDaDVyDwX4H0GEBkERON7AhDqNL/t/a96Hsu8FuB8BhAZA0TjegIQin/ZCuCATC3Q+bEAmTFALJ5bgYXiP84GoEPozTDXxwJkhgDRaH9B6pM6aRpnA9AhtAnwPAOInNJCRNrfkNqk4j/WBqBDaBPgeAbgNKB1XltNpOI/3gagQ+Rc4ILjGYB7wa1zOgGI3TQj3wI0TKYdaMHvDMCVYNb5fJFaLP4/Ro3/q6vPUv9QpzOATKMW4nF5LbjcTXPiZwDGyZwJWPA6A3AtuHUeGwHk4l/iFtD5fov9W13OADKPtSIeh40AcvEvfQh4GqFmgAWXPYE7Yn88YnH3uyJ403TcDGCPWB7Q4wxAFdA+b89RC+aVY2cAe8TygA5nAIoA9jm7eU7yrSnBa0DnEbkitMfbDCByWxOi8pUFlIz/mD2Aw6T6ATuWffVtkAN0QPtLEkL0rUmxdwBuI1YK7PB0T+BzyT8ckfj5TdkRrSrHLwH2fZP8Z3uaAXgZ0AM3rUAy93/fiHoIYJTUkYAeP82bpAA8eKT9NalIOP5TlAD7BEuBHW7eDBJ5sQmxPdf+nlQi8v7fQIoeoAGZZwJuOJkBOArog4slpXD8J10AiC8BFu64aN8STdkiGg97gPvC8Z92ASC+BPBxMIAdgBP29wDi6eR494BNJ70EWDi33xLEDsAL83UA8bVkmibgYdJLAAdNgewAvDjX/qrMtyP/TfqcfAK4ErogdIjxhgBOAvph+kCQcPmvI/0CQPRMUJ/t7O0P+T8YkVg+D/BAPv41FgBXV9JZgAXj5UDOAThiNw24FyGVrLEAiJAFWDBdDuQqAE/M/pRE6SZPXQLoES8EdDwymwrkNkBXjC4Bolwqm7oHoC/GEsBsMYAFgC8mlwA7cQ6TpG0CHIiyBLBaDGAB4IzBJcDzCOm/Bb0FQKQlgM02DhYA3thbAsRI/3VoLQDaS4A4f9DCF3upQBYA7lhbAkS7TCLhPQDjZO8FGDCXCmQB4I+xXoBofaTpLgKaJHs10JBlY61c9AA4ZOlqsAjdf32KC4Crq7/R/ixTlzvTBOjRuZ2dpPTh/yGprgKeTvKC4DGGEgE7nAN2ycyPSMy7JKO/Bjqf6AXBo+wkArgK0Ckb36AIh/8GdLqAByIcCbphJRHAPQBembgaKFL1/5rKMaBh8qeCh5joCGAD4JeBL9Bl1K/PC+34j9UMdM3C4SA2AI6pVwKiNP8P6DUB9cVqBrqm/3QYFQDPlnV/QWSf/plCtQbYE6sZqE/5lpAHkf88xKWaBojV/HtDswmo73fkv1G3HrhDC5BzimcC4j8mr1wD7IlYCezRvDCYMwDuaZ0ujZv979KuAfbErAReU+vo4CLgDOhUk+Nm/3vUa4A9ca4FGKFUDeA14Bxo3DGzEzn736V3EcCouJXAHpWmIOI/D+lngBg3/06ykALsiHYmcMT75IsAzgDnIvUMED/71/VbO/L74p0JHJb6bEDEE1xILOkM8DxR5vi7dtzf+JXmD06bCyT+c5JwBviR6otjJAXYEfVAwJA76a55it7DgaRSzQCRLv6dwkoKsONPqj96OVVfIPm/3KRJI6co/l2zkgLsSJMG7EqzCCD+MxS/Iyjdz/+CkS7AvujdgAMpFgH0/2Qpdldwst1/h40uwL4E3YADsRcB0Y9wQcmjmKXkVMn/azrvAc4S6ZGgGZajlgMecP4nWxFPlyeq/d8wcBB4WOxDwWMexfsgOf+ftUh3BO2l/tX4qx3xYyJeDzxdpMbApGkcKIjRT/Y8/bfGUBNAT6pWgBvLMZK6Cas40CL927FzN/23xlITQE+KE0FjxPcBChM5FJyLtgTc18gZWWoC6EnYCjDwRbQekLSKA013xPYBe0nO/U34pR3vk76rDITcci55Ggeanor8duwpVYxtNQH0JG0FGFi+KzIFaH2SUNN8CtD70vzRjvYpIt8PPpvAFED4F+lpo43AfZ3Ff5eZmwCGpbkVYJrlZpP5JeFfqjt1S0nP72ruGC3uANT2AD1f6iZ2d36w9y/Z8vsay4BL5XKR/ntA06RtB55wfrfGMuCSYz84D5sDLp+qV4uMtQH3JW4HnvToR9AcYOCThA3nTy8rJZKe3/9i4Dtj5y6wUaluBpvn/H21vYCNTxKGPHp/f+5KYO/HFyO7RVsHAYfo7gFu3Hl/OXclsPfjqZFPEtY8+nL3/t7YPLC39+PuHUvfGKM7AAN7gCF3nt693Hs+5ZNULN7Aj/M7XRaXiVZ3ADb2ABN6H6SpGRxowOwOwMweAMiY2R2ArT0AkCW7OwCjewAgJza7gK5pDw6QO5PnAPr0zgMARbB5DqBP9TwAkD+LJ4EH1M4EA2UwvQNgDwBE9UI7wm/xU3uAgJzZuw10lMrdoEApDN4GOkrnblCgDObeAxin8D4AUAprL4JN+q09REC+DB8E6uNAEBCL4YNAfRwIAiKxfBCojwNBQCS22wB7aAYEInmtHd1VvNUeJSBP1tsAe2gGBKKwXwTsoBAIROGgCNjxUXucgCw5KAJ2UAgEIrB9F8gAt4IAEVg/CdhHIRCIwPxJwD5OBALyzJ8E7PujPVJAfjz0AffQDQyI89AH3EMSABDnJgVANzAgz00KgGuBAHF+UgBXV6+1BwvIjZ8UwBVvBALSHKUASAIA0hylAEgCAMI8pQDoBACEuUoB0AkAyHKVAuA4ACDLyV0AfRwHAAR5uQugjzsBAEFe7gLo45VgQJCT6wAHuBgQkPNbO6BD/dUeMSAj2vEcjFYgQMxb7XgOxnkgQIyvNqAu7SED8vFZO5zD0QoESHHWBtTB8yCAEB+vgo7ijVBAiL8cIFlAQMwb7WiuQ3vQgFw4zAGSBQSkuOsD7CALCMjQjuVa6AUERHjMAZIFBIR4Owvcw7VggAiXRYCrqxfa4wZk4bV2KNfD4wCABIeNwB3cCwhI0I7kmmgGBgT4LAJQBgBE+CwCcDEoIMJpEYDTAIAEZ48CDVAGAJpzWgXkZmBAgnYc18ZpAKA57TiujTog0JjXKiB1QECA3wngt/bQAf45fBOgT3voAP/ctgEwAQDNubwQsIdrAYGm3LYB0AkENOd4AqATCGjqsXYY10cnENCUdhQ3wAQANKUdxQ0wAQBNaUdxA5+1xw7wzm8jIL3AQGNMAEDBmACAgjEBAAVjAgAKxgQAFIwJACgYEwBQsO/aUdwAEwDQlHYUN0AnINCUdhQ3wFkAoCntKG6ACQBoyvGFIF+1xw5wz/EEwJVgQFM/tcO4vo/aYwe4x7XgQMH8dgLxMhDQ2EftOK7tl/bQARnQjuPaqAICzbktA1AEAJpzWwZ4oT1yQAb+agdyTd+0Bw7IwQvtSK6Jo0CAhN/aoVwPjcCABKdJAPoAAQk+kwC0AQEytGO5lp/aowZk4pd2MNfxXXvUgEx81Q7mGigCAkI8FgLZAQBSPmuHczh2AIAUf3UAagCAnG/aAR2KLiBAjrdrgR5zEAiQ4y0NyDkAQJKzNCBtwIAkXxeDcRkYIMvVvUDcBQTI8nQ5MK8CA9IcLQFYAADS/GQByAAA8twUAigBAPI+PtaO7Go4BgTE4KMdkCZAIA4XJwI4BQDE4aEUSAkQiMXB/cBkAIFYXpjfBPAgKBCP9U0AGwAgJtubgMdsAICoTL8T9ld7dIDMWW4HogUIiM3uBaFcBArEZ7UhkBZAIAWbp4Ie8xIAkMILk4lAWoCBNCzOAMQ/kMp3c6UA7gEH0rE2AxD/QEq2ZgDiH0jL0gxA/AOp2ZkBiH8gPSszAPEPaPhoohpI/Q/QYaEfgPgH1Gh3BdP/C2j6oxr/v7kABFD1VjEV+Jnzf4CyF1qvhj5m+w8YoHNBwG+2/4AJbxVuC+f6L8CKF6kvC/72VvtPBjCQdhHwhuwfYMubZOWA1+z+AXM+/koS/iT/AZvexq8IPmb1D5j1NXIq4DOtf4BlMacAwh8wL9IU8JjwB1yIkAv4xt4fcOPjT9Gi4Gsy/4AvX6Wqgt9+svYH/Pn4p/mNQY8//9X+MwDU9PFPk3XAt59EP+Dbi78/a5UFfv2h4xfIwse/P0MKA49//eG0H5CXt19/vr61NvD715u35PyAXL19++bNr9fjM8Hv169/vvlK6AMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgMb+D3LPRjEUFtv1AAAAAElFTkSuQmCC';
@@ -1514,7 +1527,8 @@ const PAGE_META = {
   statusreport:      { titulo:'Status Report',            sub:'Relatório executivo de acompanhamento' },
   riscos:            { titulo:'Riscos',                   sub:'Mapa de riscos do projeto' },
   pontosfocais:      { titulo:'Pontos Focais',            sub:'Contatos e responsáveis do projeto' },
-  encaminhamentos:   { titulo:'On Demand',                sub:'Ações e solicitações do projeto' },
+  encaminhamentos:   { titulo:'Encaminhamentos',          sub:'Ações e solicitações do projeto' },
+  ondemand:          { titulo:'On Demand',                sub:'Kanban operacional de atividades' },
   tep:               { titulo:'TEP',                      sub:'Termo de Encerramento do Projeto' },
   licoes:            { titulo:'Lições Aprendidas',        sub:'Registro estruturado de aprendizados' },
   atas:              { titulo:'Gerador de Atas',          sub:'Atas no padrão Hapvida' },
@@ -1683,20 +1697,24 @@ function listaNotificacoesPortal(){
   const hoje=hojeISO(), itens=[];
   if(papelPortal()==='collaborator'&&!podeGerenciarAcessos()){
     solicitacoesVisiveis().forEach(s=>{const atualizado=s.updated_at||s.atualizado_em||s.created_at||s.criado_em,visto=localStorage.getItem(chavePreferencia(`sol_vista_${s.id}`))||'';if(s.status!=='enviada'&&atualizado>visto)itens.push({nivel:'warn',texto:`${s.request_code||'Solicitação'}: ${STATUS_SOLICITACAO_LABEL[s.status]||s.status}${s.admin_descricao?' — '+s.admin_descricao:''}`,pagina:'solicitacoes',solicitacao:s.id,naoLida:true});});
-    return itens.slice(0,20);
+    return finalizarListaNotificacoes(itens);
   }
   STATE.tarefas.filter(t=>isAtrasada(t)).forEach(t=>itens.push({nivel:'erro',texto:'Atividade atrasada: '+t.nome,projeto:t.projeto_id,pagina:'cronograma'}));
   STATE.tarefas.filter(t=>estaVencendoEmBreve(t.data_fim)&&!['concluido','cancelado'].includes(t.status)&&!isAtrasada(t)).forEach(t=>itens.push({nivel:'warn',texto:'Prazo próximo: '+t.nome,projeto:t.projeto_id,pagina:'cronograma'}));
   STATE.encaminhamentos.filter(e=>e.prazo&&e.prazo<hoje&&!['Concluído','Cancelado'].includes(e.status)).forEach(e=>itens.push({nivel:'erro',texto:'On Demand vencido: '+e.tema,projeto:e.projeto_id,pagina:'encaminhamentos'}));
   STATE.riscos.filter(r=>r.status!=='Encerrado'&&nivelRisco(r.probabilidade,r.impacto).label==='Alto').forEach(r=>itens.push({nivel:'erro',texto:'Risco alto: '+r.descricao,projeto:r.projeto_id,pagina:'riscos'}));
-  return itens.slice(0,20);
+  return finalizarListaNotificacoes(itens);
 }
+function finalizarListaNotificacoes(itens){const ocultas=new Set(JSON.parse(localStorage.getItem(chavePreferencia('notificacoes_ocultas'))||'[]'));return itens.map((item,indice)=>({...item,id:`${item.pagina||'geral'}|${item.projeto||''}|${item.solicitacao||''}|${item.texto}|${indice}`})).filter(item=>!ocultas.has(item.id)).slice(0,20);}
+function notificacoesOcultas(){try{return new Set(JSON.parse(localStorage.getItem(chavePreferencia('notificacoes_ocultas'))||'[]'));}catch(e){return new Set();}}
+function ocultarNotificacao(id){const itens=notificacoesOcultas();itens.add(id);localStorage.setItem(chavePreferencia('notificacoes_ocultas'),JSON.stringify([...itens].slice(-200)));renderNotificacoes();}
+function limparNotificacoes(){const ocultas=notificacoesOcultas();listaNotificacoesPortal().forEach(n=>ocultas.add(n.id));localStorage.setItem(chavePreferencia('notificacoes_ocultas'),JSON.stringify([...ocultas].slice(-200)));renderNotificacoes();fecharNotificacoes();toast('Notificações limpas.');}
 function marcarSolicitacaoVista(id){const s=STATE.solicitacoes.find(x=>x.id===id);if(!s)return;try{localStorage.setItem(chavePreferencia(`sol_vista_${id}`),s.updated_at||s.atualizado_em||new Date().toISOString());}catch(e){}renderNotificacoes();}
 function abrirNotificacaoPortal(pagina,projetoId,solicitacaoId){fecharNotificacoes();if(projetoId)definirProjetoAtivo(STATE.projetos.find(p=>p.id===projetoId)||null);navigate(pagina);if(solicitacaoId){marcarSolicitacaoVista(solicitacaoId);abrirDetalheSolicitacao(solicitacaoId);}}
 function renderNotificacoes(){
   const count=document.getElementById('notification-count'),pop=document.getElementById('notification-popover');if(!count||!pop)return;
   const itens=listaNotificacoesPortal();count.textContent=itens.length;count.style.display=itens.length?'grid':'none';
-  pop.innerHTML='<h4>Alertas e notificações</h4>'+(itens.length?itens.map(n=>`<div class="notification-item ${n.naoLida?'notification-unread':''}" style="border-left:3px solid ${n.nivel==='erro'?'var(--red)':'var(--orange)'};cursor:pointer" onclick="abrirNotificacaoPortal('${n.pagina}','${n.projeto||''}','${n.solicitacao||''}')">${esc(n.texto)}</div>`).join(''):'<div class="notification-item" style="color:var(--ink-mute)">Nenhuma pendência crítica encontrada.</div>');
+  pop.innerHTML='<h4 style="display:flex;align-items:center;justify-content:space-between;gap:10px">Alertas e notificações <button class="btn btn-outline btn-sm" onclick="limparNotificacoes()" '+(itens.length?'':'disabled')+'>Limpar</button></h4>'+(itens.length?itens.map(n=>`<div class="notification-item ${n.naoLida?'notification-unread':''}" style="border-left:3px solid ${n.nivel==='erro'?'var(--red)':'var(--orange)'};display:flex;gap:8px;align-items:flex-start"><span style="flex:1;cursor:pointer" onclick="abrirNotificacaoPortal('${n.pagina}','${n.projeto||''}','${n.solicitacao||''}')">${esc(n.texto)}</span><button class="btn btn-outline btn-sm" title="Excluir notificação" onclick="ocultarNotificacao(decodeURIComponent('${encodeURIComponent(n.id)}'))">×</button></div>`).join(''):'<div class="notification-item" style="color:var(--ink-mute)">Nenhuma pendência crítica encontrada.</div>');
 }
 function alternarNotificacoes(){const el=document.getElementById('notification-popover');if(!el)return;renderNotificacoes();el.classList.toggle('open');}
 function fecharNotificacoes(){document.getElementById('notification-popover')?.classList.remove('open');}
@@ -1772,11 +1790,11 @@ let permissoesModuloProntas=false;
 const MODULOS_PORTAL=[
   ['portfolio','Portfólio de Projetos'],['tap','TAP'],['eap','EAP'],['raci','Matriz RACI'],
   ['cronograma','Cronograma'],['statusreport','Status Report'],['riscos','Riscos'],['pontosfocais','Pontos Focais'],
-  ['encaminhamentos','On Demand'],['tep','TEP'],['licoes','Lições Aprendidas'],['lecoms','LECOMs'],['solicitacoes','Solicitações']
+  ['encaminhamentos','Encaminhamentos'],['on_demand','On Demand'],['tep','TEP'],['licoes','Lições Aprendidas'],['lecoms','LECOMs'],['solicitacoes','Solicitações']
 ];
 /* EAP e Matriz RACI permanecem preservados no código, porém ocultos do menu por decisão vigente. */
 const MODULOS_OPERADOR=MODULOS_PORTAL.filter(([chave])=>!['solicitacoes','eap','raci'].includes(chave));
-const MODULO_POR_PAGINA={home:'portfolio',projetos:'portfolio',portfdash:'portfolio',dashboardprojeto:'portfolio',tap:'tap',eap:'eap',raci:'raci',cronograma:'cronograma',statusreport:'statusreport',riscos:'riscos',pontosfocais:'pontosfocais',encaminhamentos:'encaminhamentos',tep:'tep',licoes:'licoes',lecoms:'lecoms',solicitacoes:'solicitacoes'};
+const MODULO_POR_PAGINA={home:'portfolio',projetos:'portfolio',portfdash:'portfolio',dashboardprojeto:'portfolio',tap:'tap',eap:'eap',raci:'raci',cronograma:'cronograma',statusreport:'statusreport',riscos:'riscos',pontosfocais:'pontosfocais',encaminhamentos:'encaminhamentos',ondemand:'on_demand',tep:'tep',licoes:'licoes',lecoms:'lecoms',solicitacoes:'solicitacoes'};
 
 function papelPortal(){return String(perfilPortal?.role||'').trim().toLowerCase();}
 /* A confirmação por RPC usa a função is_admin() protegida por RLS como fonte de verdade. */
@@ -2106,12 +2124,14 @@ const STATE = {
   statusReports: {},        // versão vigente por projeto
   statusReportHistory: [],  // versões publicadas dos Status Reports
   solicitacoes: [],         // solicitações de LECOM/projeto feitas por colaboradores
+  onDemandItems: [],        // Kanban operacional independente de projeto
+  onDemandHistory: [],
 };
 
 function salvarState(){
   try{
     /* Nunca persistimos chaves, sessão ou payloads sensíveis no cache local. */
-    const cacheSeguro={projetos:STATE.projetos,riscos:STATE.riscos,encaminhamentos:STATE.encaminhamentos,tarefas:STATE.tarefas,eapNos:STATE.eapNos,raciAtividades:STATE.raciAtividades,raciPessoas:STATE.raciPessoas,raciMatriz:STATE.raciMatriz,licoesAprendidas:STATE.licoesAprendidas,teps:STATE.teps,melhorias:STATE.melhorias,pontosFocais:STATE.pontosFocais,statusReports:STATE.statusReports,statusReportHistory:STATE.statusReportHistory,solicitacoes:STATE.solicitacoes};
+    const cacheSeguro={projetos:STATE.projetos,riscos:STATE.riscos,encaminhamentos:STATE.encaminhamentos,tarefas:STATE.tarefas,eapNos:STATE.eapNos,raciAtividades:STATE.raciAtividades,raciPessoas:STATE.raciPessoas,raciMatriz:STATE.raciMatriz,licoesAprendidas:STATE.licoesAprendidas,teps:STATE.teps,melhorias:STATE.melhorias,pontosFocais:STATE.pontosFocais,statusReports:STATE.statusReports,statusReportHistory:STATE.statusReportHistory,solicitacoes:STATE.solicitacoes,onDemandItems:STATE.onDemandItems,onDemandHistory:STATE.onDemandHistory};
     localStorage.setItem(LS_KEY, JSON.stringify(cacheSeguro));
     registrarAuditoria('salvar','dados','Dados do portal salvos no cache local por '+Object.keys(cacheSeguro).length+' conjuntos.');
     renderNotificacoes();
@@ -2417,7 +2437,8 @@ function renderProjetosHome(){
   document.getElementById('home-atencao').textContent=saudes.filter(s=>s.cls==='health-warn').length;
   document.getElementById('home-risco').textContent=saudes.filter(s=>s.cls==='health-risk').length;
   const distribuicao={andamento:projetosTodos.filter(p=>p.status_portfolio==='andamento'||p.status==='execucao').length,a_iniciar:projetosTodos.filter(p=>(p.status_portfolio||'a_iniciar')==='a_iniciar').length,concluido:projetosTodos.filter(p=>p.status_portfolio==='concluido'||p.status==='encerrado').length,atrasado:projetosTodos.filter(p=>p.status_portfolio==='atrasado').length}; const totalGrafico=Math.max(projetosTodos.length,1),cores=['#0041A6','#F59E0B','#16A05B','#DC2626'],valores=[distribuicao.andamento,distribuicao.a_iniciar,distribuicao.concluido,distribuicao.atrasado];let acumulado=0;const faixas=valores.map((v,i)=>{const ini=acumulado, fim=acumulado+=v/totalGrafico*100;return cores[i]+' '+ini+'% '+fim+'%';});document.getElementById('home-pizza').style.background='conic-gradient('+faixas.join(',')+')';document.getElementById('home-pizza-total').textContent=projetosTodos.length;document.getElementById('home-pizza-legenda').innerHTML=[['Em andamento',valores[0]],['À iniciar',valores[1]],['Concluídos',valores[2]],['Atrasados',valores[3]]].map((x,i)=>'<div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+cores[i]+';margin-right:6px"></span>'+x[0]+': <b>'+x[1]+'</b></div>').join('');
-  const hoje=hojeISO(), alertas=[...STATE.tarefas.filter(t=>isAtrasada(t)).map(t=>'Atividade atrasada: '+t.nome),...STATE.tarefas.filter(t=>estaVencendoEmBreve(t.data_fim)&&!['concluido','cancelado'].includes(t.status)&&!isAtrasada(t)).map(t=>'Prazo próximo: '+t.nome),...STATE.encaminhamentos.filter(e=>e.prazo&&e.prazo<hoje&&!['Concluído','Cancelado'].includes(e.status)).map(e=>'On Demand vencido: '+e.tema),...STATE.encaminhamentos.filter(e=>estaVencendoEmBreve(e.prazo)&&!['Concluído','Cancelado'].includes(e.status)).map(e=>'On Demand vence em breve: '+e.tema),...STATE.riscos.filter(r=>r.status!=='Encerrado'&&nivelRisco(r.probabilidade,r.impacto).label==='Alto').map(r=>'Risco alto: '+r.descricao)].slice(0,7);document.getElementById('home-alertas').innerHTML=alertas.length?alertas.map(a=>'<div style="padding:8px 10px;border-left:3px solid var(--red);background:#fff7f7;margin-bottom:7px">'+esc(a)+'</div>').join(''):'<div style="color:var(--ink-mute);padding:12px 0">Nenhum alerta de prazo no momento.</div>';
+  const nomeProjeto=id=>STATE.projetos.find(p=>p.id===id)?.nome||'Projeto não identificado';
+  const hoje=hojeISO(), alertas=[...STATE.tarefas.filter(t=>isAtrasada(t)).map(t=>`[${nomeProjeto(t.projeto_id)}] Atividade atrasada: ${t.nome}`),...STATE.tarefas.filter(t=>estaVencendoEmBreve(t.data_fim)&&!['concluido','cancelado'].includes(t.status)&&!isAtrasada(t)).map(t=>`[${nomeProjeto(t.projeto_id)}] Prazo próximo: ${t.nome}`),...STATE.encaminhamentos.filter(e=>e.prazo&&e.prazo<hoje&&!['Concluído','Cancelado'].includes(e.status)).map(e=>`[${nomeProjeto(e.projeto_id)}] Encaminhamento vencido: ${e.tema}`),...STATE.encaminhamentos.filter(e=>estaVencendoEmBreve(e.prazo)&&!['Concluído','Cancelado'].includes(e.status)).map(e=>`[${nomeProjeto(e.projeto_id)}] Encaminhamento vence em breve: ${e.tema}`),...STATE.riscos.filter(r=>r.status!=='Encerrado'&&nivelRisco(r.probabilidade,r.impacto).label==='Alto').map(r=>`[${nomeProjeto(r.projeto_id)}] Risco alto: ${r.descricao}`)].slice(0,7);document.getElementById('home-alertas').innerHTML=alertas.length?alertas.map(a=>'<div style="padding:8px 10px;border-left:3px solid var(--red);background:#fff7f7;margin-bottom:7px">'+esc(a)+'</div>').join(''):'<div style="color:var(--ink-mute);padding:12px 0">Nenhum alerta de prazo no momento.</div>';
   const lista = STATE.projetos.filter(p =>
     !filtro || p.nome.toLowerCase().includes(filtro) || (p.lecom||'').toLowerCase().includes(filtro)
   );
@@ -2538,8 +2559,8 @@ function abrirModalProjeto(id){
   abrirModal('modal-projeto');
 }
 
-function payloadProjetoSupabase(dados){const payload={name:dados.nome,objective:dados.objetivo,manager_name:dados.gerente_projeto,opening_date:dados.data_abertura||null,start_date:dados.data_inicio||null,planned_end_date:dados.data_fim_prevista||null,replanned_end_date:dados.data_replanejada||null,final_delivery_date:dados.data_entrega_final||null,macro_delivery:dados.macro_entrega,deliverables:dados.entregaveis,portfolio_status:dados.status_portfolio,extra:{solicitante:dados.solicitante,areas_envolvidas:dados.areas_envolvidas,ganhos_esperados:dados.ganhos_esperados,tap_lecom:dados.tap_lecom||'',patrocinador:dados.patrocinador||'',lider_ti:dados.lider_ti||'',direcao_ti:dados.direcao_ti||'Experiência do Cliente e Operações',status:dados.status||'planejamento'}};if(dados.lecom)payload.control_code=dados.lecom;return payload;}
-function codigoProjetoLocal(){const maior=STATE.projetos.reduce((n,p)=>Math.max(n,Number(String(p.lecom||'').match(/^PRJ(\d+)$/)?.[1]||0)),0);return `PRJ${String(maior+1).padStart(4,'0')}`;}
+function payloadProjetoSupabase(dados){const payload={name:dados.nome,objective:dados.objetivo,manager_name:dados.gerente_projeto,opening_date:dados.data_abertura||null,start_date:dados.data_inicio||null,planned_end_date:dados.data_fim_prevista||null,replanned_end_date:dados.data_replanejada||null,final_delivery_date:dados.data_entrega_final||null,macro_delivery:dados.macro_entrega,deliverables:dados.entregaveis,portfolio_status:dados.status_portfolio,extra:{solicitante:dados.solicitante,areas_envolvidas:dados.areas_envolvidas,ganhos_esperados:dados.ganhos_esperados,tap_lecom:dados.tap_lecom||'',patrocinador:dados.patrocinador||'',lider_ti:dados.lider_ti||'',direcao_ti:dados.direcao_ti||'Experiência do Cliente e Operações',status:dados.status||'planejamento',fases_ocultas:dados.fases_ocultas||[]}};if(dados.lecom)payload.control_code=dados.lecom;return payload;}
+function codigoProjetoLocal(){const maior=STATE.projetos.reduce((n,p)=>Math.max(n,Number(String(p.lecom||'').match(/^PROJ(\d+)$/)?.[1]||0)),0);return `PROJ${String(maior+1).padStart(4,'0')}`;}
 async function salvarProjeto(){
   const nome = document.getElementById('mp-nome').value.trim();
   const lecom = document.getElementById('mp-lecom').value.trim();
@@ -2694,7 +2715,7 @@ function preencherTAP(){
   if(vazio) return;
   const p = projetoAtivo;
   document.getElementById('tap-nome').value = p.nome || '';
-  document.getElementById('tap-lecom').value = p.tap_lecom || '';
+  document.getElementById('tap-lecom').value = p.lecom || '';
   document.getElementById('tap-patrocinador').value = p.patrocinador || '';
   document.getElementById('tap-gerente').value = p.gerente_projeto || '';
   document.getElementById('tap-lider').value = p.lider_ti || '';
@@ -2708,16 +2729,10 @@ function preencherTAP(){
 async function salvarTAP(){
   if(!projetoAtivo){ toast('Nenhum projeto ativo.'); return; }
   const nome = document.getElementById('tap-nome').value.trim();
-  const lecom = document.getElementById('tap-lecom').value.trim();
-  if(!nome || !lecom){ toast('Nome e LECOM são obrigatórios.'); return; }
-  if(!/^\d+$/.test(lecom)){ toast('LECOM deve conter somente números, sem pontos ou letras.'); return; }
-  const lecomEmUso = STATE.projetos.some(x =>
-    x.id !== projetoAtivo.id && (x.tap_lecom || '').trim().toLowerCase() === lecom.toLowerCase()
-  );
-  if(lecomEmUso){ toast('Já existe um projeto com esse código LECOM.'); return; }
+  if(!nome){ toast('Informe o nome do projeto.'); return; }
 
   Object.assign(projetoAtivo, {
-    nome, tap_lecom:lecom,
+    nome,
     patrocinador: document.getElementById('tap-patrocinador').value.trim(),
     gerente_projeto: document.getElementById('tap-gerente').value.trim(),
     lider_ti: document.getElementById('tap-lider').value.trim(),
@@ -2786,7 +2801,7 @@ if(window.jspdf?.jsPDF&&!window.jspdf.jsPDF.prototype.__marcaPortalProjetos){
 }
 function gerarPdfTap(){
   const doc=pdfDocumentoBase('TAP - Termo de Abertura do Projeto');if(!doc)return; const pegar=id=>document.getElementById(id)?.value || '';
-  pdfSecao(doc,'Identificação',pegar('tap-nome')+'\nLECOM: '+pegar('tap-lecom')+'\nStatus: '+pegar('tap-status')+'\nInício: '+fmtData(pegar('tap-inicio'))+' | Término previsto: '+fmtData(pegar('tap-fim')));
+  pdfSecao(doc,'Identificação',pegar('tap-nome')+'\nCódigo Interno: '+pegar('tap-lecom')+'\nStatus: '+pegar('tap-status')+'\nInício: '+fmtData(pegar('tap-inicio'))+' | Término previsto: '+fmtData(pegar('tap-fim')));
   pdfSecao(doc,'Governança','Patrocinador: '+pegar('tap-patrocinador')+'\nPMO/Gerente de Projetos: '+pegar('tap-gerente')+'\nLíder TI: '+pegar('tap-lider')+'\nDireção TI: '+pegar('tap-direcao'));
   pdfSecao(doc,'Objetivo do projeto',pegar('tap-objetivo'));salvarPdfDocumento(doc,'TAP');
 }
@@ -3206,7 +3221,7 @@ function codigoSolicitacaoLocal(tipo){
 function mapearSolicitacaoSupabase(linha){return {...linha,id:linha.id,request_code:linha.request_code||'',criado_em:linha.created_at||linha.criado_em,atualizado_em:linha.updated_at||linha.atualizado_em};}
 function mapearProjetoSupabase(linha){
   const extra=linha.extra||{};
-  return {id:linha.id,nome:linha.name||'',lecom:linha.control_code||'',tap_lecom:extra.tap_lecom||'',objetivo:linha.objective||'',gerente_projeto:linha.manager_name||'',data_abertura:linha.opening_date||'',data_inicio:linha.start_date||'',data_fim_prevista:linha.planned_end_date||'',data_replanejada:linha.replanned_end_date||'',data_entrega_final:linha.final_delivery_date||'',macro_entrega:linha.macro_delivery||'',entregaveis:linha.deliverables||'',status_portfolio:linha.portfolio_status||'a_iniciar',solicitacao_id:linha.source_request_id||extra.solicitacao_id||null,solicitante:extra.solicitante||'',areas_envolvidas:extra.areas_envolvidas||'',ganhos_esperados:extra.ganhos_esperados||'',patrocinador:extra.patrocinador||'',lider_ti:extra.lider_ti||'',direcao_ti:extra.direcao_ti||'Experiência do Cliente e Operações',status:extra.status||'planejamento',arquivado:false,criado_em:linha.created_at};
+  return {id:linha.id,nome:linha.name||'',lecom:linha.control_code||'',tap_lecom:extra.tap_lecom||'',objetivo:linha.objective||'',gerente_projeto:linha.manager_name||'',data_abertura:linha.opening_date||'',data_inicio:linha.start_date||'',data_fim_prevista:linha.planned_end_date||'',data_replanejada:linha.replanned_end_date||'',data_entrega_final:linha.final_delivery_date||'',macro_entrega:linha.macro_delivery||'',entregaveis:linha.deliverables||'',status_portfolio:linha.portfolio_status||'a_iniciar',solicitacao_id:linha.source_request_id||extra.solicitacao_id||null,solicitante:extra.solicitante||'',areas_envolvidas:extra.areas_envolvidas||'',ganhos_esperados:extra.ganhos_esperados||'',patrocinador:extra.patrocinador||'',lider_ti:extra.lider_ti||'',direcao_ti:extra.direcao_ti||'Experiência do Cliente e Operações',status:extra.status||'planejamento',fases_ocultas:extra.fases_ocultas||[],arquivado:false,criado_em:linha.created_at};
 }
 async function carregarProjetosSupabase(){
   if(!supabasePortal||!sessaoPortal)return false;
@@ -3220,7 +3235,7 @@ async function carregarProjetosSupabase(){
 }
 function mapearLecomSupabase(l){const x=l.extra||{};return {...x,id:l.id,iniciativa:l.initiative,codigo:l.lecom_code,solicitante:l.requester,area_solicitante:l.requester_area,classificacao:l.classification,priorizacao_ti:l.it_priority,priorizacao_negocio:l.business_priority,compromisso:l.commitment,area_ti:l.it_area,diretor_ti:l.it_director,area_classificacao:l.classification_area,impacto_jornada:l.beneficiary_impact?'sim':'nao',impacto_nips:l.nips_impact?'sim':'nao',impacto_financeiro:l.financial_impact?'sim':'nao',risco_assistencial:l.care_risk?'sim':'nao',envolve_ia:l.involves_ai?'sim':'nao',plan_especificacao:l.specification_planned_date,final_especificacao:l.specification_final_date,status_especificacao:l.specification_status,plan_homologacao:l.approval_planned_date,final_homologacao:l.approval_final_date,status_homologacao:l.approval_status,plan_producao:l.production_planned_date,final_producao:l.production_final_date,status_producao:l.production_status,criado_em:l.created_at};}
 async function carregarLecomsSupabase(){if(!supabasePortal||!sessaoPortal)return false;try{const {data,error}=await supabasePortal.from('lecoms').select('*').order('created_at',{ascending:false});if(error)throw error;STATE.melhorias=(data||[]).map(mapearLecomSupabase);salvarState();renderLecoms();return true;}catch(e){registrarLogSistema('erro','Sincronização de LECOMs',e);return false;}}
-function mapearTarefaSupabase(linha){const extra=linha.extra||{};return {id:linha.id,projeto_id:linha.project_id,numero:extra.numero||0,nome:linha.title||'',fase:linha.phase||'SEM FASE',fase_id:linha.phase_id||null,tipo:extra.tipo||'comum',area:extra.area||'',responsavel:linha.responsible_name||'',data_inicio:linha.replanned_start_date||linha.planned_start_date||'',data_fim:linha.replanned_end_date||linha.planned_end_date||'',baseline_inicio:linha.baseline_start_date||linha.planned_start_date||'',baseline_fim:linha.baseline_end_date||linha.planned_end_date||'',status:linha.status||'a_iniciar',progresso:Number(linha.progress??extra.progresso??(PROGRESSO_STATUS[linha.status]??0)),dependencias:extra.dependencias||[],observacoes:linha.description||'',historico_inicio:extra.historico_inicio||[linha.planned_start_date].filter(Boolean),historico_fim:extra.historico_fim||[linha.planned_end_date].filter(Boolean),criado_em:linha.created_at};}
+function mapearTarefaSupabase(linha){const extra=linha.extra||{};return {id:linha.id,projeto_id:linha.project_id,codigo:linha.activity_code||'',numero:extra.numero||0,nome:linha.title||'',fase:linha.phase||'SEM FASE',fase_id:linha.phase_id||null,tipo:extra.tipo||'comum',area:extra.area||'',responsavel:linha.responsible_name||'',data_inicio:linha.replanned_start_date||linha.planned_start_date||'',data_fim:linha.replanned_end_date||linha.planned_end_date||'',baseline_inicio:linha.baseline_start_date||linha.planned_start_date||'',baseline_fim:linha.baseline_end_date||linha.planned_end_date||'',status:linha.status||'a_iniciar',progresso:Number(linha.progress??extra.progresso??(PROGRESSO_STATUS[linha.status]??0)),dependencias:extra.dependencias||[],observacoes:linha.description||'',justificativa_atraso:extra.justificativa_atraso||'',data_replanejamento:extra.data_replanejamento||linha.replanned_end_date||'',historico_inicio:extra.historico_inicio||[linha.planned_start_date].filter(Boolean),historico_fim:extra.historico_fim||[linha.planned_end_date].filter(Boolean),criado_em:linha.created_at};}
 async function carregarTarefasSupabase(projetoId){if(!supabasePortal||!sessaoPortal||!projetoId)return false;try{const {data,error}=await supabasePortal.from('tasks').select('*').eq('project_id',projetoId).order('created_at');if(error)throw error;const tarefas=(data||[]).map(mapearTarefaSupabase),ids=tarefas.map(t=>t.id);if(ids.length){const {data:deps,error:erroDeps}=await supabasePortal.from('task_dependencies').select('*').in('task_id',ids);if(erroDeps)throw erroDeps;const porId=new Map(tarefas.map(t=>[t.id,t]));(deps||[]).forEach(d=>{const alvo=porId.get(d.task_id),origem=porId.get(d.depends_on_task_id);if(alvo&&origem&&!alvo.dependencias.includes(origem.numero))alvo.dependencias.push(origem.numero);});}STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(tarefas);return true;}catch(e){registrarLogSistema('erro','Sincronização de cronograma',e);return false;}}
 function idUuid(valor){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(valor||''));}
 async function gravarRegistroProjetoSupabase(tabela,id,payload){
@@ -3229,7 +3244,7 @@ async function gravarRegistroProjetoSupabase(tabela,id,payload){
 async function excluirRegistroSupabase(tabela,id){if(!supabasePortal||!sessaoPortal||!idUuid(id))return;const {error}=await supabasePortal.from(tabela).delete().eq('id',id);if(error)throw error;}
 async function sincronizarDependenciasTarefa(tarefa,dependenciasNumericas,conjuntoTarefas=STATE.tarefas){if(!supabasePortal||!sessaoPortal||!idUuid(tarefa?.id))return;const {error:erroLimpeza}=await supabasePortal.from('task_dependencies').delete().eq('task_id',tarefa.id);if(erroLimpeza)throw erroLimpeza;const predecessoras=(dependenciasNumericas||[]).map(numero=>conjuntoTarefas.find(t=>t.projeto_id===tarefa.projeto_id&&Number(t.numero)===Number(numero))).filter(t=>t&&idUuid(t.id));if(predecessoras.length){const {error}=await supabasePortal.from('task_dependencies').insert(predecessoras.map(t=>({task_id:tarefa.id,depends_on_task_id:t.id,dependency_type:'FS',lag_days:0})));if(error)throw error;}}
 async function garantirFaseProjetoSupabase(nome){if(!supabasePortal||!sessaoPortal)return null;const {data:existente,error}=await supabasePortal.from('project_phases').select('id').eq('project_id',projetoAtivo.id).eq('name',nome).maybeSingle();if(error)throw error;if(existente)return existente.id;const {data:fases,error:erroLista}=await supabasePortal.from('project_phases').select('sequence').eq('project_id',projetoAtivo.id).order('sequence',{ascending:false}).limit(1);if(erroLista)throw erroLista;const {data:nova,error:erroNova}=await supabasePortal.from('project_phases').insert({project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,name:nome,sequence:Number(fases?.[0]?.sequence||0)+1,phase_type:'custom'}).select('id').single();if(erroNova)throw erroNova;return nova.id;}
-function mesclarExtraSupabase(linha,campos){return {...(linha.extra||{}),...campos,id:linha.id,projeto_id:linha.project_id,criado_em:linha.created_at};}
+function mesclarExtraSupabase(linha,campos){return {...(linha.extra||{}),...campos,id:linha.id,codigo:linha.control_code||campos.codigo||'',projeto_id:linha.project_id,criado_em:linha.created_at};}
 async function carregarDadosProjetoSupabase(projetoId){
   if(!supabasePortal||!sessaoPortal||!projetoId)return false;
   try{
@@ -3237,7 +3252,7 @@ async function carregarDadosProjetoSupabase(projetoId){
     const resultados=await Promise.all(tabelas.map(t=>supabasePortal.from(t).select('*').eq('project_id',projetoId)));
     resultados.forEach((r,i)=>{if(r.error)throw r.error;const t=tabelas[i],dados=r.data||[];
       if(t==='risks')STATE.riscos=STATE.riscos.filter(x=>x.projeto_id!==projetoId).concat(dados.map(x=>mesclarExtraSupabase(x,{descricao:x.description||x.title,categoria:x.category,probabilidade:x.probability,impacto:x.impact,status:x.status,resposta:x.mitigation})));
-      if(t==='referrals')STATE.encaminhamentos=STATE.encaminhamentos.filter(x=>x.projeto_id!==projetoId).concat(dados.map(x=>mesclarExtraSupabase(x,{tema:x.subject,acao:x.description,responsavel:x.responsible_name,status:x.status,prazo:x.due_date,data_conclusao:x.completion_date})));
+      if(t==='referrals')STATE.encaminhamentos=STATE.encaminhamentos.filter(x=>x.projeto_id!==projetoId).concat(dados.map(x=>mesclarExtraSupabase(x,{tema:x.subject,acao:x.description,responsavel:x.responsible_name,status:x.status,prazo:x.due_date,data_conclusao:x.completion_date,justificativa_atraso:x.extra?.justificativa_atraso||'',data_replanejamento:x.extra?.data_replanejamento||''})));
       if(t==='focal_points')STATE.pontosFocais=STATE.pontosFocais.filter(x=>x.projeto_id!==projetoId).concat(dados.map(x=>mesclarExtraSupabase(x,{nome:x.name,area:x.area,papel:x.role_name,email:x.email,telefone:x.phone})));
       if(t==='lessons_learned')STATE.licoesAprendidas=STATE.licoesAprendidas.filter(x=>x.projeto_id!==projetoId).concat(dados.map(x=>mesclarExtraSupabase(x,{titulo:x.title,contexto:x.context,aprendizado:x.lesson,recomendacao:x.recommendation,categoria:x.category,status:x.status})));
       if(t==='eap_nodes')STATE.eapNos=STATE.eapNos.filter(x=>x.projeto_id!==projetoId).concat(dados.map(x=>mesclarExtraSupabase(x,{pai_id:x.parent_id,codigo:x.node_code,titulo:x.title,descricao:x.description,responsavel:x.responsible_name,status:x.status,data_inicio:x.planned_start_date,data_fim:x.planned_end_date})));
@@ -3246,8 +3261,8 @@ async function carregarDadosProjetoSupabase(projetoId){
     });
     const atividadesIds=STATE.raciAtividades.filter(a=>a.projeto_id===projetoId).map(a=>a.id);if(atividadesIds.length){const {data:atribuicoes,error:erroAtribuicoes}=await supabasePortal.from('raci_assignments').select('*').in('activity_id',atividadesIds);if(erroAtribuicoes)throw erroAtribuicoes;STATE.raciMatriz=STATE.raciMatriz.filter(m=>m.projeto_id!==projetoId).concat((atribuicoes||[]).map(x=>({id:`${x.activity_id}:${x.person_id}`,projeto_id:projetoId,atividade_id:x.activity_id,pessoa_id:x.person_id,papel:x.assignment})));}else STATE.raciMatriz=STATE.raciMatriz.filter(m=>m.projeto_id!==projetoId);
     const [{data:tep},{data:sr}]=await Promise.all([supabasePortal.from('project_closures').select('*').eq('project_id',projetoId).maybeSingle(),supabasePortal.from('status_reports').select('*').eq('project_id',projetoId).maybeSingle()]);
-    if(tep)STATE.teps[projetoId]={...(tep.extra||{}),data_encerramento:tep.closure_date,resumo:tep.summary,resultado:tep.results,aceite:tep.acceptance};
-    if(sr)STATE.statusReports[projetoId]={...(sr.report_data||{}),periodo_referencia:sr.reference_date,farol_geral:sr.overall_status,resumo_executivo:sr.executive_summary,pontos_atencao:sr.attention_points};
+    if(tep)STATE.teps[projetoId]={...(tep.extra||{}),codigo:tep.control_code||'',data_encerramento:tep.closure_date,resumo:tep.summary,resultado:tep.results,aceite:tep.acceptance};
+    if(sr)STATE.statusReports[projetoId]={...(sr.report_data||{}),codigo:sr.control_code||'',periodo_referencia:sr.reference_date,farol_geral:sr.overall_status,resumo_executivo:sr.executive_summary,pontos_atencao:sr.attention_points};
     salvarState();return true;
   }catch(e){registrarLogSistema('erro','Sincronização dos dados do projeto',e);toast('Alguns dados do projeto não puderam ser carregados do banco; o cache de contingência foi mantido.');return false;}
 }
@@ -3434,7 +3449,7 @@ async function abrirProjetoDaSolicitacao(solicitacaoId){
 }
 function criarProjetoAPartirDaSolicitacao(s){
   if(!s||s.tipo_solicitacao!=='projeto'||s.projeto_id)return null;
-  const projeto={id:uid(),nome:s.nome_projeto||s.titulo,lecom:s.request_code||('PROJ-'+String(s.id).replace(/[^a-z0-9]/gi,'').slice(-8).toUpperCase()),solicitante:s.solicitante||'',gerente_projeto:s.responsavel||s.solicitante||'',areas_envolvidas:s.areas_envolvidas||s.areas_impactadas||'',ganhos_esperados:s.ganhos_esperados||'',patrocinador:'',lider_ti:'',direcao_ti:'Experiência do Cliente e Operações',data_inicio:'',data_fim_prevista:s.data_alvo||'',data_abertura:s.data_abertura_solicitacao||hojeISO(),macro_entrega:s.escopo_macro_entrega||s.produto_funcionalidade||'Projeto aprovado a partir de solicitação',entregaveis:s.principais_entregas||'',data_replanejada:'',data_entrega_final:'',status:'planejamento',status_portfolio:'a_iniciar',objetivo:s.objetivo||'',arquivado:false,criado_em:new Date().toISOString(),solicitacao_id:s.id};
+  const projeto={id:uid(),nome:s.nome_projeto||s.titulo,lecom:s.request_code||codigoProjetoLocal(),solicitante:s.solicitante||'',gerente_projeto:s.responsavel||s.solicitante||'',areas_envolvidas:s.areas_envolvidas||s.areas_impactadas||'',ganhos_esperados:s.ganhos_esperados||'',patrocinador:'',lider_ti:'',direcao_ti:'Experiência do Cliente e Operações',data_inicio:'',data_fim_prevista:s.data_alvo||'',data_abertura:s.data_abertura_solicitacao||hojeISO(),macro_entrega:s.escopo_macro_entrega||s.produto_funcionalidade||'Projeto aprovado a partir de solicitação',entregaveis:s.principais_entregas||'',data_replanejada:'',data_entrega_final:'',status:'planejamento',status_portfolio:'a_iniciar',objetivo:s.objetivo||'',arquivado:false,criado_em:new Date().toISOString(),solicitacao_id:s.id};
   STATE.projetos.unshift(projeto);s.projeto_id=projeto.id;return projeto;
 }
 async function salvarStatusSolicitacao(id){
@@ -3557,7 +3572,7 @@ async function salvarTep(){
     atualizado_em:new Date().toISOString(),
   };
   projetoAtivo.status = statusFinal;
-  if(supabasePortal&&sessaoPortal){try{const payload={project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,summary:dadosTep.resumo,results:dadosTep.resultado,acceptance:dadosTep.aceite,closure_date:dadosTep.data_encerramento||null,extra:dadosTep},{error}=await supabasePortal.from('project_closures').upsert(payload,{onConflict:'project_id'});if(error)throw error;const {data:projetoAtualizado,error:erroProjeto}=await supabasePortal.from('projects').update(payloadProjetoSupabase(projetoAtivo)).eq('id',projetoAtivo.id).select('*').single();if(erroProjeto)throw erroProjeto;const persistido=mapearProjetoSupabase(projetoAtualizado),indice=STATE.projetos.findIndex(p=>p.id===persistido.id);if(indice>=0)STATE.projetos[indice]=persistido;projetoAtivo=persistido;}catch(e){registrarLogSistema('erro','Persistência do TEP',e);toast('Não foi possível salvar o TEP no banco.');return;}}
+  if(supabasePortal&&sessaoPortal){try{const payload={project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,summary:dadosTep.resumo,results:dadosTep.resultado,acceptance:dadosTep.aceite,closure_date:dadosTep.data_encerramento||null,extra:dadosTep},{data:tepPersistido,error}=await supabasePortal.from('project_closures').upsert(payload,{onConflict:'project_id'}).select('*').single();if(error)throw error;dadosTep.codigo=tepPersistido?.control_code||dadosTep.codigo||'';const {data:projetoAtualizado,error:erroProjeto}=await supabasePortal.from('projects').update(payloadProjetoSupabase(projetoAtivo)).eq('id',projetoAtivo.id).select('*').single();if(erroProjeto)throw erroProjeto;const persistido=mapearProjetoSupabase(projetoAtualizado),indice=STATE.projetos.findIndex(p=>p.id===persistido.id);if(indice>=0)STATE.projetos[indice]=persistido;projetoAtivo=persistido;}catch(e){registrarLogSistema('erro','Persistência do TEP',e);toast('Não foi possível salvar o TEP no banco.');return;}}
   salvarState(); definirProjetoAtivo(projetoAtivo); renderTep();
   toast('Termo de Encerramento salvo e status do projeto atualizado.');
 }
@@ -3770,7 +3785,7 @@ function renderEncaminhamentos(){
   const tbody = document.getElementById('enc-tbody');
   const lista = encaminhamentosDoProjeto();
   if(!lista.length){
-    tbody.innerHTML = `<tr><td colspan="6"><div class="dtable-empty"><span class="icon">✅</span>Nenhum item On Demand cadastrado para este projeto.</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="dtable-empty"><span class="icon">✅</span>Nenhum encaminhamento cadastrado para este projeto.</div></td></tr>`;
     return;
   }
   const statusCls = { 'A Iniciar':'badge-neutral','À iniciar':'badge-neutral','Em Andamento':'badge-warn','Em andamento':'badge-warn','Atrasado':'badge-danger','Concluído':'badge-ok','Cancelado':'badge-neutral' };
@@ -3796,19 +3811,23 @@ function abrirModalEncaminhamento(id){
   document.getElementById('me-id').value = id || '';
   if(id){
     const e = STATE.encaminhamentos.find(x => x.id === id);
-    document.getElementById('modal-enc-titulo').textContent = 'Editar On Demand';
+    document.getElementById('modal-enc-titulo').textContent = 'Editar Encaminhamento';
     document.getElementById('me-tema').value = e.tema;
     document.getElementById('me-acao').value = e.acao;
     document.getElementById('me-responsavel').value = e.responsavel || '';
     document.getElementById('me-prazo').value = e.prazo || '';
     document.getElementById('me-status').value = e.status;
+    document.getElementById('me-justificativa-atraso').value=e.justificativa_atraso||'';
+    document.getElementById('me-data-replanejamento').value=e.data_replanejamento||'';
   }else{
-    document.getElementById('modal-enc-titulo').textContent = 'Novo On Demand';
-    ['me-tema','me-acao','me-responsavel','me-prazo'].forEach(f => document.getElementById(f).value = '');
+    document.getElementById('modal-enc-titulo').textContent = 'Novo Encaminhamento';
+    ['me-tema','me-acao','me-responsavel','me-prazo','me-justificativa-atraso','me-data-replanejamento'].forEach(f => document.getElementById(f).value = '');
     document.getElementById('me-status').value = 'À iniciar';
   }
+  atualizarCamposAtrasoEncaminhamento();
   abrirModal('modal-encaminhamento');
 }
+function atualizarCamposAtrasoEncaminhamento(){const prazo=document.getElementById('me-prazo')?.value||'',status=document.getElementById('me-status')?.value||'',atrasado=!!prazo&&prazo<hojeISO()&&!['Concluído','Cancelado'].includes(status);const bloco=document.getElementById('me-atraso-campos');if(bloco)bloco.style.display=atrasado?'block':'none';if(atrasado&&document.getElementById('me-status'))document.getElementById('me-status').value='Atrasado';}
 async function salvarEncaminhamento(){
   const tema = document.getElementById('me-tema').value.trim();
   const acao = document.getElementById('me-acao').value.trim();
@@ -3819,19 +3838,22 @@ async function salvarEncaminhamento(){
     responsavel: document.getElementById('me-responsavel').value.trim(),
     prazo: document.getElementById('me-prazo').value,
     status: document.getElementById('me-status').value,
+    justificativa_atraso:document.getElementById('me-justificativa-atraso').value.trim(),
+    data_replanejamento:document.getElementById('me-data-replanejamento').value,
   };
-  try{const remoto=await gravarRegistroProjetoSupabase('referrals',id,{project_id:projetoAtivo.id,subject:dados.tema,description:dados.acao,responsible_name:dados.responsavel,status:dados.status,due_date:dados.prazo||null,extra:{}});if(id)Object.assign(STATE.encaminhamentos.find(x=>x.id===id),dados,remoto?{id:remoto.id}:{});else STATE.encaminhamentos.push({id:remoto?.id||uid(),projeto_id:projetoAtivo.id,...dados,criado_em:remoto?.created_at||new Date().toISOString()});toast(id?'On Demand atualizado.':'On Demand cadastrado.');}catch(e){registrarLogSistema('erro','Persistência de On Demand',e);toast('Não foi possível salvar o item On Demand no banco.');return;}
+  const vencido=dados.prazo&&dados.prazo<hojeISO()&&!['Concluído','Cancelado'].includes(dados.status);if(vencido){dados.status='Atrasado';if(!dados.justificativa_atraso||!dados.data_replanejamento){toast('Informe a justificativa e a data de replanejamento para o encaminhamento atrasado.');return;}}
+  try{const remoto=await gravarRegistroProjetoSupabase('referrals',id,{project_id:projetoAtivo.id,subject:dados.tema,description:dados.acao,responsible_name:dados.responsavel,status:dados.status,due_date:dados.prazo||null,extra:{justificativa_atraso:dados.justificativa_atraso,data_replanejamento:dados.data_replanejamento}});if(id)Object.assign(STATE.encaminhamentos.find(x=>x.id===id),dados,remoto?{id:remoto.id}:{});else STATE.encaminhamentos.push({id:remoto?.id||uid(),projeto_id:projetoAtivo.id,...dados,criado_em:remoto?.created_at||new Date().toISOString()});toast(id?'Encaminhamento atualizado.':'Encaminhamento cadastrado.');}catch(e){registrarLogSistema('erro','Persistência de encaminhamentos',e);toast('Não foi possível salvar o encaminhamento no banco.');return;}
   salvarState();
   fecharModal('modal-encaminhamento');
   renderEncaminhamentos();
 }
 async function excluirEncaminhamento(id){
-  if(!confirm('Excluir este item On Demand?')) return;
-  try{await excluirRegistroSupabase('referrals',id);}catch(e){registrarLogSistema('erro','Exclusão de On Demand',e);toast('Não foi possível excluir o item no banco.');return;}
+  if(!confirm('Excluir este encaminhamento?')) return;
+  try{await excluirRegistroSupabase('referrals',id);}catch(e){registrarLogSistema('erro','Exclusão de encaminhamentos',e);toast('Não foi possível excluir o item no banco.');return;}
   STATE.encaminhamentos = STATE.encaminhamentos.filter(x => x.id !== id);
   salvarState();
   renderEncaminhamentos();
-  toast('On Demand excluído.');
+  toast('Encaminhamento excluído.');
 }
 
 /* ═══════════════════════════════════════════
@@ -3853,7 +3875,8 @@ function proximoIdTarefa(){
 const FASES_PADRAO_PROJETO=['Planejamento e Refinamento','Kickoff','Desenvolvimento','Homologação','Go-live','Operação Assistida'];
 function fasesDoProjeto(){
   const vistas = new Set(); const out = [];
-  FASES_PADRAO_PROJETO.forEach(f=>{vistas.add(f);out.push(f);});
+  const ocultas=new Set(projetoAtivo?.fases_ocultas||[]);
+  FASES_PADRAO_PROJETO.filter(f=>!ocultas.has(f)).forEach(f=>{vistas.add(f);out.push(f);});
   tarefasDoProjeto().forEach(t => { if(!vistas.has(t.fase)){ vistas.add(t.fase); out.push(t.fase); } });
   return out;
 }
@@ -3874,6 +3897,8 @@ function normalizarCronogramas(){
     if(!Array.isArray(t.historico_fim)) t.historico_fim = t.data_fim ? [t.data_fim] : [];
     t.data_inicio = historicoInicio(t).at(-1) || '';
     t.data_fim = historicoFim(t).at(-1) || '';
+    /* Regra de prazo: item não concluído/cancelado fica automaticamente atrasado. */
+    if(t.data_fim && t.data_fim < hojeISO() && !['concluido','cancelado'].includes(t.status)) t.status='atrasado';
     if(typeof t.progresso !== 'number') t.progresso = PROGRESSO_STATUS[t.status] ?? 0;
   });
 }
@@ -4003,6 +4028,7 @@ function renderCronograma(){
       <span class="cg-nome" onclick="toggleFase('${esc(fase)}')" style="cursor:pointer">${esc(fase)}</span>
       <span style="font-size:10px;opacity:.7">${itens.length}</span>
       <button class="cg-phase-add" onclick="criarTarefaInline('${esc(fase)}')" title="Adicionar atividade nesta fase">+ atividade</button>
+      <button class="cg-phase-add" onclick="excluirFaseCronograma('${esc(fase)}')" title="Excluir fase e suas atividades" style="color:var(--red)">🗑</button>
     </div>`;
     ganttHtml += `<div class="gantt-row phase"></div>`;
     rowIndex++;
@@ -4087,6 +4113,27 @@ function desenharDependenciasGantt(bodyEl, inicio, tarefasVisiveis, criticos){
 function toggleFase(fase){
   fasesColapsadas[fase] = !fasesColapsadas[fase];
   renderCronograma();
+}
+
+async function excluirFaseCronograma(fase){
+  if(!projetoAtivo)return;
+  const atividades=tarefasDoProjeto().filter(t=>t.fase===fase);
+  const aviso=atividades.length?`A fase “${fase}” possui ${atividades.length} atividade(s). Elas também serão excluídas. Deseja continuar?`:`Excluir a fase “${fase}”?`;
+  if(!confirm(aviso))return;
+  try{
+    if(supabasePortal&&sessaoPortal){
+      const ids=atividades.filter(t=>idUuid(t.id)).map(t=>t.id);
+      if(ids.length){const {error}=await supabasePortal.from('tasks').delete().in('id',ids);if(error)throw error;}
+      const {data:faseRemota,error:erroFase}=await supabasePortal.from('project_phases').select('id').eq('project_id',projetoAtivo.id).eq('name',fase).maybeSingle();
+      if(erroFase)throw erroFase;
+      if(faseRemota){const {error}=await supabasePortal.from('project_phases').delete().eq('id',faseRemota.id);if(error)throw error;}
+      projetoAtivo.fases_ocultas=[...new Set([...(projetoAtivo.fases_ocultas||[]),fase])];
+      const {data,error}=await supabasePortal.from('projects').update(payloadProjetoSupabase(projetoAtivo)).eq('id',projetoAtivo.id).select('*').single();if(error)throw error;
+      const p=mapearProjetoSupabase(data),idx=STATE.projetos.findIndex(x=>x.id===p.id);if(idx>=0)STATE.projetos[idx]=p;projetoAtivo=p;
+    }else projetoAtivo.fases_ocultas=[...new Set([...(projetoAtivo.fases_ocultas||[]),fase])];
+    STATE.tarefas=STATE.tarefas.filter(t=>!(t.projeto_id===projetoAtivo.id&&t.fase===fase));
+    salvarState();renderCronograma();toast(`Fase “${fase}” excluída.`);
+  }catch(e){registrarLogSistema('erro','Exclusão de fase',e);toast('Não foi possível excluir a fase no banco.');}
 }
 
 /* ═══ FASE — criação inline, sem modal ═══ */
@@ -4301,17 +4348,29 @@ function abrirModalTarefa(id, faseFixa){
     document.getElementById('mt-responsavel').value = t.responsavel || '';
     document.getElementById('mt-inicio').value = t.data_inicio || '';
     document.getElementById('mt-fim').value = t.data_fim || '';
+    document.getElementById('mt-baseline-inicio').value = t.baseline_inicio || t.data_inicio || '';
+    document.getElementById('mt-baseline-fim').value = t.baseline_fim || t.data_fim || '';
     document.getElementById('mt-status').value = t.status;
     document.getElementById('mt-dep').value = (t.dependencias||[]).join(', ');
     document.getElementById('mt-obs').value = t.observacoes || '';
+    document.getElementById('mt-justificativa-atraso').value=t.justificativa_atraso||'';
+    document.getElementById('mt-data-replanejamento').value=t.data_replanejamento||'';
   }else{
     document.getElementById('modal-tarefa-titulo').textContent = 'Nova Atividade';
-    ['mt-nome','mt-area','mt-responsavel','mt-inicio','mt-fim','mt-dep','mt-obs'].forEach(f => document.getElementById(f).value = '');
+    ['mt-nome','mt-area','mt-responsavel','mt-inicio','mt-fim','mt-baseline-inicio','mt-baseline-fim','mt-dep','mt-obs','mt-justificativa-atraso','mt-data-replanejamento'].forEach(f => document.getElementById(f).value = '');
     document.getElementById('mt-tipo').value = 'comum';
     document.getElementById('mt-status').value = 'a_iniciar';
     if(faseFixa) selFase.value = faseFixa;
   }
+  atualizarCamposAtrasoTarefa();
   abrirModal('modal-tarefa');
+}
+
+function atualizarCamposAtrasoTarefa(){
+  const fim=document.getElementById('mt-fim')?.value||'',status=document.getElementById('mt-status')?.value||'';
+  const atrasada=!!fim&&fim<hojeISO()&&!['concluido','cancelado'].includes(status);
+  const bloco=document.getElementById('mt-atraso-campos'); if(bloco)bloco.style.display=atrasada?'block':'none';
+  if(atrasada&&document.getElementById('mt-status'))document.getElementById('mt-status').value='atrasado';
 }
 
 async function salvarTarefa(){
@@ -4334,16 +4393,22 @@ async function salvarTarefa(){
     responsavel: document.getElementById('mt-responsavel').value.trim(),
     data_inicio: inicio, data_fim: fim,
     status: document.getElementById('mt-status').value,
+    baseline_inicio: document.getElementById('mt-baseline-inicio').value || inicio,
+    baseline_fim: document.getElementById('mt-baseline-fim').value || fim,
+    justificativa_atraso: document.getElementById('mt-justificativa-atraso').value.trim(),
+    data_replanejamento: document.getElementById('mt-data-replanejamento').value,
     dependencias,
     observacoes: document.getElementById('mt-obs').value.trim(),
   };
+  const vencida=fim<hojeISO()&&!['concluido','cancelado'].includes(dados.status);
+  if(vencida){dados.status='atrasado';if(!dados.justificativa_atraso||!dados.data_replanejamento){toast('Informe a justificativa e a data de replanejamento para a atividade atrasada.');return;}}
 
   if(supabasePortal&&sessaoPortal){
     const existente=id?STATE.tarefas.find(t=>t.id===id):null;
     let faseId=null;try{faseId=await garantirFaseProjetoSupabase(fase);}catch(erroFase){registrarLogSistema('erro','Fase do cronograma',erroFase);toast('Não foi possível localizar ou criar a fase no banco. Execute a migration de governança.');return;}
     const historicoInicioNovo=existente?.data_inicio!==inicio?[...(historicoInicio(existente||{})),inicio].filter(Boolean):historicoInicio(existente||{data_inicio:inicio});
     const historicoFimNovo=existente?.data_fim!==fim?[...(historicoFim(existente||{})),fim].filter(Boolean):historicoFim(existente||{data_fim:fim});
-    const houveReplanejamento=!!existente&&(existente.data_inicio!==inicio||existente.data_fim!==fim),payload={project_id:projetoAtivo.id,phase_id:faseId,title:nome,description:dados.observacoes,phase:fase,responsible_name:dados.responsavel,status:dados.status,planned_start_date:existente?.baseline_inicio||inicio,planned_end_date:existente?.baseline_fim||fim,baseline_start_date:existente?.baseline_inicio||inicio,baseline_end_date:existente?.baseline_fim||fim,replanned_start_date:houveReplanejamento?inicio:(existente?.replanned_start_date||null),replanned_end_date:houveReplanejamento?fim:(existente?.replanned_end_date||null),progress:PROGRESSO_STATUS[dados.status]??0,extra:{numero:existente?.numero||proximoIdTarefa(),tipo:dados.tipo,area:dados.area,dependencias,progresso:PROGRESSO_STATUS[dados.status]??0,historico_inicio:historicoInicioNovo,historico_fim:historicoFimNovo}};
+    const houveReplanejamento=!!existente&&(existente.data_inicio!==inicio||existente.data_fim!==fim),payload={project_id:projetoAtivo.id,phase_id:faseId,title:nome,description:dados.observacoes,phase:fase,responsible_name:dados.responsavel,status:dados.status,planned_start_date:dados.baseline_inicio,planned_end_date:dados.baseline_fim,baseline_start_date:dados.baseline_inicio,baseline_end_date:dados.baseline_fim,replanned_start_date:houveReplanejamento||dados.data_replanejamento?inicio:(existente?.replanned_start_date||null),replanned_end_date:houveReplanejamento||dados.data_replanejamento?(dados.data_replanejamento||fim):(existente?.replanned_end_date||null),progress:PROGRESSO_STATUS[dados.status]??0,extra:{numero:existente?.numero||proximoIdTarefa(),tipo:dados.tipo,area:dados.area,dependencias,progresso:PROGRESSO_STATUS[dados.status]??0,justificativa_atraso:dados.justificativa_atraso,data_replanejamento:dados.data_replanejamento,historico_inicio:historicoInicioNovo,historico_fim:historicoFimNovo}};
     try{const query=id?supabasePortal.from('tasks').update(payload).eq('id',id):supabasePortal.from('tasks').insert(payload);const {data,error}=await query.select('*').single();if(error)throw error;const persistida=mapearTarefaSupabase(data);STATE.tarefas=STATE.tarefas.filter(t=>t.id!==persistida.id&&t.id!==id);STATE.tarefas.push(persistida);await sincronizarDependenciasTarefa(persistida,dependencias);if(houveReplanejamento){const {error:erroVersao}=await supabasePortal.from('task_schedule_versions').insert({task_id:persistida.id,project_id:projetoAtivo.id,change_type:'replanning',previous_start_date:existente.data_inicio,previous_end_date:existente.data_fim,new_start_date:inicio,new_end_date:fim,reason:dados.observacoes||'Replanejamento registrado no cronograma.'});if(erroVersao)throw erroVersao;}else if(!id){const {error:erroBaseline}=await supabasePortal.from('task_schedule_versions').insert({task_id:persistida.id,project_id:projetoAtivo.id,change_type:'baseline',new_start_date:inicio,new_end_date:fim,reason:'Baseline original da atividade.'});if(erroBaseline)throw erroBaseline;}salvarState();fecharModal('modal-tarefa');renderCronograma();toast(id?'Atividade atualizada.':'Atividade cadastrada.');return;}catch(e){registrarLogSistema('erro','Persistência de atividade',e);toast('Não foi possível salvar a atividade no banco.');return;}
   }
 
@@ -4649,7 +4714,7 @@ async function salvarStatusReport(){
   };
   STATE.statusReports[projetoAtivo.id]=dados;
   let versao={id:uid(),projeto_id:projetoAtivo.id,project_id:projetoAtivo.id,...dados,author_id:sessaoPortal?.user?.id||null,author_name:perfilPortal?.full_name||sessaoPortal?.user?.email||'Usuário',criado_em:new Date().toISOString(),created_at:new Date().toISOString()};
-  if(supabasePortal&&sessaoPortal){try{const atual={project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,reference_date:dados.periodo_referencia,overall_status:dados.farol_geral,executive_summary:dados.resumo_executivo,attention_points:relatorioStatusProjeto().atencao.join('\n'),report_data:dados},{error:erroAtual}=await supabasePortal.from('status_reports').upsert(atual,{onConflict:'project_id'});if(erroAtual)throw erroAtual;const payload={project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,reference_date:dados.periodo_referencia,report_data:dados,author_name:versao.author_name};const {data,error}=await supabasePortal.from('status_report_versions').insert(payload).select('*').single();if(error)throw error;versao={...versao,...data,...(data.report_data||{})};}catch(e){registrarLogSistema('erro','Persistência do Status Report',e);toast('Não foi possível salvar o Status Report no banco.');return;}}
+  if(supabasePortal&&sessaoPortal){try{const atual={project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,reference_date:dados.periodo_referencia,overall_status:dados.farol_geral,executive_summary:dados.resumo_executivo,attention_points:relatorioStatusProjeto().atencao.join('\n'),report_data:dados},{data:reportPersistido,error:erroAtual}=await supabasePortal.from('status_reports').upsert(atual,{onConflict:'project_id'}).select('*').single();if(erroAtual)throw erroAtual;dados.codigo=reportPersistido?.control_code||dados.codigo||'';const payload={project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,reference_date:dados.periodo_referencia,report_data:dados,author_name:versao.author_name};const {data,error}=await supabasePortal.from('status_report_versions').insert(payload).select('*').single();if(error)throw error;versao={...versao,...data,...(data.report_data||{})};}catch(e){registrarLogSistema('erro','Persistência do Status Report',e);toast('Não foi possível salvar o Status Report no banco.');return;}}
   STATE.statusReportHistory.unshift(versao);
   salvarState();
   renderStatusReport();
@@ -4770,6 +4835,20 @@ function renderDashboardProjeto(){
   document.getElementById('dash-governanca').innerHTML='<div><b>Direção de Negócios:</b> '+esc(projetoAtivo.patrocinador || '—')+'</div><div><b>PMO/Gerente de Projetos:</b> '+esc(projetoAtivo.gerente_projeto || '—')+'</div><div><b>Líder TI:</b> '+esc(projetoAtivo.lider_ti || '—')+'</div><div><b>Direção TI:</b> '+esc(projetoAtivo.direcao_ti || '—')+'</div>';
 }
 
+/* ═══ ON DEMAND — Kanban operacional independente ═══ */
+let onDemandVisaoLista=false;
+const OND_COLUNAS=[['entrada','Entrada'],['triagem','Triagem'],['execucao','Em execução'],['aguardando_retorno','Aguardando retorno'],['concluido','Concluído'],['cancelado','Cancelado']];
+const OND_PRIORIDADE={baixa:'Baixa',media:'Média',alta:'Alta',critica:'Crítica'};
+function mapearOnDemandSupabase(x){return {id:x.id,codigo:x.control_code||'',projeto_id:x.project_id||'',titulo:x.title||'',descricao:x.description||'',responsavel:x.responsible_name||'',area:x.business_area||'',prioridade:x.priority||'media',coluna:x.board_column||'entrada',prazo:x.due_date||'',tags:x.tags||[],anexos:x.attachments||[],criado_em:x.created_at,atualizado_em:x.updated_at};}
+async function carregarOnDemandSupabase(){if(!supabasePortal||!sessaoPortal||!temPermissaoModulo('on_demand'))return false;try{const {data,error}=await supabasePortal.from('on_demand_items').select('*').order('updated_at',{ascending:false});if(error)throw error;STATE.onDemandItems=(data||[]).map(mapearOnDemandSupabase);salvarState();return true;}catch(e){registrarLogSistema('erro','Sincronização On Demand',e);toast('Não foi possível carregar o Kanban On Demand do banco.');return false;}}
+function filtrarOnDemand(){const texto=(document.getElementById('ond-busca')?.value||'').toLowerCase(),prioridade=document.getElementById('ond-prioridade')?.value||'';return STATE.onDemandItems.filter(i=>(!prioridade||i.prioridade===prioridade)&&(!texto||[i.codigo,i.titulo,i.responsavel,i.area].join(' ').toLowerCase().includes(texto)));}
+function renderOnDemand(){const kanban=document.getElementById('ond-kanban'),lista=document.getElementById('ond-lista'),tbody=document.getElementById('ond-tbody');if(!kanban||!lista||!tbody)return;kanban.style.display=onDemandVisaoLista?'none':'grid';lista.style.display=onDemandVisaoLista?'block':'none';const botao=document.getElementById('ond-view-btn');if(botao)botao.textContent=onDemandVisaoLista?'Visão Kanban':'Visão em lista';const itens=filtrarOnDemand(),hoje=hojeISO(),badgePrioridade=i=>`<span class="badge ${i.prioridade==='critica'?'badge-danger':i.prioridade==='alta'?'badge-warn':'badge-neutral'}">${OND_PRIORIDADE[i.prioridade]||'Média'}</span>`;kanban.innerHTML=OND_COLUNAS.map(([chave,rotulo])=>{const coluna=itens.filter(i=>i.coluna===chave);return `<section class="card" style="padding:12px;min-height:260px;background:var(--paper)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:12px">${rotulo}</b><span class="badge badge-neutral">${coluna.length}</span></div>${coluna.map(i=>`<article class="card" style="padding:11px;margin-bottom:8px;border-left:3px solid ${i.prioridade==='critica'?'var(--red)':i.prioridade==='alta'?'var(--orange)':'var(--blue)'};cursor:pointer" onclick="abrirModalOnDemand('${i.id}')"><small class="mono" style="color:var(--ink-mute)">${esc(i.codigo||'Gerando código')}</small><b style="display:block;margin-top:4px;font-size:12px">${esc(i.titulo)}</b><small style="display:block;margin-top:5px;color:${i.prazo&&i.prazo<hoje&&!['concluido','cancelado'].includes(i.coluna)?'var(--red)':'var(--ink-mute)'}">${i.responsavel?esc(i.responsavel)+' · ':''}${i.prazo?'Prazo: '+fmtData(i.prazo):'Sem prazo'}</small><div style="display:flex;justify-content:space-between;gap:6px;margin-top:8px;align-items:center">${badgePrioridade(i)}<select onclick="event.stopPropagation()" onchange="moverOnDemand('${i.id}',this.value)">${OND_COLUNAS.map(([v,l])=>`<option value="${v}" ${i.coluna===v?'selected':''}>${l}</option>`).join('')}</select></div></article>`).join('')||'<small style="color:var(--ink-mute)">Nenhum item.</small>'}</section>`;}).join('');tbody.innerHTML=itens.length?itens.map(i=>`<tr><td class="mono">${esc(i.codigo||'—')}</td><td><b>${esc(i.titulo)}</b><small style="display:block;color:var(--ink-mute)">${esc(i.area||'')}</small></td><td>${esc(i.responsavel||'—')}</td><td>${badgePrioridade(i)}</td><td>${fmtData(i.prazo)}</td><td>${esc(OND_COLUNAS.find(x=>x[0]===i.coluna)?.[1]||'Entrada')}</td><td class="dtable-actions"><button onclick="abrirModalOnDemand('${i.id}')">✏️</button><button onclick="excluirOnDemand('${i.id}')">🗑️</button></td></tr>`).join(''):'<tr><td colspan="7"><div class="dtable-empty">Nenhuma atividade encontrada.</div></td></tr>';}
+function alternarVisaoOnDemand(){onDemandVisaoLista=!onDemandVisaoLista;renderOnDemand();}
+function abrirModalOnDemand(id){const item=id?STATE.onDemandItems.find(i=>i.id===id):null;document.getElementById('ond-modal-titulo').textContent=item?'Editar atividade On Demand':'Nova atividade On Demand';document.getElementById('ond-id').value=id||'';document.getElementById('ond-codigo').value=item?.codigo||'Gerado automaticamente';document.getElementById('ond-titulo').value=item?.titulo||'';document.getElementById('ond-descricao').value=item?.descricao||'';document.getElementById('ond-responsavel').value=item?.responsavel||'';document.getElementById('ond-area').value=item?.area||'';document.getElementById('ond-prioridade-form').value=item?.prioridade||'media';document.getElementById('ond-prazo').value=item?.prazo||'';document.getElementById('ond-tags').value=(item?.tags||[]).join(', ');document.getElementById('ond-comentario').value='';const projetos=document.getElementById('ond-projeto');projetos.innerHTML='<option value="">Não relacionado a projeto</option>'+STATE.projetos.map(p=>`<option value="${p.id}">${esc(p.lecom||'')} — ${esc(p.nome)}</option>`).join('');projetos.value=item?.projeto_id||'';abrirModal('modal-ondemand');}
+async function salvarOnDemand(){const id=document.getElementById('ond-id').value,titulo=document.getElementById('ond-titulo').value.trim();if(!titulo){toast('Informe o título da atividade.');return;}const anterior=id?STATE.onDemandItems.find(i=>i.id===id):null,dados={titulo,descricao:document.getElementById('ond-descricao').value.trim(),responsavel:document.getElementById('ond-responsavel').value.trim(),area:document.getElementById('ond-area').value.trim(),prioridade:document.getElementById('ond-prioridade-form').value,projeto_id:document.getElementById('ond-projeto').value||'',prazo:document.getElementById('ond-prazo').value,tags:document.getElementById('ond-tags').value.split(',').map(x=>x.trim()).filter(Boolean)},comentario=document.getElementById('ond-comentario').value.trim();try{let persistido=null;if(supabasePortal&&sessaoPortal){const payload={project_id:dados.projeto_id||null,title:dados.titulo,description:dados.descricao,responsible_name:dados.responsavel,business_area:dados.area,priority:dados.prioridade,due_date:dados.prazo||null,tags:dados.tags};const q=idUuid(id)?supabasePortal.from('on_demand_items').update(payload).eq('id',id):supabasePortal.from('on_demand_items').insert(payload);const {data,error}=await q.select('*').single();if(error)throw error;persistido=mapearOnDemandSupabase(data);const {error:erroHist}=await supabasePortal.from('on_demand_history').insert({item_id:persistido.id,action:anterior?'atualizacao':'criacao',previous_column:anterior?.coluna||null,new_column:persistido.coluna,note:comentario||null});if(erroHist)throw erroHist;}const item={...(anterior||{id:uid(),codigo:'',coluna:'entrada',criado_em:new Date().toISOString()}),...dados,...(persistido||{}),atualizado_em:new Date().toISOString()};STATE.onDemandItems=STATE.onDemandItems.filter(i=>i.id!==item.id);STATE.onDemandItems.unshift(item);salvarState();fecharModal('modal-ondemand');renderOnDemand();toast(anterior?'Atividade atualizada.':'Atividade criada.');}catch(e){registrarLogSistema('erro','Persistência On Demand',e);toast('Não foi possível salvar a atividade On Demand no banco.');}}
+async function moverOnDemand(id,coluna){const item=STATE.onDemandItems.find(i=>i.id===id);if(!item||item.coluna===coluna)return;const anterior=item.coluna;try{if(supabasePortal&&sessaoPortal){const {error}=await supabasePortal.from('on_demand_items').update({board_column:coluna}).eq('id',id);if(error)throw error;const {error:erroHist}=await supabasePortal.from('on_demand_history').insert({item_id:id,action:'movimentacao',previous_column:anterior,new_column:coluna});if(erroHist)throw erroHist;}item.coluna=coluna;item.atualizado_em=new Date().toISOString();salvarState();renderOnDemand();}catch(e){registrarLogSistema('erro','Movimentação On Demand',e);toast('Não foi possível movimentar a atividade.');renderOnDemand();}}
+async function excluirOnDemand(id){if(!confirm('Excluir esta atividade On Demand e seu histórico?'))return;try{if(supabasePortal&&sessaoPortal&&idUuid(id)){const {error}=await supabasePortal.from('on_demand_items').delete().eq('id',id);if(error)throw error;}STATE.onDemandItems=STATE.onDemandItems.filter(i=>i.id!==id);salvarState();renderOnDemand();toast('Atividade excluída.');}catch(e){registrarLogSistema('erro','Exclusão On Demand',e);toast('Não foi possível excluir a atividade no banco.');}}
+
 /* ═══ hook de entrada de página — chama o render certo ao navegar ═══ */
 const PAGE_ON_ENTER = {
   home: renderProjetosHome,
@@ -4785,6 +4864,7 @@ const PAGE_ON_ENTER = {
   tep: renderTep,
   riscos: renderRiscos,
   encaminhamentos: renderEncaminhamentos,
+  ondemand: ()=>{renderOnDemand();carregarOnDemandSupabase().then(renderOnDemand);},
   cronograma: renderCronograma,
   pontosfocais: renderPontosFocais,
   statusreport: renderStatusReport,
