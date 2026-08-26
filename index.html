@@ -1716,9 +1716,27 @@ function registrarAuditoria(acao,entidade,detalhe){
 function renderAuditoriaLocal(){const el=document.getElementById('auditoria-local');if(!el)return;el.textContent=AUDITORIA_LOCAL.length?AUDITORIA_LOCAL.map(a=>`[${a.data}] ${a.acao.toUpperCase()} | ${a.entidade} | ${a.usuario}\n${a.detalhe}`).join('\n\n'):'Nenhuma alteração registrada.';}
 function limparAuditoriaLocal(){AUDITORIA_LOCAL=[];try{localStorage.removeItem(AUDITORIA_LOCAL_KEY);}catch(e){}renderAuditoriaLocal();toast('Histórico de alterações limpo.');}
 function registrarLogSistema(nivel,origem,detalhe){
-  const mensagem=detalhe instanceof Error?(detalhe.stack||detalhe.message):String(detalhe||'');
+  const mensagem=formatarDetalheErro(detalhe);
   LOGS_SISTEMA.unshift({data:new Date().toLocaleString('pt-BR'),nivel,origem,mensagem});LOGS_SISTEMA=LOGS_SISTEMA.slice(0,100);
   try{localStorage.setItem(LOG_SISTEMA_KEY,JSON.stringify(LOGS_SISTEMA));}catch(e){} renderConsoleSistema();
+}
+function formatarDetalheErro(detalhe){
+  if(detalhe instanceof Error)return detalhe.stack||detalhe.message;
+  if(detalhe&&typeof detalhe==='object'){
+    const campos=['code','message','details','hint','status','statusCode','name'];
+    const resumo=campos.filter(c=>detalhe[c]!==undefined&&detalhe[c]!==null&&String(detalhe[c]).trim()!=='').map(c=>`${c}: ${detalhe[c]}`).join(' | ');
+    if(resumo)return resumo;
+    try{return JSON.stringify(detalhe);}catch(e){return 'Erro sem detalhes serializáveis.';}
+  }
+  return String(detalhe||'');
+}
+function mensagemErroSupabase(erro,contexto='operação'){
+  const detalhe=formatarDetalheErro(erro),codigo=String(erro?.code||'');
+  if(codigo==='42501'||/row-level security|permission denied/i.test(detalhe))return `Sem permissão para ${contexto}. Confirme o perfil, os módulos permitidos e as políticas RLS no Supabase.`;
+  if(codigo==='42703'||/column .* does not exist|schema cache/i.test(detalhe))return `O banco ainda não possui todos os campos necessários para ${contexto}. Execute a migration SQL corrigida e atualize o schema.`;
+  if(codigo==='23505'||/duplicate key|unique constraint/i.test(detalhe))return `Já existe um registro com este código de controle.`;
+  if(codigo==='42P01'||/relation .* does not exist/i.test(detalhe))return `A estrutura do banco está incompleta para ${contexto}. Execute a migration SQL corrigida.`;
+  return `Não foi possível concluir ${contexto}. Consulte Configurações > Console do sistema para ver os detalhes.`;
 }
 function formatarLogSistema(log){return `[${log.data}] ${log.nivel.toUpperCase()} | ${log.origem}\n${log.mensagem}`;}
 function renderConsoleSistema(){
@@ -2552,7 +2570,21 @@ async function salvarProjeto(){
   if(lecomEmUso){ toast('Já existe um projeto com esse código de controle.'); return; }
 
   if(supabasePortal&&sessaoPortal){
-    try{const dadosCompletos={...(STATE.projetos.find(p=>p.id===id)||{}),...dados},query=id?supabasePortal.from('projects').update(payloadProjetoSupabase(dadosCompletos)).eq('id',id):supabasePortal.from('projects').insert(payloadProjetoSupabase(dadosCompletos));const {data,error}=await query.select('*').single();if(error)throw error;const persistido=mapearProjetoSupabase(data);if(id){const indice=STATE.projetos.findIndex(p=>p.id===id);if(indice>=0)STATE.projetos[indice]=persistido;}else STATE.projetos.unshift(persistido);salvarState();fecharModal('modal-projeto');renderProjetosHome();renderPortfolioProjetos();toast(id?'Projeto atualizado.':'Projeto criado.');return;}catch(e){registrarLogSistema('erro','Persistência de projeto',e);toast('Não foi possível salvar o projeto no banco.');return;}
+    try{
+      const dadosCompletos={...(STATE.projetos.find(p=>p.id===id)||{}),...dados};
+      const payload=payloadProjetoSupabase(dadosCompletos);
+      /* Atribuição explícita evita depender do default auth.uid() e mantém o RLS consistente. */
+      if(!id)payload.owner_id=sessaoPortal.user.id;
+      const query=id?supabasePortal.from('projects').update(payload).eq('id',id):supabasePortal.from('projects').insert(payload);
+      const {data,error}=await query.select('*').single();if(error)throw error;
+      const persistido=mapearProjetoSupabase(data);
+      if(id){const indice=STATE.projetos.findIndex(p=>p.id===id);if(indice>=0)STATE.projetos[indice]=persistido;}else STATE.projetos.unshift(persistido);
+      salvarState();fecharModal('modal-projeto');renderProjetosHome();renderPortfolioProjetos();toast(id?'Projeto atualizado.':'Projeto criado.');return;
+    }catch(e){
+      registrarLogSistema('erro','Persistência de projeto',e);
+      toast(mensagemErroSupabase(e,'salvar o projeto'));
+      return;
+    }
   }
   if(id){
     const p = STATE.projetos.find(x => x.id === id);
