@@ -3849,7 +3849,8 @@ function proximoIdTarefa(){
   const ts = tarefasDoProjeto();
   return ts.length ? Math.max(...ts.map(t => t.numero)) + 1 : 1;
 }
-const FASES_PADRAO_PROJETO=['Planejamento','Execução/Desenvolvimento','Homologação/Monitoramento','Operação Assistida','Encerramento'];
+/* Fases automaticamente disponíveis em todo novo projeto. */
+const FASES_PADRAO_PROJETO=['Planejamento e Refinamento','Kickoff','Desenvolvimento','Homologação','Go-live','Operação Assistida'];
 function fasesDoProjeto(){
   const vistas = new Set(); const out = [];
   FASES_PADRAO_PROJETO.forEach(f=>{vistas.add(f);out.push(f);});
@@ -3956,7 +3957,8 @@ function renderCronograma(){
   const todasTarefas = tarefasDoProjeto();
   preencherFiltrosCronograma();
   const ts = filtrarTarefasCronograma(todasTarefas);
-  const fases = [...new Set(ts.map(t => t.fase))];
+  /* As fases padrão ficam visíveis mesmo antes do primeiro cadastro de atividade. */
+  const fases = fasesDoProjeto().filter(f=>FASES_PADRAO_PROJETO.includes(f)||ts.some(t=>t.fase===f));
   const criticos = calcularCaminhoCritico();
   [['baseline','crono-baseline-btn'],['critico','crono-critico-btn'],['cascata','crono-cascata-btn']].forEach(([opcao,id]) => document.getElementById(id)?.classList.toggle('btn-primary', CRONO_CONFIG[opcao]));
   const { inicio, fim } = calcularEscala();
@@ -3988,12 +3990,6 @@ function renderCronograma(){
   const gridEl = document.getElementById('crono-grid');
   const bodyEl = document.getElementById('gantt-body');
   bodyEl.style.width = (totalDias * DAY_PX) + 'px';
-
-  if(!ts.length){
-    gridEl.innerHTML = `<div class="dtable-empty" style="padding:40px 16px"><span class="icon">📅</span>Nenhuma atividade cadastrada.<br>Crie uma fase e adicione atividades.</div>`;
-    bodyEl.innerHTML = '';
-    return;
-  }
 
   let gridHtml = '', ganttHtml = '';
   let rowIndex = 0;
