@@ -4372,7 +4372,8 @@ async function excluirTarefa(id){
   if(!confirm('Excluir esta atividade?')) return;
   const tarefa = STATE.tarefas.find(x => x.id === id);
   if(!tarefa) return;
-  if(supabasePortal&&sessaoPortal){
+  /* IDs id_* pertencem ao cache local e não podem ser enviados ao campo UUID do Supabase. */
+  if(supabasePortal&&sessaoPortal&&idUuid(id)){
     try{const {error}=await supabasePortal.from('tasks').delete().eq('id',id);if(error)throw error;}catch(e){registrarLogSistema('erro','Exclusão de atividade',e);toast('Não foi possível excluir a atividade no banco.');return;}
   }
   const numeroExcluido = tarefa.numero;
