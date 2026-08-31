@@ -650,10 +650,8 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
   <div class="nav-group-label" data-toggle-group><span>Planejamento</span><span class="chevron">▾</span></div>
   <div class="nav-group-body">
     <div class="nav-item nav-item-sub" data-page="tap"><span class="icon">📄</span> TAP</div>
-    <!-- EAP e Matriz RACI temporariamente ocultos do menu. Preservar para reativação futura.
     <div class="nav-item nav-item-sub" data-page="eap"><span class="icon">🌳</span> EAP</div>
     <div class="nav-item nav-item-sub" data-page="raci"><span class="icon">👥</span> Matriz RACI</div>
-    -->
   </div>
 
   <!-- EXECUÇÃO -->
@@ -1822,7 +1820,7 @@ window.addEventListener('unhandledrejection',e=>registrarLogSistema('erro','Prom
    travado no documento de arquitetura. Cada
    chave abaixo é uma tabela futura.
 ═══════════════════════════════════════════ */
-/* Supabase Auth: integração inicial. Dados de negócio continuam locais até a migração/importação. */
+/* Supabase Auth e persistência dos módulos integrados; o localStorage funciona como cache de contingência por usuário. */
 const SUPABASE_PORTAL_CONFIG={
   url:'https://narsvhwwjogfwuxoingd.supabase.co',
   publishableKey:'sb_publishable_eM-NA_6WT3KizBgmVuLEIA_Qx_1Oluy'
@@ -1841,8 +1839,8 @@ const MODULOS_PORTAL=[
   ['cronograma','Cronograma'],['statusreport','Status Report'],['riscos','Riscos'],['pontosfocais','Pontos Focais'],
   ['encaminhamentos','Encaminhamentos'],['on_demand','On Demand'],['tep','TEP'],['licoes','Lições Aprendidas'],['lecoms','LECOMs'],['solicitacoes','Solicitações']
 ];
-/* EAP e Matriz RACI permanecem preservados no código, porém ocultos do menu por decisão vigente. */
-const MODULOS_OPERADOR=MODULOS_PORTAL.filter(([chave])=>!['solicitacoes','eap','raci'].includes(chave));
+/* Solicitações permanecem exclusivas de Administradores e Colaboradores; EAP e RACI podem ser liberados para Operadores. */
+const MODULOS_OPERADOR=MODULOS_PORTAL.filter(([chave])=>chave!=='solicitacoes');
 const MODULO_POR_PAGINA={home:'portfolio',projetos:'portfolio',portfdash:'portfolio',dashboardprojeto:'portfolio',tap:'tap',eap:'eap',raci:'raci',cronograma:'cronograma',statusreport:'statusreport',riscos:'riscos',pontosfocais:'pontosfocais',encaminhamentos:'encaminhamentos',ondemand:'on_demand',tep:'tep',licoes:'licoes',lecoms:'lecoms',solicitacoes:'solicitacoes'};
 
 function papelPortal(){return String(perfilPortal?.role||'').trim().toLowerCase();}
@@ -3421,7 +3419,7 @@ async function carregarProjetosSupabase(){
 function mapearLecomSupabase(l){const x=l.extra||{};return {...x,id:l.id,iniciativa:l.initiative,codigo:l.lecom_code,solicitante:l.requester,area_solicitante:l.requester_area,classificacao:l.classification,priorizacao_ti:l.it_priority,priorizacao_negocio:l.business_priority,compromisso:l.commitment,area_ti:l.it_area,diretor_ti:l.it_director,area_classificacao:l.classification_area,impacto_jornada:l.beneficiary_impact?'sim':'nao',impacto_nips:l.nips_impact?'sim':'nao',impacto_financeiro:l.financial_impact?'sim':'nao',risco_assistencial:l.care_risk?'sim':'nao',envolve_ia:l.involves_ai?'sim':'nao',plan_especificacao:l.specification_planned_date,final_especificacao:l.specification_final_date,status_especificacao:l.specification_status,plan_homologacao:l.approval_planned_date,final_homologacao:l.approval_final_date,status_homologacao:l.approval_status,plan_producao:l.production_planned_date,final_producao:l.production_final_date,status_producao:l.production_status,source_request_id:l.source_request_id||x.solicitacao_id||null,criado_em:l.created_at};}
 async function carregarLecomsSupabase(){if(!supabasePortal||!sessaoPortal)return false;try{const {data,error}=await supabasePortal.from('lecoms').select('*').order('created_at',{ascending:false});if(error)throw error;STATE.melhorias=(data||[]).map(mapearLecomSupabase);salvarState();renderLecoms();return true;}catch(e){registrarLogSistema('erro','Sincronização de LECOMs',e);return false;}}
 function mapearTarefaSupabase(linha){const extra=linha.extra||{};return {id:linha.id,projeto_id:linha.project_id,codigo:linha.activity_code||'',numero:extra.numero||0,nome:linha.title||'',fase:linha.phase||'SEM FASE',fase_id:linha.phase_id||null,tipo:extra.tipo||'comum',area:extra.area||'',responsavel:linha.responsible_name||'',data_inicio:linha.replanned_start_date||linha.planned_start_date||'',data_fim:linha.replanned_end_date||linha.planned_end_date||'',baseline_inicio:linha.baseline_start_date||linha.planned_start_date||'',baseline_fim:linha.baseline_end_date||linha.planned_end_date||'',status:linha.status||'a_iniciar',progresso:Number(linha.progress??extra.progresso??(PROGRESSO_STATUS[linha.status]??0)),dependencias:extra.dependencias||[],observacoes:linha.description||'',justificativa_atraso:extra.justificativa_atraso||'',data_replanejamento:extra.data_replanejamento||linha.replanned_end_date||'',historico_inicio:extra.historico_inicio||[linha.planned_start_date].filter(Boolean),historico_fim:extra.historico_fim||[linha.planned_end_date].filter(Boolean),criado_em:linha.created_at};}
-async function carregarTarefasSupabase(projetoId){if(!supabasePortal||!sessaoPortal||!projetoId)return false;try{const {data,error}=await supabasePortal.from('tasks').select('*').eq('project_id',projetoId).order('created_at');if(error)throw error;const tarefas=(data||[]).map(mapearTarefaSupabase),ids=tarefas.map(t=>t.id);if(ids.length){const {data:deps,error:erroDeps}=await supabasePortal.from('task_dependencies').select('*').in('task_id',ids);if(erroDeps)throw erroDeps;const porId=new Map(tarefas.map(t=>[t.id,t]));(deps||[]).forEach(d=>{const alvo=porId.get(d.task_id),origem=porId.get(d.depends_on_task_id);if(alvo&&origem&&!alvo.dependencias.includes(origem.numero))alvo.dependencias.push(origem.numero);});}STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(tarefas);return true;}catch(e){registrarLogSistema('erro','Sincronização de cronograma',e);return false;}}
+async function carregarTarefasSupabase(projetoId){if(!supabasePortal||!sessaoPortal||!projetoId)return false;try{const pendentesLocais=STATE.tarefas.filter(t=>t.projeto_id===projetoId&&t._sync_pendente),{data,error}=await supabasePortal.from('tasks').select('*').eq('project_id',projetoId).order('created_at');if(error)throw error;const tarefas=(data||[]).map(mapearTarefaSupabase),ids=tarefas.map(t=>t.id);if(ids.length){const {data:deps,error:erroDeps}=await supabasePortal.from('task_dependencies').select('*').in('task_id',ids);if(erroDeps)throw erroDeps;const porId=new Map(tarefas.map(t=>[t.id,t]));(deps||[]).forEach(d=>{const alvo=porId.get(d.task_id),origem=porId.get(d.depends_on_task_id);if(alvo&&origem&&!alvo.dependencias.includes(origem.numero))alvo.dependencias.push(origem.numero);});}const mescladas=tarefas.slice();pendentesLocais.forEach(local=>{const indice=mescladas.findIndex(remota=>remota.id===local.id);if(indice>=0)mescladas[indice]=local;else mescladas.push(local);});STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(mescladas);pendentesLocais.forEach(t=>agendarPersistenciaTarefaCronograma(t.id,250));salvarState();return true;}catch(e){registrarLogSistema('erro','Sincronização de cronograma',e);return false;}}
 function idUuid(valor){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(valor||''));}
 async function gravarRegistroProjetoSupabase(tabela,id,payload){
   if(!supabasePortal||!sessaoPortal)return null;let consulta=idUuid(id)?supabasePortal.from(tabela).update(payload).eq('id',id):supabasePortal.from(tabela).insert({...payload,owner_id:sessaoPortal.user.id});const {data,error}=await consulta.select('*').single();if(error)throw error;return data;
@@ -4381,6 +4379,82 @@ function criarTarefaInline(faseAlvo){
   });
 }
 
+/* ═══ sincronização da edição rápida com o Supabase ═══
+   O localStorage permanece como cache/contingência. Atividades completas
+   são inseridas ou atualizadas no banco após uma pequena pausa na edição. */
+const tarefaSyncTimers = new Map();
+const tarefaSyncEmCurso = new Set();
+const tarefaSyncCanceladas = new Set();
+
+function payloadTarefaCronogramaSupabase(tarefa,faseId){
+  const historicoIni=historicoInicio(tarefa),historicoFim=historicoFim(tarefa);
+  const baselineInicio=tarefa.baseline_inicio||historicoIni[0]||tarefa.data_inicio||null;
+  const baselineFim=tarefa.baseline_fim||historicoFim[0]||tarefa.data_fim||null;
+  const replanejada=!!((tarefa.data_inicio&&baselineInicio&&tarefa.data_inicio!==baselineInicio)||(tarefa.data_fim&&baselineFim&&tarefa.data_fim!==baselineFim));
+  return {
+    project_id:tarefa.projeto_id,phase_id:faseId,title:tarefa.nome,description:tarefa.observacoes||'',phase:tarefa.fase,
+    responsible_name:tarefa.responsavel||'',status:tarefa.status||'a_iniciar',
+    planned_start_date:baselineInicio,planned_end_date:baselineFim,baseline_start_date:baselineInicio,baseline_end_date:baselineFim,
+    replanned_start_date:replanejada?(tarefa.data_inicio||null):null,replanned_end_date:replanejada?(tarefa.data_fim||null):null,
+    progress:Number(tarefa.progresso??PROGRESSO_STATUS[tarefa.status]??0),
+    extra:{numero:tarefa.numero,tipo:tarefa.tipo||'comum',area:tarefa.area||'',dependencias:tarefa.dependencias||[],progresso:Number(tarefa.progresso??PROGRESSO_STATUS[tarefa.status]??0),justificativa_atraso:tarefa.justificativa_atraso||'',data_replanejamento:tarefa.data_replanejamento||'',historico_inicio:historicoIni,historico_fim:historicoFim}
+  };
+}
+
+function agendarPersistenciaTarefaCronograma(id,atraso=1100){
+  if(!id)return;
+  clearTimeout(tarefaSyncTimers.get(id));
+  tarefaSyncTimers.set(id,setTimeout(()=>{tarefaSyncTimers.delete(id);persistirTarefaCronogramaNoBanco(id);},atraso));
+}
+
+async function persistirTarefaCronogramaNoBanco(id){
+  if(tarefaSyncCanceladas.has(id)||tarefaSyncEmCurso.has(id)){if(tarefaSyncEmCurso.has(id))agendarPersistenciaTarefaCronograma(id,500);return;}
+  const tarefa=STATE.tarefas.find(t=>t.id===id);
+  if(!tarefa||!tarefa._sync_pendente||!supabasePortal||!sessaoPortal)return;
+  if(!tarefa.nome?.trim()||!tarefa.fase||!tarefa.data_inicio||!tarefa.data_fim)return;
+  if(projetoAtivo?.id!==tarefa.projeto_id){agendarPersistenciaTarefaCronograma(id,1500);return;}
+  tarefaSyncEmCurso.add(id);
+  let idPersistido=id;
+  try{
+    const criando=!idUuid(tarefa.id),revisaoEnviada=Number(tarefa._sync_revisao||0),versaoEnviada=tarefa._sync_versao_pendente?{...tarefa._sync_versao_pendente}:null,faseId=await garantirFaseProjetoSupabase(tarefa.fase),payload=payloadTarefaCronogramaSupabase(tarefa,faseId);
+    const consulta=criando?supabasePortal.from('tasks').insert(payload):supabasePortal.from('tasks').update(payload).eq('id',tarefa.id);
+    const {data,error}=await consulta.select('*').single();if(error)throw error;
+    if(tarefaSyncCanceladas.has(id)){
+      await supabasePortal.from('tasks').delete().eq('id',data.id);
+      tarefaSyncCanceladas.delete(id);
+      return;
+    }
+    const indice=STATE.tarefas.findIndex(t=>t.id===id);if(indice<0)return;
+    const tarefaAtual=STATE.tarefas[indice],houveNovaEdicao=Number(tarefaAtual._sync_revisao||0)>revisaoEnviada;
+    const persistida={...mapearTarefaSupabase(data),...(houveNovaEdicao?tarefaAtual:{}),id:data.id,projeto_id:data.project_id,_sync_pendente:true,_sync_erro_notificado:false,_sync_baseline_pendente:criando||tarefaAtual._sync_baseline_pendente,_sync_versao_pendente:houveNovaEdicao?(tarefaAtual._sync_versao_pendente||null):versaoEnviada,_sync_revisao:Number(tarefaAtual._sync_revisao||0)};
+    STATE.tarefas[indice]=persistida;idPersistido=persistida.id;
+    await sincronizarDependenciasTarefa(persistida,payload.extra.dependencias);
+    if(persistida._sync_baseline_pendente){
+      const {error:erroBaseline}=await supabasePortal.from('task_schedule_versions').insert({task_id:persistida.id,project_id:persistida.projeto_id,change_type:'baseline',new_start_date:persistida.baseline_inicio||persistida.data_inicio||null,new_end_date:persistida.baseline_fim||persistida.data_fim||null,reason:'Baseline original criada pela edição rápida do cronograma.'});
+      if(erroBaseline)throw erroBaseline;delete persistida._sync_baseline_pendente;
+    }
+    if(versaoEnviada){
+      const versao=versaoEnviada,{error:erroVersao}=await supabasePortal.from('task_schedule_versions').insert({task_id:persistida.id,project_id:persistida.projeto_id,change_type:'replanning',previous_start_date:versao.previous_start_date||null,previous_end_date:versao.previous_end_date||null,new_start_date:versao.new_start_date||null,new_end_date:versao.new_end_date||null,reason:payload.description||'Replanejamento realizado na edição rápida do cronograma.'});
+      if(erroVersao)throw erroVersao;if(!houveNovaEdicao)delete persistida._sync_versao_pendente;
+    }
+    if(!houveNovaEdicao){delete persistida._sync_pendente;delete persistida._sync_erro_notificado;}
+    salvarState();mostrarAutosaveIndicator('Sincronizado no banco às');
+    if(criando){const timerPendente=tarefaSyncTimers.get(id);if(timerPendente){clearTimeout(timerPendente);tarefaSyncTimers.delete(id);}renderCronograma();}
+    if(houveNovaEdicao)agendarPersistenciaTarefaCronograma(persistida.id,250);
+  }catch(e){
+    const atual=STATE.tarefas.find(t=>t.id===idPersistido)||STATE.tarefas.find(t=>t.id===id);
+    if(atual){atual._sync_pendente=true;if(!atual._sync_erro_notificado){toast('Alteração mantida localmente. A sincronização com o banco será tentada novamente.');atual._sync_erro_notificado=true;}salvarState();}
+    registrarLogSistema('erro','Sincronização automática do cronograma',e);
+  }finally{tarefaSyncEmCurso.delete(id);}
+}
+
+function sincronizarTarefasPendentes(){
+  if(!supabasePortal||!sessaoPortal)return;
+  STATE.tarefas.filter(t=>t._sync_pendente&&t.projeto_id===projetoAtivo?.id).forEach(t=>agendarPersistenciaTarefaCronograma(t.id,150));
+}
+window.addEventListener('online',sincronizarTarefasPendentes);
+setInterval(sincronizarTarefasPendentes,30000);
+
 /* ═══ edição inline de campo — não redesenha a grade inteira quando o
    campo é texto (perderia o foco no meio da digitação). Só re-renderiza
    quando o campo muda algo visual no Gantt (data/status). ═══ */
@@ -4398,16 +4472,20 @@ function campoTarefa(id, campo, valor, precisaRedesenhar){
     return;
   }
   if(campo === 'data_inicio' || campo === 'data_fim'){
+    const versao=t._sync_versao_pendente||{previous_start_date:t.data_inicio||null,previous_end_date:t.data_fim||null};
     const historico = campo === 'data_inicio' ? (t.historico_inicio ||= historicoInicio(t)) : (t.historico_fim ||= historicoFim(t));
     if(valor && historico.at(-1) !== valor) historico.push(valor);
     if(!valor) historico.length = 0;
     t[campo] = valor;
+    t._sync_versao_pendente={...versao,new_start_date:t.data_inicio||null,new_end_date:t.data_fim||null};
     if(campo === 'data_fim' && CRONO_CONFIG.cascata) aplicarCascataDependencias(t);
   }else if(campo === 'status'){
     t.status = valor;
     t.progresso = PROGRESSO_STATUS[valor] ?? 0;
   }else t[campo] = valor;
+  t._sync_pendente=true;t._sync_erro_notificado=false;t._sync_revisao=Number(t._sync_revisao||0)+1;
   salvarStateDebounced();
+  agendarPersistenciaTarefaCronograma(id);
   if(precisaRedesenhar) renderCronograma();
 }
 
@@ -4420,9 +4498,10 @@ function aplicarCascataDependencias(origem){
       if(!tarefa.data_fim || !sucessora.data_inicio || sucessora.data_inicio > tarefa.data_fim) return;
       const duracao = sucessora.data_fim ? Math.max(0, diffDias(sucessora.data_inicio, sucessora.data_fim)) : 0;
       const novoInicio = addDias(tarefa.data_fim, 1), novoFim = addDias(novoInicio, duracao);
+      const versao=sucessora._sync_versao_pendente||{previous_start_date:sucessora.data_inicio||null,previous_end_date:sucessora.data_fim||null};
       (sucessora.historico_inicio ||= historicoInicio(sucessora)).push(novoInicio);
       (sucessora.historico_fim ||= historicoFim(sucessora)).push(novoFim);
-      sucessora.data_inicio = novoInicio; sucessora.data_fim = novoFim; alteradas++; propagar(sucessora);
+      sucessora.data_inicio = novoInicio; sucessora.data_fim = novoFim;sucessora._sync_versao_pendente={...versao,new_start_date:novoInicio,new_end_date:novoFim};sucessora._sync_pendente=true;sucessora._sync_erro_notificado=false;sucessora._sync_revisao=Number(sucessora._sync_revisao||0)+1;agendarPersistenciaTarefaCronograma(sucessora.id);alteradas++; propagar(sucessora);
     });
   };
   propagar(origem);
@@ -4505,8 +4584,8 @@ function exportarCronogramaPdf(){
   exportarElementoComoPdf(document.getElementById('crono-split'),'Cronograma',`CRONOGRAMA_${(projetoAtivo.lecom || 'PROJETO').replace(/[^\w-]/g,'_')}.pdf`);
 }
 
-/* ═══ autosave — debounce curto (750ms após parar de digitar), indicador
-   visual a cada salvamento, e um pulso periódico de 10min como reforço. ═══ */
+/* ═══ cache local — debounce curto (750ms após parar de digitar), indicador
+   visual a cada atualização, e um pulso periódico de 10min como reforço. ═══ */
 let saveDebounceTimer = null;
 function salvarStateDebounced(){
   clearTimeout(saveDebounceTimer);
@@ -4515,12 +4594,12 @@ function salvarStateDebounced(){
     mostrarAutosaveIndicator();
   }, 750);
 }
-function mostrarAutosaveIndicator(){
+function mostrarAutosaveIndicator(prefixo='Cache atualizado às'){
   const ind = document.getElementById('autosave-indicator');
   if(!ind) return;
   const agora = new Date();
   document.getElementById('autosave-txt').textContent =
-    'Salvo às ' + agora.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    prefixo + ' ' + agora.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
   ind.classList.add('show');
   clearTimeout(ind._hideTimer);
   ind._hideTimer = setTimeout(() => ind.classList.remove('show'), 4000);
@@ -4608,11 +4687,12 @@ async function salvarTarefa(){
 
   if(supabasePortal&&sessaoPortal){
     const existente=id?STATE.tarefas.find(t=>t.id===id):null;
+    const criando=!idUuid(id);
     let faseId=null;try{faseId=await garantirFaseProjetoSupabase(fase);}catch(erroFase){registrarLogSistema('erro','Fase do cronograma',erroFase);toast('Não foi possível localizar ou criar a fase no banco. Execute a migration de governança.');return;}
     const historicoInicioNovo=existente?.data_inicio!==inicio?[...(historicoInicio(existente||{})),inicio].filter(Boolean):historicoInicio(existente||{data_inicio:inicio});
     const historicoFimNovo=existente?.data_fim!==fim?[...(historicoFim(existente||{})),fim].filter(Boolean):historicoFim(existente||{data_fim:fim});
     const houveReplanejamento=!!existente&&(existente.data_inicio!==inicio||existente.data_fim!==fim),payload={project_id:projetoAtivo.id,phase_id:faseId,title:nome,description:dados.observacoes,phase:fase,responsible_name:dados.responsavel,status:dados.status,planned_start_date:dados.baseline_inicio,planned_end_date:dados.baseline_fim,baseline_start_date:dados.baseline_inicio,baseline_end_date:dados.baseline_fim,replanned_start_date:houveReplanejamento||dados.data_replanejamento?inicio:(existente?.replanned_start_date||null),replanned_end_date:houveReplanejamento||dados.data_replanejamento?(dados.data_replanejamento||fim):(existente?.replanned_end_date||null),progress:PROGRESSO_STATUS[dados.status]??0,extra:{numero:existente?.numero||proximoIdTarefa(),tipo:dados.tipo,area:dados.area,dependencias,progresso:PROGRESSO_STATUS[dados.status]??0,justificativa_atraso:dados.justificativa_atraso,data_replanejamento:dados.data_replanejamento,historico_inicio:historicoInicioNovo,historico_fim:historicoFimNovo}};
-    try{const query=id?supabasePortal.from('tasks').update(payload).eq('id',id):supabasePortal.from('tasks').insert(payload);const {data,error}=await query.select('*').single();if(error)throw error;const persistida=mapearTarefaSupabase(data);STATE.tarefas=STATE.tarefas.filter(t=>t.id!==persistida.id&&t.id!==id);STATE.tarefas.push(persistida);await sincronizarDependenciasTarefa(persistida,dependencias);if(houveReplanejamento){const {error:erroVersao}=await supabasePortal.from('task_schedule_versions').insert({task_id:persistida.id,project_id:projetoAtivo.id,change_type:'replanning',previous_start_date:existente.data_inicio,previous_end_date:existente.data_fim,new_start_date:inicio,new_end_date:fim,reason:dados.observacoes||'Replanejamento registrado no cronograma.'});if(erroVersao)throw erroVersao;}else if(!id){const {error:erroBaseline}=await supabasePortal.from('task_schedule_versions').insert({task_id:persistida.id,project_id:projetoAtivo.id,change_type:'baseline',new_start_date:inicio,new_end_date:fim,reason:'Baseline original da atividade.'});if(erroBaseline)throw erroBaseline;}salvarState();fecharModal('modal-tarefa');renderCronograma();toast(id?'Atividade atualizada.':'Atividade cadastrada.');return;}catch(e){registrarLogSistema('erro','Persistência de atividade',e);toast('Não foi possível salvar a atividade no banco.');return;}
+    try{const query=criando?supabasePortal.from('tasks').insert(payload):supabasePortal.from('tasks').update(payload).eq('id',id);const {data,error}=await query.select('*').single();if(error)throw error;const persistida=mapearTarefaSupabase(data);STATE.tarefas=STATE.tarefas.filter(t=>t.id!==persistida.id&&t.id!==id);STATE.tarefas.push(persistida);clearTimeout(tarefaSyncTimers.get(id));tarefaSyncTimers.delete(id);await sincronizarDependenciasTarefa(persistida,dependencias);if(houveReplanejamento&&!criando){const {error:erroVersao}=await supabasePortal.from('task_schedule_versions').insert({task_id:persistida.id,project_id:projetoAtivo.id,change_type:'replanning',previous_start_date:existente.data_inicio,previous_end_date:existente.data_fim,new_start_date:inicio,new_end_date:fim,reason:dados.observacoes||'Replanejamento registrado no cronograma.'});if(erroVersao)throw erroVersao;}else if(criando){const {error:erroBaseline}=await supabasePortal.from('task_schedule_versions').insert({task_id:persistida.id,project_id:projetoAtivo.id,change_type:'baseline',new_start_date:inicio,new_end_date:fim,reason:'Baseline original da atividade.'});if(erroBaseline)throw erroBaseline;}salvarState();fecharModal('modal-tarefa');renderCronograma();toast(existente?'Atividade atualizada.':'Atividade cadastrada.');return;}catch(e){registrarLogSistema('erro','Persistência de atividade',e);toast('Não foi possível salvar a atividade no banco.');return;}
   }
 
   if(id){
@@ -4640,6 +4720,7 @@ async function excluirTarefa(id){
   if(!confirm('Excluir esta atividade?')) return;
   const tarefa = STATE.tarefas.find(x => x.id === id);
   if(!tarefa) return;
+  tarefaSyncCanceladas.add(id);clearTimeout(tarefaSyncTimers.get(id));tarefaSyncTimers.delete(id);
   /* IDs id_* pertencem ao cache local e não podem ser enviados ao campo UUID do Supabase. */
   if(supabasePortal&&sessaoPortal&&idUuid(id)){
     try{const {error}=await supabasePortal.from('tasks').delete().eq('id',id);if(error)throw error;}catch(e){registrarLogSistema('erro','Exclusão de atividade',e);toast('Não foi possível excluir a atividade no banco.');return;}
@@ -4651,8 +4732,10 @@ async function excluirTarefa(id){
   STATE.tarefas.forEach(t => {
     if(t.projeto_id !== tarefa.projeto_id || !Array.isArray(t.dependencias)) return;
     const dependenciasAtualizadas = t.dependencias.filter(n => n !== numeroExcluido);
-    referenciasRemovidas += t.dependencias.length - dependenciasAtualizadas.length;
+    const removidas=t.dependencias.length-dependenciasAtualizadas.length;
+    referenciasRemovidas += removidas;
     t.dependencias = dependenciasAtualizadas;
+    if(removidas){t._sync_pendente=true;t._sync_erro_notificado=false;t._sync_revisao=Number(t._sync_revisao||0)+1;agendarPersistenciaTarefaCronograma(t.id);}
   });
   salvarState();
   renderCronograma();
