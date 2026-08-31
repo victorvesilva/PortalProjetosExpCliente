@@ -137,6 +137,8 @@ img[src$="hapvida-logo.jpg"]{
 .crono-readonly .cg-input{border-color:transparent!important;background:transparent!important;color:var(--ink)!important;box-shadow:none!important;pointer-events:none}
 .crono-readonly .cg-status-sel{appearance:none;-webkit-appearance:none}
 .crono-readonly .crono-edit-only{display:none!important}
+.cg-row.crono-row-confirmada{animation:confirmarLinhaCronograma .65s ease}
+@keyframes confirmarLinhaCronograma{0%{background:rgba(21,154,91,.18);box-shadow:inset 3px 0 0 var(--green)}100%{background:transparent;box-shadow:inset 0 0 0 transparent}}
 .audit-filters{display:grid;grid-template-columns:minmax(190px,1.4fr) repeat(4,minmax(125px,.8fr)) minmax(160px,1fr);gap:10px;align-items:end}
 .audit-detail{max-width:440px;white-space:normal;line-height:1.45;color:var(--ink-soft)}
 @media(max-width:1100px){.audit-filters{grid-template-columns:repeat(2,minmax(160px,1fr))}}
@@ -4413,7 +4415,8 @@ function renderCronograma(){
         <span class="cg-toggle"></span>
         ${marcoIcon ? `<span class="cg-marco">${marcoIcon}</span>` : ''}
         <input class="cg-input cg-nome" value="${esc(t.nome)}" placeholder="Nome da atividade" ${editando?'':'disabled'}
-          oninput="campoTarefa('${t.id}','nome',this.value,false)">
+          oninput="campoTarefa('${t.id}','nome',this.value,false)"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();confirmarLinhaCronograma('${t.id}',this)}">
         <input type="date" class="cg-input cg-data" value="${t.data_inicio||''}" ${editando?'':'disabled'}
           onchange="campoTarefa('${t.id}','data_inicio',this.value,true)">
         <input type="date" class="cg-input cg-data" value="${t.data_fim||''}" ${editando?'':'disabled'}
@@ -4668,6 +4671,17 @@ function campoTarefa(id, campo, valor, precisaRedesenhar){
   salvarStateDebounced();
   agendarPersistenciaTarefaCronograma(id);
   if(precisaRedesenhar) renderCronograma();
+}
+
+function confirmarLinhaCronograma(id,input){
+  if(!cronogramaEdicaoAtiva()){toast('O cronograma está em modo somente leitura.');return;}
+  const tarefa=STATE.tarefas.find(t=>t.id===id),nome=String(input?.value||'').trim();
+  if(!tarefa)return;
+  if(!nome){toast('Informe o nome da atividade antes de confirmar.');input?.focus();return;}
+  tarefa.nome=nome;marcarCronogramaAlterado();input.value=nome;input.blur();
+  const linha=document.querySelector(`.cg-row[data-task-id="${CSS.escape(String(id))}"]`);
+  if(linha){linha.classList.remove('crono-row-confirmada');void linha.offsetWidth;linha.classList.add('crono-row-confirmada');setTimeout(()=>linha.classList.remove('crono-row-confirmada'),700);}
+  toast('Atividade confirmada no rascunho.');
 }
 
 function aplicarCascataDependencias(origem){
