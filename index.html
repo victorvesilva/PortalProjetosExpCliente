@@ -941,7 +941,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <span><span class="sw" style="background:var(--green)"></span>Concluído</span>
         <span><span class="sw" style="background:#9CA3AF"></span>Cancelado</span>
         <span>◆ <span style="color:var(--orange); font-weight:700">Marco</span></span>
-        <span>◆ <span style="color:var(--red); font-weight:700">Go-Live</span></span>
+        <span>◆ <span style="color:var(--red); font-weight:700">Go Live</span></span>
       </div>
       </div>
     </div>
@@ -1181,7 +1181,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <div class="field span2"><label>Nome da Atividade <span class="req">*</span></label><input type="text" id="mt-nome" placeholder="Ex: Homologação com o time de negócio"></div>
         <div class="field"><label>Fase <span class="req">*</span></label><select id="mt-fase"></select></div>
         <div class="field"><label>Tipo</label>
-          <select id="mt-tipo"><option value="comum">Atividade comum</option><option value="marco">Marco</option><option value="golive">Go-Live</option></select>
+          <select id="mt-tipo"><option value="comum">Atividade comum</option><option value="marco">Marco</option><option value="golive">Go Live</option></select>
         </div>
         <div class="field"><label>Área</label><input type="text" id="mt-area"></div>
         <div class="field"><label>Responsável</label><input type="text" id="mt-responsavel"></div>
@@ -2290,7 +2290,7 @@ function carregarDadosDemo(silencioso=false){
       {id:'dt2',projeto_id:'demo-p1',fase:'Planejamento',ordem_fase:1,nome:'Validar escopo e requisitos',area:'Negócio',responsavel:'Ricardo Almeida',data_inicio:'2026-08-11',data_fim:'2026-08-25',baseline_inicio:'2026-08-11',baseline_fim:'2026-08-25',historico_inicio:['2026-08-11'],historico_fim:['2026-08-25'],progresso:100,status:'concluido',tipo:'comum',dependencias:['dt1'],historico:[]},
       {id:'dt3',projeto_id:'demo-p1',fase:'Execução/Desenvolvimento',ordem_fase:2,nome:'Construir portal do beneficiário',area:'Digital',responsavel:'Felipe Nunes',data_inicio:'2026-08-28',data_fim:'2026-10-15',baseline_inicio:'2026-08-26',baseline_fim:'2026-10-10',historico_inicio:['2026-08-26','2026-08-28'],historico_fim:['2026-10-10','2026-10-15'],progresso:55,status:'andamento',tipo:'comum',dependencias:['dt2'],observacoes:'Replanejamento registrado após ajuste da integração de identidade.',historico:[]},
       {id:'dt4',projeto_id:'demo-p1',fase:'Homologação/Monitoramento',ordem_fase:3,nome:'Homologar com áreas de negócio',area:'Operações',responsavel:'Camila Torres',data_inicio:'2026-10-16',data_fim:'2026-11-06',baseline_inicio:'2026-10-13',baseline_fim:'2026-11-05',historico_inicio:['2026-10-13','2026-10-16'],historico_fim:['2026-11-05','2026-11-06'],progresso:0,status:'a_iniciar',tipo:'comum',dependencias:['dt3'],historico:[]},
-      {id:'dt5',projeto_id:'demo-p1',fase:'Operação Assistida',ordem_fase:4,nome:'Publicação controlada e operação assistida',area:'Tecnologia',responsavel:'Felipe Nunes',data_inicio:'2026-11-20',data_fim:'2026-11-28',baseline_inicio:'2026-11-20',baseline_fim:'2026-11-28',historico_inicio:['2026-11-20'],historico_fim:['2026-11-28'],progresso:0,status:'a_iniciar',tipo:'golive',dependencias:['dt4'],historico:[]},
+      {id:'dt5',projeto_id:'demo-p1',fase:'Encerramento',ordem_fase:5,nome:'Publicação controlada e operação assistida',area:'Tecnologia',responsavel:'Felipe Nunes',data_inicio:'2026-11-20',data_fim:'2026-11-28',baseline_inicio:'2026-11-20',baseline_fim:'2026-11-28',historico_inicio:['2026-11-20'],historico_fim:['2026-11-28'],progresso:0,status:'a_iniciar',tipo:'golive',dependencias:['dt4'],historico:[]},
       {id:'dt25',projeto_id:'demo-p1',fase:'Encerramento',ordem_fase:5,nome:'Formalizar aceite e transição',area:'PMO',responsavel:'Mariana Costa',data_inicio:'2026-11-29',data_fim:'2026-12-05',baseline_inicio:'2026-11-29',baseline_fim:'2026-12-05',historico_inicio:['2026-11-29'],historico_fim:['2026-12-05'],progresso:0,status:'a_iniciar',tipo:'comum',dependencias:['dt5'],historico:[]},
       {id:'dt6',projeto_id:'demo-p2',fase:'Planejamento',ordem_fase:1,nome:'Definir catálogo de regras',area:'Autorizações',responsavel:'Eduardo Ramos',data_inicio:'2026-09-01',data_fim:'2026-09-22',status:'a_iniciar',tipo:'comum',dependencias:[],historico:[]}
     ],
@@ -2335,7 +2335,7 @@ function carregarDadosDemo(silencioso=false){
     {id:'dt9',projeto_id:'demo-p3',fase:'Diagnóstico',ordem_fase:1,nome:'Mapear canais e filas atuais',area:'Operações',responsavel:'Paula Mendes',data_inicio:'2026-06-10',data_fim:'2026-06-28',status:'concluido',tipo:'comum',dependencias:[],historico:[]},
     {id:'dt10',projeto_id:'demo-p3',fase:'Desenvolvimento',ordem_fase:2,nome:'Integrar roteamento omnichannel',area:'Tecnologia',responsavel:'João Pedro Lima',data_inicio:'2026-07-01',data_fim:'2026-08-20',status:'concluido',tipo:'comum',dependencias:['dt9'],historico:[]},
     {id:'dt11',projeto_id:'demo-p3',fase:'Piloto',ordem_fase:3,nome:'Executar piloto em três unidades',area:'Atendimento',responsavel:'Paula Mendes',data_inicio:'2026-08-25',data_fim:'2026-09-20',status:'atrasado',tipo:'comum',dependencias:['dt10'],historico:[]},
-    {id:'dt12',projeto_id:'demo-p3',fase:'Go-live',ordem_fase:4,nome:'Expandir para a rede',area:'Operações',responsavel:'Renata Souza',data_inicio:'2026-10-01',data_fim:'2026-11-15',status:'a_iniciar',tipo:'golive',dependencias:['dt11'],historico:[]},
+    {id:'dt12',projeto_id:'demo-p3',fase:'Go Live',ordem_fase:4,nome:'Expandir para a rede',area:'Operações',responsavel:'Renata Souza',data_inicio:'2026-10-01',data_fim:'2026-11-15',status:'a_iniciar',tipo:'golive',dependencias:['dt11'],historico:[]},
     {id:'dt13',projeto_id:'demo-p4',fase:'Dados',ordem_fase:1,nome:'Consolidar fontes assistenciais',area:'Dados',responsavel:'Larissa Freire',data_inicio:'2026-03-03',data_fim:'2026-04-15',status:'concluido',tipo:'comum',dependencias:[],historico:[]},
     {id:'dt14',projeto_id:'demo-p4',fase:'Entrega',ordem_fase:2,nome:'Publicar cockpit executivo',area:'Analytics',responsavel:'Bruno Salles',data_inicio:'2026-06-05',data_fim:'2026-07-28',status:'concluido',tipo:'golive',dependencias:['dt13'],historico:[]},
     {id:'dt15',projeto_id:'demo-p5',fase:'Descoberta',ordem_fase:1,nome:'Pesquisa com beneficiários',area:'Produtos',responsavel:'Ana Clara Vieira',data_inicio:'2026-10-05',data_fim:'2026-10-20',status:'a_iniciar',tipo:'comum',dependencias:[],historico:[]},
@@ -2391,7 +2391,7 @@ function carregarDadosDemo(silencioso=false){
     {id:'dt19',projeto_id:'demo-p6',fase:'Homologação',ordem_fase:3,nome:'Homologar jornadas assistenciais',area:'Assistencial',responsavel:'Fernanda Nóbrega',data_inicio:'2026-07-15',data_fim:'2026-08-14',status:'atrasado',tipo:'comum',dependencias:['dt18'],historico:[]},
     {id:'dt20',projeto_id:'demo-p7',fase:'Planejamento',ordem_fase:1,nome:'Definir públicos e eventos de disparo',area:'Experiência do Cliente',responsavel:'Mateus Silva',data_inicio:'2026-08-20',data_fim:'2026-09-08',status:'andamento',tipo:'comum',dependencias:[],historico:[]},
     {id:'dt21',projeto_id:'demo-p7',fase:'Construção',ordem_fase:2,nome:'Construir régua de comunicação',area:'Digital',responsavel:'Felipe Arantes',data_inicio:'2026-09-09',data_fim:'2026-10-30',status:'a_iniciar',tipo:'comum',dependencias:['dt20'],historico:[]},
-    {id:'dt22',projeto_id:'demo-p7',fase:'Go-live',ordem_fase:3,nome:'Ativar primeira régua preventiva',area:'Operações',responsavel:'Mateus Silva',data_inicio:'2026-11-16',data_fim:'2026-12-10',status:'a_iniciar',tipo:'golive',dependencias:['dt21'],historico:[]},
+    {id:'dt22',projeto_id:'demo-p7',fase:'Go Live',ordem_fase:4,nome:'Ativar primeira régua preventiva',area:'Operações',responsavel:'Mateus Silva',data_inicio:'2026-11-16',data_fim:'2026-12-10',status:'a_iniciar',tipo:'golive',dependencias:['dt21'],historico:[]},
     {id:'dt23',projeto_id:'demo-p8',fase:'Mapeamento',ordem_fase:1,nome:'Inventariar catálogo atual',area:'SAC',responsavel:'Carla Reis',data_inicio:'2026-01-12',data_fim:'2026-02-05',status:'concluido',tipo:'comum',dependencias:[],historico:[]},
     {id:'dt24',projeto_id:'demo-p8',fase:'Entrega',ordem_fase:2,nome:'Publicar catálogo revisado',area:'SIGO',responsavel:'João Pedro Lima',data_inicio:'2026-04-10',data_fim:'2026-05-27',status:'concluido',tipo:'golive',dependencias:['dt23'],historico:[]}
   );
@@ -3418,7 +3418,7 @@ async function carregarProjetosSupabase(){
 }
 function mapearLecomSupabase(l){const x=l.extra||{};return {...x,id:l.id,iniciativa:l.initiative,codigo:l.lecom_code,solicitante:l.requester,area_solicitante:l.requester_area,classificacao:l.classification,priorizacao_ti:l.it_priority,priorizacao_negocio:l.business_priority,compromisso:l.commitment,area_ti:l.it_area,diretor_ti:l.it_director,area_classificacao:l.classification_area,impacto_jornada:l.beneficiary_impact?'sim':'nao',impacto_nips:l.nips_impact?'sim':'nao',impacto_financeiro:l.financial_impact?'sim':'nao',risco_assistencial:l.care_risk?'sim':'nao',envolve_ia:l.involves_ai?'sim':'nao',plan_especificacao:l.specification_planned_date,final_especificacao:l.specification_final_date,status_especificacao:l.specification_status,plan_homologacao:l.approval_planned_date,final_homologacao:l.approval_final_date,status_homologacao:l.approval_status,plan_producao:l.production_planned_date,final_producao:l.production_final_date,status_producao:l.production_status,source_request_id:l.source_request_id||x.solicitacao_id||null,criado_em:l.created_at};}
 async function carregarLecomsSupabase(){if(!supabasePortal||!sessaoPortal)return false;try{const {data,error}=await supabasePortal.from('lecoms').select('*').order('created_at',{ascending:false});if(error)throw error;STATE.melhorias=(data||[]).map(mapearLecomSupabase);salvarState();renderLecoms();return true;}catch(e){registrarLogSistema('erro','Sincronização de LECOMs',e);return false;}}
-function mapearTarefaSupabase(linha){const extra=linha.extra||{};return {id:linha.id,projeto_id:linha.project_id,codigo:linha.activity_code||'',numero:extra.numero||0,nome:linha.title||'',fase:linha.phase||'SEM FASE',fase_id:linha.phase_id||null,tipo:extra.tipo||'comum',area:extra.area||'',responsavel:linha.responsible_name||'',data_inicio:linha.replanned_start_date||linha.planned_start_date||'',data_fim:linha.replanned_end_date||linha.planned_end_date||'',baseline_inicio:linha.baseline_start_date||linha.planned_start_date||'',baseline_fim:linha.baseline_end_date||linha.planned_end_date||'',status:linha.status||'a_iniciar',progresso:Number(linha.progress??extra.progresso??(PROGRESSO_STATUS[linha.status]??0)),dependencias:extra.dependencias||[],observacoes:linha.description||'',justificativa_atraso:extra.justificativa_atraso||'',data_replanejamento:extra.data_replanejamento||linha.replanned_end_date||'',historico_inicio:extra.historico_inicio||[linha.planned_start_date].filter(Boolean),historico_fim:extra.historico_fim||[linha.planned_end_date].filter(Boolean),criado_em:linha.created_at};}
+function mapearTarefaSupabase(linha){const extra=linha.extra||{};return {id:linha.id,projeto_id:linha.project_id,codigo:linha.activity_code||'',numero:extra.numero||0,nome:linha.title||'',fase:FASES_ANTIGAS_PARA_ATUAIS[linha.phase]||linha.phase||'SEM FASE',fase_id:linha.phase_id||null,tipo:extra.tipo||'comum',area:extra.area||'',responsavel:linha.responsible_name||'',data_inicio:linha.replanned_start_date||linha.planned_start_date||'',data_fim:linha.replanned_end_date||linha.planned_end_date||'',baseline_inicio:linha.baseline_start_date||linha.planned_start_date||'',baseline_fim:linha.baseline_end_date||linha.planned_end_date||'',status:linha.status||'a_iniciar',progresso:Number(linha.progress??extra.progresso??(PROGRESSO_STATUS[linha.status]??0)),dependencias:extra.dependencias||[],observacoes:linha.description||'',justificativa_atraso:extra.justificativa_atraso||'',data_replanejamento:extra.data_replanejamento||linha.replanned_end_date||'',historico_inicio:extra.historico_inicio||[linha.planned_start_date].filter(Boolean),historico_fim:extra.historico_fim||[linha.planned_end_date].filter(Boolean),criado_em:linha.created_at};}
 async function carregarTarefasSupabase(projetoId){if(!supabasePortal||!sessaoPortal||!projetoId)return false;try{const pendentesLocais=STATE.tarefas.filter(t=>t.projeto_id===projetoId&&t._sync_pendente),{data,error}=await supabasePortal.from('tasks').select('*').eq('project_id',projetoId).order('created_at');if(error)throw error;const tarefas=(data||[]).map(mapearTarefaSupabase),ids=tarefas.map(t=>t.id);if(ids.length){const {data:deps,error:erroDeps}=await supabasePortal.from('task_dependencies').select('*').in('task_id',ids);if(erroDeps)throw erroDeps;const porId=new Map(tarefas.map(t=>[t.id,t]));(deps||[]).forEach(d=>{const alvo=porId.get(d.task_id),origem=porId.get(d.depends_on_task_id);if(alvo&&origem&&!alvo.dependencias.includes(origem.numero))alvo.dependencias.push(origem.numero);});}const mescladas=tarefas.slice();pendentesLocais.forEach(local=>{const indice=mescladas.findIndex(remota=>remota.id===local.id);if(indice>=0)mescladas[indice]=local;else mescladas.push(local);});STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(mescladas);pendentesLocais.forEach(t=>agendarPersistenciaTarefaCronograma(t.id,250));salvarState();return true;}catch(e){registrarLogSistema('erro','Sincronização de cronograma',e);return false;}}
 function idUuid(valor){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(valor||''));}
 async function gravarRegistroProjetoSupabase(tabela,id,payload){
@@ -4072,7 +4072,11 @@ function proximoIdTarefa(){
   return ts.length ? Math.max(...ts.map(t => t.numero)) + 1 : 1;
 }
 /* Fases automaticamente disponíveis em todo novo projeto. */
-const FASES_PADRAO_PROJETO=['Planejamento e Refinamento','Kickoff','Desenvolvimento','Homologação','Go-live','Operação Assistida'];
+const FASES_PADRAO_PROJETO=['Planejamento','Desenvolvimento','Homologação','Go Live','Encerramento'];
+const FASES_ANTIGAS_PARA_ATUAIS={
+  'Planejamento e Refinamento':'Planejamento','Kickoff':'Planejamento','Kick-off':'Planejamento','Kick Off':'Planejamento',
+  'Go-live':'Go Live','Go-Live':'Go Live','Operação Assistida':'Encerramento'
+};
 function fasesDoProjeto(){
   const vistas = new Set(); const out = [];
   const ocultas=new Set(projetoAtivo?.fases_ocultas||[]);
@@ -4092,6 +4096,7 @@ function progressoTarefa(t){ return typeof t.progresso === 'number' ? t.progress
 function normalizarCronogramas(){
   const aliases = { 'CONCLUÍDO':'concluido', 'CONCLUIDO':'concluido', 'EM ANDAMENTO':'andamento', 'A INICIAR':'a_iniciar', 'ATRASADO':'atrasado', 'IMPEDIDO':'impedido', 'CANCELADO':'cancelado' };
   STATE.tarefas.forEach(t => {
+    t.fase=FASES_ANTIGAS_PARA_ATUAIS[t.fase]||t.fase;
     t.status = aliases[t.status] || t.status || 'a_iniciar';
     if(!Array.isArray(t.historico_inicio)) t.historico_inicio = t.data_inicio ? [t.data_inicio] : [];
     if(!Array.isArray(t.historico_fim)) t.historico_fim = t.data_fim ? [t.data_fim] : [];
@@ -4101,6 +4106,7 @@ function normalizarCronogramas(){
     if(t.data_fim && t.data_fim < hojeISO() && !['concluido','cancelado'].includes(t.status)) t.status='atrasado';
     if(typeof t.progresso !== 'number') t.progresso = PROGRESSO_STATUS[t.status] ?? 0;
   });
+  STATE.projetos.forEach(p=>{if(Array.isArray(p.fases_ocultas))p.fases_ocultas=[...new Set(p.fases_ocultas.map(f=>FASES_ANTIGAS_PARA_ATUAIS[f]||f))];});
 }
 function preencherFiltrosCronograma(){
   const preencher = (id, valores, rotulo) => {
