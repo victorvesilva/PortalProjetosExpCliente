@@ -898,6 +898,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
           <button class="btn btn-outline btn-sm" onclick="abrirImportacaoCronograma()">Importar Excel</button>
           <button class="btn btn-outline btn-sm" onclick="exportarCronogramaExcel()">Exportar Excel</button>
           <button class="btn btn-outline btn-sm" onclick="abrirPreviewCronograma()">PDF</button>
+          <button class="btn btn-outline btn-sm" id="crono-atualizar-btn" data-permission-action="view" onclick="atualizarCronogramaDoBanco(true)" title="Buscar agora as alterações salvas por outros usuários">Atualizar</button>
           <span id="crono-resumo" style="font-size:12px;color:var(--ink-mute);display:inline-flex;align-items:center;white-space:nowrap">—</span>
           <input type="file" id="crono-file" accept=".xlsx,.xls" style="display:none" onchange="importarCronogramaExcel(event)">
         </div>
@@ -1849,7 +1850,7 @@ function podeGerenciarAcessos(){ return !!sessaoPortal && (adminPortalConfirmado
 function podeGerenciarSolicitacoes(){return podeGerenciarAcessos();}
 function temPermissaoAcao(modulo,acao='view'){
   if(podeGerenciarAcessos())return true;
-  if(papelPortal()==='collaborator')return modulo==='solicitacoes'&&['view','create','edit'].includes(acao);
+  if(papelPortal()==='collaborator')return (modulo==='solicitacoes'&&['view','create','edit'].includes(acao))||(modulo==='portfolio'&&acao==='view');
   if(papelPortal()==='operator'){
     if(modulo==='solicitacoes')return false;
     const regra=permissoesAcaoPortal.get(modulo);
@@ -1870,7 +1871,7 @@ function acaoPermissaoDoElemento(el){
   return null;
 }
 function aplicarPermissoesAcoesNaInterface(raiz=document){
-  if(papelPortal()!=='operator'||podeGerenciarAcessos())return;
+  if(!sessaoPortal||podeGerenciarAcessos())return;
   raiz.querySelectorAll?.('button,[role="button"],a.btn').forEach(el=>{
     const pagina=el.closest('.page')?.id?.replace('page-','');
     const modulo=el.dataset.permissionModule||MODULO_POR_PAGINA[pagina];
@@ -1903,7 +1904,8 @@ function atualizarNavegacaoAcessos(){
     const modulo=MODULO_POR_PAGINA[nav.dataset.page];
     if(!modulo)return;
     const bloqueado=!temPermissaoModulo(modulo);
-    const ocultar=colaborador ? nav.dataset.page!=='solicitacoes' : operador ? nav.dataset.page==='solicitacoes'||bloqueado : false;
+    const paginasColaborador=['solicitacoes','home','projetos','portfdash','dashboardprojeto'];
+    const ocultar=colaborador ? !paginasColaborador.includes(nav.dataset.page)||bloqueado : operador ? nav.dataset.page==='solicitacoes'||bloqueado : false;
     nav.style.display=ocultar?'none':'';
     nav.classList.toggle('locked',bloqueado&&!colaborador);
     nav.setAttribute('aria-disabled',String(bloqueado));
@@ -1920,7 +1922,7 @@ function atualizarNavegacaoAcessos(){
   const busca=document.querySelector('.global-search'),avisos=document.querySelector('.notification-wrap'),seletorProjeto=document.querySelector('.project-switch');
   if(busca)busca.style.display=colaborador?'none':'';
   if(avisos)avisos.style.display='';
-  if(seletorProjeto)seletorProjeto.style.display=colaborador?'none':'';
+  if(seletorProjeto&&colaborador&&!projetoAtivo)seletorProjeto.style.display='none';
   atualizarSaudacaoUsuario();
 }
 function alternarVisibilidadeSenha(inputId,botao){
@@ -2027,7 +2029,7 @@ function cartaoPermissoesUsuario(usuario,permitidos){
   const checks=`<table class="permission-matrix"><thead><tr><th>Módulo</th><th>Visualizar</th><th>Criar</th><th>Editar</th><th>Excluir</th></tr></thead><tbody>${MODULOS_OPERADOR.map(([chave,rotulo])=>{const regra=permitidos.get(chave)||{};return `<tr><td>${rotulo}</td>${['view','create','edit','delete'].map(acao=>`<td><input type="checkbox" aria-label="${acao} em ${rotulo}" data-permissao-usuario="${usuario.id}" data-modulo="${chave}" data-acao="${acao}" ${regra[acao]?'checked':''}></td>`).join('')}</tr>`}).join('')}</tbody></table>`;
   const email=usuario.email || (proprio ? sessaoPortal?.user?.email : 'E-mail gerenciado pelo Supabase Auth');
   const perfilLabel=usuario.role==='admin'?'Administrador':usuario.role==='operator'?'Operador':'Colaborador';
-  const descricaoModulos=usuario.role==='admin'?'<span style="font-size:12px;color:var(--ink-soft)">Administradores possuem acesso integral por padrão.</span>':usuario.role==='collaborator'?'<span style="font-size:12px;color:var(--ink-soft)">Colaboradores podem visualizar, criar e ajustar apenas as próprias Solicitações.</span>':`<span style="font-size:12px;color:var(--ink-soft);display:block;width:100%;margin-bottom:2px">Defina o que o Operador pode visualizar, criar, editar ou excluir em cada módulo. Solicitações e Acessos permanecem exclusivos do Administrador.</span>${checks}`;
+  const descricaoModulos=usuario.role==='admin'?'<span style="font-size:12px;color:var(--ink-soft)">Administradores possuem acesso integral por padrão.</span>':usuario.role==='collaborator'?'<span style="font-size:12px;color:var(--ink-soft)">Colaboradores podem visualizar os próprios projetos e criar ou ajustar apenas as próprias Solicitações.</span>':`<span style="font-size:12px;color:var(--ink-soft);display:block;width:100%;margin-bottom:2px">Defina o que o Operador pode visualizar, criar, editar ou excluir em cada módulo. Solicitações e Acessos permanecem exclusivos do Administrador.</span>${checks}`;
   return `<details class="access-user-row"><summary><span style="width:32px;height:32px;border-radius:50%;background:#e8eefb;color:var(--blue);display:grid;place-items:center;font-weight:800">${esc((usuario.full_name||'?').trim().charAt(0).toUpperCase())}</span><span style="min-width:0;flex:1"><b data-usuario-nome="${usuario.id}" style="display:block">${esc(usuario.full_name||'Usuário sem nome')}</b><small style="display:block;color:var(--ink-mute);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(email||'E-mail não disponível')}</small></span><span class="badge ${usuario.active?'badge-ok':'badge-danger'}">${usuario.active?'Ativo':'Inativo'}</span><span class="badge badge-neutral">${perfilLabel}</span></summary><div class="access-user-details"><div style="display:grid;grid-template-columns:repeat(2,minmax(160px,1fr));gap:10px;margin-top:14px"><label style="font-size:12px;font-weight:700">Perfil<select id="perfil-${usuario.id}" ${proprio?'disabled':''} style="display:block;width:100%;margin-top:5px"><option value="collaborator" ${usuario.role==='collaborator'?'selected':''}>Colaborador</option><option value="operator" ${usuario.role==='operator'?'selected':''}>Operador</option><option value="admin" ${usuario.role==='admin'?'selected':''}>Administrador</option></select></label><label style="font-size:12px;font-weight:700;display:flex;align-items:end;gap:8px;padding-bottom:7px"><input id="ativo-${usuario.id}" type="checkbox" ${usuario.active?'checked':''} ${proprio?'disabled':''}> Usuário ativo</label></div><div style="margin-top:14px"><b style="font-size:12px">Módulos permitidos</b><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">${descricaoModulos}</div></div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:15px"><button class="btn btn-outline btn-sm" onclick="excluirUsuarioAcesso('${usuario.id}')" ${proprio?'disabled title="Não é permitido excluir o próprio usuário"':''}>Excluir usuário</button><button class="btn btn-primary btn-sm" onclick="salvarAcessosUsuario('${usuario.id}')" ${proprio?'disabled title="Não é permitido alterar o próprio perfil nesta tela"':''}>Salvar acesso</button></div></div></details>`;
 }
 
@@ -2795,7 +2797,10 @@ async function selecionarProjeto(id){
   const p = STATE.projetos.find(x => x.id === id);
   if(!p) return;
   definirProjetoAtivo(p);
-  await Promise.all([carregarTarefasSupabase(p.id),carregarDadosProjetoSupabase(p.id)]);
+  const cargas=[];
+  if(temPermissaoModulo('cronograma'))cargas.push(carregarTarefasSupabase(p.id));
+  if(['riscos','encaminhamentos','pontosfocais','licoes','eap','raci','tep','statusreport'].some(temPermissaoModulo))cargas.push(carregarDadosProjetoSupabase(p.id));
+  await Promise.all(cargas);
   navigate('dashboardprojeto');
 }
 
@@ -3404,22 +3409,46 @@ function codigoSolicitacaoLocal(tipo){
 function mapearSolicitacaoSupabase(linha){return {...linha,id:linha.id,request_code:linha.request_code||'',criado_em:linha.created_at||linha.criado_em,atualizado_em:linha.updated_at||linha.atualizado_em};}
 function mapearProjetoSupabase(linha){
   const extra=linha.extra||{};
-  return {id:linha.id,nome:linha.name||'',lecom:linha.control_code||'',tap_lecom:extra.tap_lecom||'',objetivo:linha.objective||'',gerente_projeto:linha.manager_name||'',data_abertura:linha.opening_date||'',data_inicio:linha.start_date||'',data_fim_prevista:linha.planned_end_date||'',data_replanejada:linha.replanned_end_date||'',data_entrega_final:linha.final_delivery_date||'',macro_entrega:linha.macro_delivery||'',entregaveis:linha.deliverables||'',status_portfolio:linha.portfolio_status||'a_iniciar',solicitacao_id:linha.source_request_id||extra.solicitacao_id||null,solicitante:extra.solicitante||'',areas_envolvidas:extra.areas_envolvidas||'',ganhos_esperados:extra.ganhos_esperados||'',patrocinador:extra.patrocinador||'',lider_ti:extra.lider_ti||'',direcao_ti:extra.direcao_ti||'Experiência do Cliente e Operações',status:extra.status||'planejamento',fases_ocultas:extra.fases_ocultas||[],arquivado:false,criado_em:linha.created_at};
+  return {id:linha.id,owner_id:linha.owner_id,nome:linha.name||'',lecom:linha.control_code||'',tap_lecom:extra.tap_lecom||'',objetivo:linha.objective||'',gerente_projeto:linha.manager_name||'',data_abertura:linha.opening_date||'',data_inicio:linha.start_date||'',data_fim_prevista:linha.planned_end_date||'',data_replanejada:linha.replanned_end_date||'',data_entrega_final:linha.final_delivery_date||'',macro_entrega:linha.macro_delivery||'',entregaveis:linha.deliverables||'',status_portfolio:linha.portfolio_status||'a_iniciar',solicitacao_id:linha.source_request_id||extra.solicitacao_id||null,solicitante:extra.solicitante||'',areas_envolvidas:extra.areas_envolvidas||'',ganhos_esperados:extra.ganhos_esperados||'',patrocinador:extra.patrocinador||'',lider_ti:extra.lider_ti||'',direcao_ti:extra.direcao_ti||'Experiência do Cliente e Operações',status:extra.status||'planejamento',fases_ocultas:extra.fases_ocultas||[],arquivado:false,criado_em:linha.created_at};
 }
+let carregamentoProjetosEmCurso=false;
 async function carregarProjetosSupabase(){
   if(!supabasePortal||!sessaoPortal)return false;
+  if(carregamentoProjetosEmCurso)return false;
+  carregamentoProjetosEmCurso=true;
   try{
     const {data,error}=await supabasePortal.from('projects').select('*').order('created_at',{ascending:false});
     if(error)throw error;
     STATE.projetos=(data||[]).map(mapearProjetoSupabase);
+    if(projetoAtivo){const atualizado=STATE.projetos.find(p=>p.id===projetoAtivo.id);definirProjetoAtivo(atualizado||null);}
     salvarState();renderProjetosHome();renderPortfolioProjetos();
     return true;
   }catch(e){registrarLogSistema('erro','Sincronização de projetos',e);toast('Não foi possível carregar o Portfólio de Projetos.');return false;}
+  finally{carregamentoProjetosEmCurso=false;}
 }
 function mapearLecomSupabase(l){const x=l.extra||{};return {...x,id:l.id,iniciativa:l.initiative,codigo:l.lecom_code,solicitante:l.requester,area_solicitante:l.requester_area,classificacao:l.classification,priorizacao_ti:l.it_priority,priorizacao_negocio:l.business_priority,compromisso:l.commitment,area_ti:l.it_area,diretor_ti:l.it_director,area_classificacao:l.classification_area,impacto_jornada:l.beneficiary_impact?'sim':'nao',impacto_nips:l.nips_impact?'sim':'nao',impacto_financeiro:l.financial_impact?'sim':'nao',risco_assistencial:l.care_risk?'sim':'nao',envolve_ia:l.involves_ai?'sim':'nao',plan_especificacao:l.specification_planned_date,final_especificacao:l.specification_final_date,status_especificacao:l.specification_status,plan_homologacao:l.approval_planned_date,final_homologacao:l.approval_final_date,status_homologacao:l.approval_status,plan_producao:l.production_planned_date,final_producao:l.production_final_date,status_producao:l.production_status,source_request_id:l.source_request_id||x.solicitacao_id||null,criado_em:l.created_at};}
 async function carregarLecomsSupabase(){if(!supabasePortal||!sessaoPortal)return false;try{const {data,error}=await supabasePortal.from('lecoms').select('*').order('created_at',{ascending:false});if(error)throw error;STATE.melhorias=(data||[]).map(mapearLecomSupabase);salvarState();renderLecoms();return true;}catch(e){registrarLogSistema('erro','Sincronização de LECOMs',e);return false;}}
 function mapearTarefaSupabase(linha){const extra=linha.extra||{};return {id:linha.id,projeto_id:linha.project_id,codigo:linha.activity_code||'',numero:extra.numero||0,nome:linha.title||'',fase:FASES_ANTIGAS_PARA_ATUAIS[linha.phase]||linha.phase||'SEM FASE',fase_id:linha.phase_id||null,tipo:extra.tipo||'comum',area:extra.area||'',responsavel:linha.responsible_name||'',data_inicio:linha.replanned_start_date||linha.planned_start_date||'',data_fim:linha.replanned_end_date||linha.planned_end_date||'',baseline_inicio:linha.baseline_start_date||linha.planned_start_date||'',baseline_fim:linha.baseline_end_date||linha.planned_end_date||'',status:linha.status||'a_iniciar',progresso:Number(linha.progress??extra.progresso??(PROGRESSO_STATUS[linha.status]??0)),dependencias:extra.dependencias||[],observacoes:linha.description||'',justificativa_atraso:extra.justificativa_atraso||'',data_replanejamento:extra.data_replanejamento||linha.replanned_end_date||'',historico_inicio:extra.historico_inicio||[linha.planned_start_date].filter(Boolean),historico_fim:extra.historico_fim||[linha.planned_end_date].filter(Boolean),criado_em:linha.created_at};}
 async function carregarTarefasSupabase(projetoId){if(!supabasePortal||!sessaoPortal||!projetoId)return false;try{const pendentesLocais=STATE.tarefas.filter(t=>t.projeto_id===projetoId&&t._sync_pendente),{data,error}=await supabasePortal.from('tasks').select('*').eq('project_id',projetoId).order('created_at');if(error)throw error;const tarefas=(data||[]).map(mapearTarefaSupabase),ids=tarefas.map(t=>t.id);if(ids.length){const {data:deps,error:erroDeps}=await supabasePortal.from('task_dependencies').select('*').in('task_id',ids);if(erroDeps)throw erroDeps;const porId=new Map(tarefas.map(t=>[t.id,t]));(deps||[]).forEach(d=>{const alvo=porId.get(d.task_id),origem=porId.get(d.depends_on_task_id);if(alvo&&origem&&!alvo.dependencias.includes(origem.numero))alvo.dependencias.push(origem.numero);});}const mescladas=tarefas.slice();pendentesLocais.forEach(local=>{const indice=mescladas.findIndex(remota=>remota.id===local.id);if(indice>=0)mescladas[indice]=local;else mescladas.push(local);});STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(mescladas);pendentesLocais.forEach(t=>agendarPersistenciaTarefaCronograma(t.id,250));salvarState();return true;}catch(e){registrarLogSistema('erro','Sincronização de cronograma',e);return false;}}
+let atualizacaoCronogramaEmCurso=false;
+function cronogramaEstaVisivel(){return document.querySelector('#page-cronograma.active')&&document.visibilityState==='visible';}
+async function atualizarCronogramaDoBanco(notificar=false){
+  if(!projetoAtivo||!supabasePortal||!sessaoPortal||!temPermissaoModulo('cronograma'))return false;
+  if(atualizacaoCronogramaEmCurso)return false;
+  atualizacaoCronogramaEmCurso=true;
+  const botao=document.getElementById('crono-atualizar-btn'),rotulo=botao?.textContent;
+  if(botao){botao.disabled=true;botao.textContent='Atualizando…';}
+  try{
+    const ok=await carregarTarefasSupabase(projetoAtivo.id);
+    if(!ok){if(notificar)toast('Não foi possível atualizar o cronograma agora.');return false;}
+    normalizarCronogramas();renderCronograma();
+    if(notificar)toast('Cronograma atualizado com os dados mais recentes.');
+    return true;
+  }finally{
+    atualizacaoCronogramaEmCurso=false;
+    if(botao){botao.disabled=false;botao.textContent=rotulo||'Atualizar';}
+  }
+}
 function idUuid(valor){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(valor||''));}
 async function gravarRegistroProjetoSupabase(tabela,id,payload){
   if(!supabasePortal||!sessaoPortal)return null;let consulta=idUuid(id)?supabasePortal.from(tabela).update(payload).eq('id',id):supabasePortal.from(tabela).insert({...payload,owner_id:sessaoPortal.user.id});const {data,error}=await consulta.select('*').single();if(error)throw error;return data;
@@ -3431,7 +3460,8 @@ function mesclarExtraSupabase(linha,campos){return {...(linha.extra||{}),...camp
 async function carregarDadosProjetoSupabase(projetoId){
   if(!supabasePortal||!sessaoPortal||!projetoId)return false;
   try{
-    const tabelas=['risks','referrals','focal_points','lessons_learned','eap_nodes','raci_activities','raci_people'];
+    const moduloTabela={risks:'riscos',referrals:'encaminhamentos',focal_points:'pontosfocais',lessons_learned:'licoes',eap_nodes:'eap',raci_activities:'raci',raci_people:'raci'};
+    const tabelas=Object.keys(moduloTabela).filter(t=>temPermissaoModulo(moduloTabela[t]));
     const resultados=await Promise.all(tabelas.map(t=>supabasePortal.from(t).select('*').eq('project_id',projetoId)));
     resultados.forEach((r,i)=>{if(r.error)throw r.error;const t=tabelas[i],dados=r.data||[];
       if(t==='risks')STATE.riscos=STATE.riscos.filter(x=>x.projeto_id!==projetoId).concat(dados.map(x=>mesclarExtraSupabase(x,{descricao:x.description||x.title,categoria:x.category,probabilidade:x.probability,impacto:x.impact,status:x.status,resposta:x.mitigation})));
@@ -3442,10 +3472,11 @@ async function carregarDadosProjetoSupabase(projetoId){
       if(t==='raci_activities')STATE.raciAtividades=STATE.raciAtividades.filter(x=>x.projeto_id!==projetoId).concat(dados.map(x=>mesclarExtraSupabase(x,{nome:x.title,descricao:x.description})));
       if(t==='raci_people')STATE.raciPessoas=STATE.raciPessoas.filter(x=>x.projeto_id!==projetoId).concat(dados.map(x=>mesclarExtraSupabase(x,{nome:x.name,area:x.area,papel:x.role_name,email:x.email})));
     });
-    const atividadesIds=STATE.raciAtividades.filter(a=>a.projeto_id===projetoId).map(a=>a.id);if(atividadesIds.length){const {data:atribuicoes,error:erroAtribuicoes}=await supabasePortal.from('raci_assignments').select('*').in('activity_id',atividadesIds);if(erroAtribuicoes)throw erroAtribuicoes;STATE.raciMatriz=STATE.raciMatriz.filter(m=>m.projeto_id!==projetoId).concat((atribuicoes||[]).map(x=>({id:`${x.activity_id}:${x.person_id}`,projeto_id:projetoId,atividade_id:x.activity_id,pessoa_id:x.person_id,papel:x.assignment})));}else STATE.raciMatriz=STATE.raciMatriz.filter(m=>m.projeto_id!==projetoId);
-    const [{data:tep},{data:sr}]=await Promise.all([supabasePortal.from('project_closures').select('*').eq('project_id',projetoId).maybeSingle(),supabasePortal.from('status_reports').select('*').eq('project_id',projetoId).maybeSingle()]);
-    if(tep)STATE.teps[projetoId]={...(tep.extra||{}),codigo:tep.control_code||'',data_encerramento:tep.closure_date,resumo:tep.summary,resultado:tep.results,aceite:tep.acceptance};
-    if(sr)STATE.statusReports[projetoId]={...(sr.report_data||{}),codigo:sr.control_code||'',periodo_referencia:sr.reference_date,farol_geral:sr.overall_status,resumo_executivo:sr.executive_summary,pontos_atencao:sr.attention_points};
+    if(temPermissaoModulo('raci')){const atividadesIds=STATE.raciAtividades.filter(a=>a.projeto_id===projetoId).map(a=>a.id);if(atividadesIds.length){const {data:atribuicoes,error:erroAtribuicoes}=await supabasePortal.from('raci_assignments').select('*').in('activity_id',atividadesIds);if(erroAtribuicoes)throw erroAtribuicoes;STATE.raciMatriz=STATE.raciMatriz.filter(m=>m.projeto_id!==projetoId).concat((atribuicoes||[]).map(x=>({id:`${x.activity_id}:${x.person_id}`,projeto_id:projetoId,atividade_id:x.activity_id,pessoa_id:x.person_id,papel:x.assignment})));}else STATE.raciMatriz=STATE.raciMatriz.filter(m=>m.projeto_id!==projetoId);}
+    const consultasFinais=[];
+    if(temPermissaoModulo('tep'))consultasFinais.push(supabasePortal.from('project_closures').select('*').eq('project_id',projetoId).maybeSingle().then(r=>({tipo:'tep',...r})));
+    if(temPermissaoModulo('statusreport'))consultasFinais.push(supabasePortal.from('status_reports').select('*').eq('project_id',projetoId).maybeSingle().then(r=>({tipo:'sr',...r})));
+    for(const resultado of await Promise.all(consultasFinais)){if(resultado.error)throw resultado.error;if(resultado.tipo==='tep'&&resultado.data){const tep=resultado.data;STATE.teps[projetoId]={...(tep.extra||{}),codigo:tep.control_code||'',data_encerramento:tep.closure_date,resumo:tep.summary,resultado:tep.results,aceite:tep.acceptance};}if(resultado.tipo==='sr'&&resultado.data){const sr=resultado.data;STATE.statusReports[projetoId]={...(sr.report_data||{}),codigo:sr.control_code||'',periodo_referencia:sr.reference_date,farol_geral:sr.overall_status,resumo_executivo:sr.executive_summary,pontos_atencao:sr.attention_points};}}
     salvarState();return true;
   }catch(e){registrarLogSistema('erro','Sincronização dos dados do projeto',e);toast('Alguns dados do projeto não puderam ser carregados do banco; o cache de contingência foi mantido.');return false;}
 }
@@ -4460,6 +4491,10 @@ function sincronizarTarefasPendentes(){
 }
 window.addEventListener('online',sincronizarTarefasPendentes);
 setInterval(sincronizarTarefasPendentes,30000);
+/* Mantém a tela alinhada com alterações feitas em outra sessão ou máquina. */
+setInterval(()=>{if(cronogramaEstaVisivel())atualizarCronogramaDoBanco(false);},30000);
+window.addEventListener('focus',()=>{if(cronogramaEstaVisivel())atualizarCronogramaDoBanco(false);});
+document.addEventListener('visibilitychange',()=>{if(cronogramaEstaVisivel())atualizarCronogramaDoBanco(false);});
 
 /* ═══ edição inline de campo — não redesenha a grade inteira quando o
    campo é texto (perderia o foco no meio da digitação). Só re-renderiza
@@ -5191,9 +5226,9 @@ async function excluirRaiaOnDemand(chave){const raias=raiasOnDemand(),raia=raias
 
 /* ═══ hook de entrada de página — chama o render certo ao navegar ═══ */
 const PAGE_ON_ENTER = {
-  home: renderProjetosHome,
-  portfdash: renderDashboardPortfolio,
-  projetos: renderPortfolioProjetos,
+  home: ()=>{renderProjetosHome();carregarProjetosSupabase();},
+  portfdash: ()=>{renderDashboardPortfolio();carregarProjetosSupabase().then(renderDashboardPortfolio);},
+  projetos: ()=>{renderPortfolioProjetos();carregarProjetosSupabase();},
   melhorias: renderMelhorias,
   lecoms: renderLecoms,
   solicitacoes: renderSolicitacoes,
@@ -5205,7 +5240,7 @@ const PAGE_ON_ENTER = {
   riscos: renderRiscos,
   encaminhamentos: renderEncaminhamentos,
   ondemand: ()=>{renderOnDemand();carregarOnDemandSupabase().then(renderOnDemand);},
-  cronograma: renderCronograma,
+  cronograma: ()=>{renderCronograma();atualizarCronogramaDoBanco(false);},
   pontosfocais: renderPontosFocais,
   statusreport: renderStatusReport,
   dashboardprojeto: renderDashboardProjeto,
