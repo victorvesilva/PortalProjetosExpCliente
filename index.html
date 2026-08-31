@@ -131,6 +131,15 @@ img[src$="hapvida-logo.jpg"]{
 .nav-item[data-page="ondemand"] .icon::before{content:'▥'}
 .nav-item[data-page="configuracoes"] .icon::before{content:'⚙'}
 .nav-item[data-page="acessos"] .icon::before{content:'⌑'}
+.nav-item[data-page="auditoria"] .icon::before{content:'≣'}
+.crono-lock-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;margin-bottom:12px;border:1px solid var(--line);border-radius:11px;background:linear-gradient(90deg,rgba(0,65,166,.055),rgba(255,255,255,.7));font-size:12px}
+.crono-lock-banner.editing{border-color:rgba(230,112,24,.45);background:#fff8f1}
+.crono-readonly .cg-input{border-color:transparent!important;background:transparent!important;color:var(--ink)!important;box-shadow:none!important;pointer-events:none}
+.crono-readonly .cg-status-sel{appearance:none;-webkit-appearance:none}
+.crono-readonly .crono-edit-only{display:none!important}
+.audit-filters{display:grid;grid-template-columns:minmax(190px,1.4fr) repeat(4,minmax(125px,.8fr)) minmax(160px,1fr);gap:10px;align-items:end}
+.audit-detail{max-width:440px;white-space:normal;line-height:1.45;color:var(--ink-soft)}
+@media(max-width:1100px){.audit-filters{grid-template-columns:repeat(2,minmax(160px,1fr))}}
 /* Locked: cor sólida direta (não opacity sobre opacity — isso multiplicava os
    alphas e derrubava o contraste a ponto de o item ficar ilegível/"sumir"
    contra o fundo navy). Cadeado explícito remove qualquer ambiguidade. */
@@ -675,6 +684,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
   <div class="sidebar-footer">
     <div class="nav-item" data-page="configuracoes"><span class="icon">⚙️</span> Configurações</div>
     <div class="nav-item" data-page="acessos"><span class="icon">🔐</span> Acessos</div>
+    <div class="nav-item" data-page="auditoria"><span class="icon"></span> Auditoria</div>
   </div>
 </nav>
 
@@ -884,6 +894,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <button class="btn btn-primary" onclick="navigate('home')">Ir para Central de Comando</button>
       </div>
       <div id="crono-conteudo" style="display:none">
+      <div class="crono-lock-banner" id="crono-lock-banner"><div><b id="crono-lock-titulo">Cronograma protegido</b><span id="crono-lock-detalhe" style="display:block;color:var(--ink-mute);margin-top:3px">Modo somente leitura. Atualize para buscar dados mais recentes.</span></div><span class="badge badge-neutral" id="crono-lock-status">Somente leitura</span></div>
       <div style="display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:8px;margin-bottom:12px" class="crono-kpis">
         <div class="card" style="padding:9px 11px"><div style="font-size:9px;font-weight:800;color:var(--ink-mute);text-transform:uppercase">Planejado</div><b id="crono-kpi-planejado" style="font-family:Manrope;font-size:17px;color:var(--blue)">0%</b><small id="crono-kpi-planejado-sub" style="display:block;color:var(--ink-mute);font-size:10px">—</small></div>
         <div class="card" style="padding:9px 11px"><div style="font-size:9px;font-weight:800;color:var(--ink-mute);text-transform:uppercase">Realizado</div><b id="crono-kpi-realizado" style="font-family:Manrope;font-size:17px;color:var(--green)">0%</b><small id="crono-kpi-realizado-sub" style="display:block;color:var(--ink-mute);font-size:10px">—</small></div>
@@ -893,11 +904,14 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
       </div>
       <div class="crono-toolbar">
         <div style="display:flex; gap:8px; flex-wrap:wrap">
-          <button class="btn btn-ghost btn-sm" onclick="toggleFaseInlineInput()">+ Fase</button>
-          <button class="btn btn-ghost btn-sm" onclick="criarTarefaInline()">+ Atividade</button>
-          <button class="btn btn-outline btn-sm" onclick="abrirImportacaoCronograma()">Importar Excel</button>
-          <button class="btn btn-outline btn-sm" onclick="exportarCronogramaExcel()">Exportar Excel</button>
-          <button class="btn btn-outline btn-sm" onclick="abrirPreviewCronograma()">PDF</button>
+          <button class="btn btn-primary btn-sm" id="crono-editar-btn" data-permission-action="view" onclick="abrirAutenticacaoEdicaoCronograma()">Editar cronograma</button>
+          <button class="btn btn-primary btn-sm crono-edit-only" id="crono-salvar-edicao-btn" onclick="salvarEdicaoCronograma()">Salvar alterações</button>
+          <button class="btn btn-outline btn-sm crono-edit-only" onclick="cancelarEdicaoCronograma(true)">Cancelar edição</button>
+          <button class="btn btn-ghost btn-sm crono-edit-only" onclick="toggleFaseInlineInput()">+ Fase</button>
+          <button class="btn btn-ghost btn-sm crono-edit-only" onclick="criarTarefaInline()">+ Atividade</button>
+          <button class="btn btn-outline btn-sm crono-edit-only" onclick="abrirImportacaoCronograma()">Importar Excel</button>
+          <button class="btn btn-outline btn-sm crono-edit-only" onclick="exportarCronogramaExcel()">Exportar Excel</button>
+          <button class="btn btn-outline btn-sm crono-edit-only" onclick="abrirPreviewCronograma()">PDF</button>
           <button class="btn btn-outline btn-sm" id="crono-atualizar-btn" data-permission-action="view" onclick="atualizarCronogramaDoBanco(true)" title="Buscar agora as alterações salvas por outros usuários">Atualizar</button>
           <span id="crono-resumo" style="font-size:12px;color:var(--ink-mute);display:inline-flex;align-items:center;white-space:nowrap">—</span>
           <input type="file" id="crono-file" accept=".xlsx,.xls" style="display:none" onchange="importarCronogramaExcel(event)">
@@ -908,11 +922,11 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
       </div>
 
       <div class="card" style="padding:10px 14px;margin-bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <button class="btn btn-sm btn-outline" id="crono-baseline-btn" onclick="alternarOpcaoCrono('baseline')">Baseline</button>
-        <button class="btn btn-sm btn-outline" id="crono-critico-btn" onclick="alternarOpcaoCrono('critico')">Caminho crítico</button>
-        <button class="btn btn-sm btn-outline" id="crono-cascata-btn" onclick="alternarOpcaoCrono('cascata')">Cascata de dependências</button>
-        <button class="btn btn-sm btn-outline" onclick="congelarBaselineCronograma()">Congelar baseline</button>
-        <button class="btn btn-sm btn-outline" onclick="validarDependenciasCronograma()">Validar dependências</button>
+        <button class="btn btn-sm btn-outline crono-edit-only" id="crono-baseline-btn" onclick="alternarOpcaoCrono('baseline')">Baseline</button>
+        <button class="btn btn-sm btn-outline crono-edit-only" id="crono-critico-btn" onclick="alternarOpcaoCrono('critico')">Caminho crítico</button>
+        <button class="btn btn-sm btn-outline crono-edit-only" id="crono-cascata-btn" onclick="alternarOpcaoCrono('cascata')">Cascata de dependências</button>
+        <button class="btn btn-sm btn-outline crono-edit-only" onclick="congelarBaselineCronograma()">Congelar baseline</button>
+        <button class="btn btn-sm btn-outline crono-edit-only" onclick="validarDependenciasCronograma()">Validar dependências</button>
         <span style="width:1px;height:24px;background:var(--line);margin:0 2px"></span>
         <select id="crono-filtro-status" onchange="renderCronograma()" style="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px"><option value="">Todos os status</option></select>
         <select id="crono-filtro-responsavel" onchange="renderCronograma()" style="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px"><option value="">Todos os responsáveis</option></select>
@@ -1159,13 +1173,32 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px" class="console-grid"><div><b style="font-size:12px;color:var(--green)">Execuções e sucessos</b><pre id="console-execucao" style="margin:8px 0 0;max-height:260px;overflow:auto;padding:14px;border-radius:8px;background:#101827;color:#d7e2f4;font:11px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap">Nenhuma execução registrada.</pre></div><div><b style="font-size:12px;color:var(--red)">Erros</b><pre id="console-erros" style="margin:8px 0 0;max-height:260px;overflow:auto;padding:14px;border-radius:8px;background:#261419;color:#ffd9df;font:11px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap">Nenhum erro registrado.</pre></div></div>
       </div>
       <div class="card" style="max-width:760px;margin-top:16px">
-        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><div style="font-weight:800;font-size:15px">Histórico de alterações</div><p style="font-size:12px;color:var(--ink-soft);margin:5px 0 0">Auditoria local das operações realizadas neste navegador. A auditoria definitiva deve ser persistida no Supabase.</p></div><button class="btn btn-outline btn-sm" onclick="limparAuditoriaLocal()">Limpar histórico</button></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><div style="font-weight:800;font-size:15px">Diagnóstico local de contingência</div><p style="font-size:12px;color:var(--ink-soft);margin:5px 0 0">Eventos técnicos deste navegador. O histórico oficial e imutável está disponível na opção Auditoria.</p></div><button class="btn btn-outline btn-sm" onclick="limparAuditoriaLocal()">Limpar histórico</button></div>
         <pre id="auditoria-local" style="margin:14px 0 0;max-height:240px;overflow:auto;padding:14px;border-radius:8px;background:#f6f8fc;color:var(--ink-soft);font:11px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap">Nenhuma alteração registrada.</pre>
       </div>
     </div>
     <div class="page" id="page-acessos"><div id="acessos-conteudo"></div></div>
+    <div class="page" id="page-auditoria">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap"><div><div style="font-weight:800;font-size:16px">Auditoria do sistema</div><p style="font-size:12px;color:var(--ink-soft);margin:5px 0 0">Histórico imutável das movimentações registradas no banco.</p></div><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="carregarAuditoriaSupabase(true)">Atualizar</button><button class="btn btn-primary btn-sm" onclick="exportarAuditoriaCsv()">Exportar CSV</button></div></div>
+        <div class="audit-filters" style="margin-top:18px">
+          <label class="field"><span>Usuário</span><select id="audit-filtro-usuario" onchange="renderAuditoriaSupabase()"><option value="">Todos os usuários</option></select></label>
+          <label class="field"><span>Data inicial</span><input type="date" id="audit-filtro-data-inicio" onchange="renderAuditoriaSupabase()"></label>
+          <label class="field"><span>Data final</span><input type="date" id="audit-filtro-data-fim" onchange="renderAuditoriaSupabase()"></label>
+          <label class="field"><span>Hora inicial</span><input type="time" id="audit-filtro-hora-inicio" onchange="renderAuditoriaSupabase()"></label>
+          <label class="field"><span>Hora final</span><input type="time" id="audit-filtro-hora-fim" onchange="renderAuditoriaSupabase()"></label>
+          <label class="field"><span>Ação ou módulo</span><input id="audit-filtro-texto" placeholder="Ex.: cronograma, editar" oninput="renderAuditoriaSupabase()"></label>
+        </div>
+        <div id="audit-resumo" style="font-size:12px;color:var(--ink-mute);margin:16px 0 8px">Carregando registros…</div>
+        <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Data e hora</th><th>Usuário</th><th>Módulo</th><th>Ação</th><th>Projeto/registro</th><th>Detalhes</th></tr></thead><tbody id="audit-tbody"></tbody></table></div>
+      </div>
+    </div>
 
   </div>
+</div>
+
+<div class="modal-overlay" id="modal-cronograma-auth">
+  <div class="modal" style="width:min(480px,94vw)"><div class="modal-header"><h3>Autorizar edição do cronograma</h3><button class="modal-close" onclick="fecharModal('modal-cronograma-auth')">✕</button></div><div class="modal-body"><p style="font-size:12.5px;color:var(--ink-soft);line-height:1.55;margin-top:0">Informe as credenciais de um administrador. A autorização será temporária e válida somente para o projeto selecionado.</p><div class="field"><label>E-mail do administrador</label><input id="crono-auth-email" type="email" autocomplete="username"></div><div class="field" style="margin-top:12px"><label>Senha</label><input id="crono-auth-senha" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')confirmarAutenticacaoEdicaoCronograma()"></div><div id="crono-auth-erro" style="display:none;color:var(--red);font-size:12px;margin-top:12px"></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-cronograma-auth')">Cancelar</button><button class="btn btn-primary" id="crono-auth-confirmar" onclick="confirmarAutenticacaoEdicaoCronograma()">Autorizar edição</button></div></div>
 </div>
 
 <!-- ═══ MODAL: Nova/Editar Tarefa ═══ -->
@@ -1200,7 +1233,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="fecharModal('modal-tarefa')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarTarefa()">Salvar Atividade</button>
+      <button class="btn btn-primary" id="mt-salvar-btn" onclick="salvarTarefa()">Salvar Atividade</button>
     </div>
   </div>
 </div>
@@ -1585,6 +1618,7 @@ const PAGE_META = {
   solicitacoes:      { titulo:'Solicitações',             sub:'Solicitação de LECOM ou novo projeto' },
   configuracoes:     { titulo:'Configurações',            sub:'Chaves de API e preferências' },
   acessos:           { titulo:'Acessos',                  sub:'Usuários e permissões do portal' },
+  auditoria:         { titulo:'Auditoria',                sub:'Histórico administrativo das movimentações' },
 };
 
 // Navegação agora é livre — todo módulo é acessível a qualquer momento.
@@ -1598,7 +1632,11 @@ const PAGINAS_COM_PROJETO = new Set([
 let projetoAtivo = null;
 
 function navigate(page){
-  if(page==='acessos' && !podeGerenciarAcessos()){
+  if(typeof CRONO_EDICAO!=='undefined'&&CRONO_EDICAO.ativa&&page!=='cronograma'){
+    if(!confirm('Há alterações não salvas no cronograma. Sair descartará o rascunho. Deseja continuar?'))return;
+    cancelarEdicaoCronograma(false);
+  }
+  if(['acessos','auditoria'].includes(page) && !podeGerenciarAcessos()){
     toast('Acesso restrito a administradores.');
     return;
   }
@@ -1854,6 +1892,8 @@ function temPermissaoAcao(modulo,acao='view'){
   if(papelPortal()==='operator'){
     if(modulo==='solicitacoes')return false;
     const regra=permissoesAcaoPortal.get(modulo);
+    /* No Cronograma, as ações são controladas pela autorização administrativa temporária. */
+    if(modulo==='cronograma')return regra?regra.view===true:permissoesModuloPortal.has(modulo);
     if(regra)return regra[acao]===true;
     /* Compatibilidade enquanto a migration CRUD ainda não foi aplicada. */
     return permissoesModuloPortal.has(modulo);
@@ -1898,6 +1938,8 @@ function atualizarNavegacaoAcessos(){
   item.classList.toggle('locked',bloqueado&&!colaborador);
   item.setAttribute('aria-disabled',String(bloqueado));
   item.title=bloqueado?'Disponível apenas para administradores':'';
+  const auditoria=document.querySelector('.nav-item[data-page="auditoria"]');
+  if(auditoria){auditoria.style.display=bloqueado?'none':'';auditoria.setAttribute('aria-disabled',String(bloqueado));auditoria.title=bloqueado?'Disponível apenas para administradores':'';}
   const sair=document.getElementById('auth-logout');
   if(sair)sair.style.display=sessaoPortal?'inline-flex':'none';
   document.querySelectorAll('.nav-item[data-page]').forEach(nav=>{
@@ -1943,6 +1985,7 @@ function reiniciarTemporizadorInatividade(){
   temporizadorInatividade=setTimeout(encerrarSessaoPorInatividade,TEMPO_INATIVIDADE_MS);
 }
 async function encerrarSessaoPorInatividade(){
+  if(typeof CRONO_EDICAO!=='undefined'&&CRONO_EDICAO.ativa)await cancelarEdicaoCronograma(false);
   if(!sessaoPortal)return;registrarLogSistema('info','Autenticação','Sessão encerrada após 15 minutos de inatividade.');
   try{await supabasePortal?.auth.signOut();}finally{sessaoPortal=null;perfilPortal=null;atualizarNavegacaoAcessos();exibirLogin('Sua sessão foi encerrada após 15 minutos de inatividade. Entre novamente para continuar.');}
 }
@@ -2025,7 +2068,7 @@ async function listarUsuariosAcessos(){
 
 function cartaoPermissoesUsuario(usuario,permitidos){
   const proprio=usuario.id===sessaoPortal?.user?.id;
-  const checks=`<table class="permission-matrix"><thead><tr><th>Módulo</th><th>Visualizar</th><th>Criar</th><th>Editar</th><th>Excluir</th></tr></thead><tbody>${MODULOS_OPERADOR.map(([chave,rotulo])=>{const regra=permitidos.get(chave)||{};return `<tr><td>${rotulo}</td>${['view','create','edit','delete'].map(acao=>`<td><input type="checkbox" aria-label="${acao} em ${rotulo}" data-permissao-usuario="${usuario.id}" data-modulo="${chave}" data-acao="${acao}" ${regra[acao]?'checked':''}></td>`).join('')}</tr>`}).join('')}</tbody></table>`;
+  const checks=`<table class="permission-matrix"><thead><tr><th>Módulo</th><th>Visualizar</th><th>Criar</th><th>Editar</th><th>Excluir</th></tr></thead><tbody>${MODULOS_OPERADOR.map(([chave,rotulo])=>{const regra=permitidos.get(chave)||{};const acoes=chave==='cronograma'?['view']:['view','create','edit','delete'];const celulas=['view','create','edit','delete'].map(acao=>acoes.includes(acao)?`<td><input type="checkbox" aria-label="${acao} em ${rotulo}" data-permissao-usuario="${usuario.id}" data-modulo="${chave}" data-acao="${acao}" ${regra[acao]?'checked':''}></td>`:'<td><span title="Controlado por autenticação administrativa">—</span></td>').join('');return `<tr><td>${rotulo}${chave==='cronograma'?'<small style="display:block;color:var(--ink-mute)">Edição com autenticação administrativa</small>':''}</td>${celulas}</tr>`}).join('')}</tbody></table>`;
   const email=usuario.email || (proprio ? sessaoPortal?.user?.email : 'E-mail gerenciado pelo Supabase Auth');
   const perfilLabel=usuario.role==='admin'?'Administrador':usuario.role==='operator'?'Operador':'Colaborador';
   const descricaoModulos=usuario.role==='admin'?'<span style="font-size:12px;color:var(--ink-soft)">Administradores possuem acesso integral por padrão.</span>':usuario.role==='collaborator'?'<span style="font-size:12px;color:var(--ink-soft)">Colaboradores podem visualizar, criar e ajustar apenas as próprias Solicitações.</span>':`<span style="font-size:12px;color:var(--ink-soft);display:block;width:100%;margin-bottom:2px">Defina o que o Operador pode visualizar, criar, editar ou excluir em cada módulo. Solicitações e Acessos permanecem exclusivos do Administrador.</span>${checks}`;
@@ -2047,6 +2090,32 @@ async function renderAcessos(){
   }catch(e){
     const lista=document.getElementById('acessos-lista');if(lista)lista.innerHTML='<div style="padding:12px;border-radius:8px;background:#fff7ed;font-size:12px;color:#9a4d08">Não foi possível carregar as permissões. Execute primeiro a migration da Fase 2 e atualize esta página.</div>';
   }
+}
+
+let AUDITORIA_BANCO=[],AUDITORIA_USUARIOS=new Map();
+const AUDIT_ENTIDADES={projects:'Projetos',project:'Projetos',project_members:'Acessos do projeto',tasks:'Cronograma',project_phases:'Cronograma',task_dependencies:'Cronograma',task_schedule_versions:'Cronograma',schedule_edit:'Cronograma',solicitacao:'Solicitações',solicitacoes:'Solicitações',solicitacao_events:'Solicitações',risks:'Riscos',referrals:'Encaminhamentos',focal_points:'Pontos Focais',eap_nodes:'EAP',raci_activities:'RACI',raci_people:'RACI',raci_assignments:'RACI',status_reports:'Status Report',status_report_versions:'Status Report',lessons_learned:'Lições Aprendidas',project_closures:'TEP',lecoms:'LECOMs',profiles:'Acessos',user_module_permissions:'Acessos',on_demand_items:'On Demand',on_demand_lanes:'On Demand',on_demand_history:'On Demand'};
+const AUDIT_ACOES={insert:'Criação',update:'Alteração',delete:'Exclusão',unlock_granted:'Edição autorizada',unlock_denied:'Autorização negada',schedule_saved:'Cronograma salvo',schedule_released:'Edição encerrada',created_from_request:'Criação por solicitação'};
+function resumoDetalhesAuditoria(evento){
+  const d=evento.details||{};
+  if(d.reason)return String(d.reason);
+  if(d.project_id&&evento.entity_type==='schedule_edit')return d.summary||`Projeto ${d.project_id}`;
+  if(d.old&&d.new){const ignorar=new Set(['updated_at','created_at']),campos=Object.keys(d.new).filter(k=>!ignorar.has(k)&&JSON.stringify(d.old?.[k])!==JSON.stringify(d.new?.[k]));return campos.length?`Campos alterados: ${campos.slice(0,6).join(', ')}${campos.length>6?'…':''}`:'Registro atualizado';}
+  const registro=d.new||d.old||d;return [registro.name,registro.title,registro.request_code,registro.control_code,registro.activity_code,d.summary].filter(Boolean).join(' · ')||'Movimentação registrada';
+}
+function auditoriaFiltrada(){
+  const usuario=document.getElementById('audit-filtro-usuario')?.value||'',inicio=document.getElementById('audit-filtro-data-inicio')?.value||'',fim=document.getElementById('audit-filtro-data-fim')?.value||'',horaInicio=document.getElementById('audit-filtro-hora-inicio')?.value||'',horaFim=document.getElementById('audit-filtro-hora-fim')?.value||'',texto=(document.getElementById('audit-filtro-texto')?.value||'').trim().toLowerCase();
+  return AUDITORIA_BANCO.filter(ev=>{const data=new Date(ev.created_at),dia=`${data.getFullYear()}-${String(data.getMonth()+1).padStart(2,'0')}-${String(data.getDate()).padStart(2,'0')}`,hora=`${String(data.getHours()).padStart(2,'0')}:${String(data.getMinutes()).padStart(2,'0')}`,busca=[ev.entity_type,ev.action,AUDIT_ENTIDADES[ev.entity_type],AUDIT_ACOES[ev.action],resumoDetalhesAuditoria(ev),AUDITORIA_USUARIOS.get(ev.actor_id)?.nome,AUDITORIA_USUARIOS.get(ev.actor_id)?.email].join(' ').toLowerCase();return(!usuario||ev.actor_id===usuario)&&(!inicio||dia>=inicio)&&(!fim||dia<=fim)&&(!horaInicio||hora>=horaInicio)&&(!horaFim||hora<=horaFim)&&(!texto||busca.includes(texto));});
+}
+function renderAuditoriaSupabase(){
+  const tbody=document.getElementById('audit-tbody'),resumo=document.getElementById('audit-resumo');if(!tbody)return;const eventos=auditoriaFiltrada();if(resumo)resumo.textContent=`${eventos.length} registro(s) exibido(s) de ${AUDITORIA_BANCO.length} carregado(s).`;
+  tbody.innerHTML=eventos.length?eventos.map(ev=>{const usuario=AUDITORIA_USUARIOS.get(ev.actor_id)||{},projetoId=ev.details?.project_id||ev.details?.new?.project_id||ev.details?.old?.project_id||(ev.entity_type==='projects'?ev.entity_id:null),projeto=STATE.projetos.find(p=>p.id===projetoId);return `<tr><td style="white-space:nowrap">${new Date(ev.created_at).toLocaleString('pt-BR')}</td><td><b>${esc(usuario.nome||usuario.email||'Sistema')}</b><small style="display:block;color:var(--ink-mute)">${esc(usuario.email||'')}</small></td><td>${esc(AUDIT_ENTIDADES[ev.entity_type]||ev.entity_type)}</td><td><span class="badge badge-neutral">${esc(AUDIT_ACOES[ev.action]||ev.action)}</span></td><td>${esc(projeto?.nome||ev.entity_id||'—')}</td><td><div class="audit-detail">${esc(resumoDetalhesAuditoria(ev))}</div></td></tr>`;}).join(''):'<tr><td colspan="6"><div class="dtable-empty">Nenhuma movimentação encontrada para os filtros informados.</div></td></tr>';
+}
+async function carregarAuditoriaSupabase(notificar=false){
+  if(!podeGerenciarAcessos()){toast('A Auditoria é exclusiva para administradores.');return false;}const tbody=document.getElementById('audit-tbody');if(tbody)tbody.innerHTML='<tr><td colspan="6"><div class="dtable-empty">Carregando auditoria…</div></td></tr>';
+  try{const {data:eventos,error}=await supabasePortal.from('audit_events').select('*').order('created_at',{ascending:false}).limit(2000);if(error)throw error;let perfis=await supabasePortal.from('profiles').select('id,full_name,email').order('full_name');if(perfis.error)perfis=await supabasePortal.from('profiles').select('id,full_name').order('full_name');if(perfis.error)throw perfis.error;const usuarios=perfis.data||[];AUDITORIA_BANCO=eventos||[];AUDITORIA_USUARIOS=new Map(usuarios.map(u=>[u.id,{nome:u.full_name||u.email,email:u.email||''}]));const select=document.getElementById('audit-filtro-usuario'),valor=select?.value||'';if(select){select.innerHTML='<option value="">Todos os usuários</option>'+[...AUDITORIA_USUARIOS.entries()].map(([id,u])=>`<option value="${id}">${esc(u.nome||u.email)}</option>`).join('');select.value=valor;}renderAuditoriaSupabase();if(notificar)toast('Auditoria atualizada.');return true;}catch(e){registrarLogSistema('erro','Carregamento da auditoria',e);if(tbody)tbody.innerHTML='<tr><td colspan="6"><div class="dtable-empty">Não foi possível carregar a auditoria. Execute a migration de segurança.</div></td></tr>';return false;}
+}
+function exportarAuditoriaCsv(){
+  const eventos=auditoriaFiltrada();if(!eventos.length){toast('Não há registros para exportar.');return;}const q=v=>`"${String(v??'').replace(/"/g,'""')}"`,linhas=[['Data e hora','Usuário','E-mail','Módulo','Ação','Registro','Detalhes']];eventos.forEach(ev=>{const u=AUDITORIA_USUARIOS.get(ev.actor_id)||{};linhas.push([new Date(ev.created_at).toLocaleString('pt-BR'),u.nome||'Sistema',u.email||'',AUDIT_ENTIDADES[ev.entity_type]||ev.entity_type,AUDIT_ACOES[ev.action]||ev.action,ev.entity_id||'',resumoDetalhesAuditoria(ev)]);});const blob=new Blob(['\ufeff'+linhas.map(l=>l.map(q).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`AUDITORIA_PORTAL_${hojeISO()}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Auditoria exportada.');
 }
 
 async function salvarAcessosUsuario(userId){
@@ -2185,6 +2254,7 @@ async function iniciarAuthPortal(){
 
 async function sairDoPortal(){
   if(!supabasePortal)return;
+  if(typeof CRONO_EDICAO!=='undefined'&&CRONO_EDICAO.ativa)await cancelarEdicaoCronograma(false);
   clearTimeout(temporizadorInatividade);
   encerrarAtualizacoesSolicitacoes();
   await supabasePortal.auth.signOut();
@@ -2216,6 +2286,7 @@ const STATE = {
 };
 
 function salvarState(){
+  if(typeof CRONO_EDICAO!=='undefined'&&CRONO_EDICAO.ativa&&!CRONO_EDICAO.persistindo)return;
   try{
     /* Nunca persistimos chaves, sessão ou payloads sensíveis no cache local. */
     const cacheSeguro={projetos:STATE.projetos,riscos:STATE.riscos,encaminhamentos:STATE.encaminhamentos,tarefas:STATE.tarefas,eapNos:STATE.eapNos,raciAtividades:STATE.raciAtividades,raciPessoas:STATE.raciPessoas,raciMatriz:STATE.raciMatriz,licoesAprendidas:STATE.licoesAprendidas,teps:STATE.teps,melhorias:STATE.melhorias,pontosFocais:STATE.pontosFocais,statusReports:STATE.statusReports,statusReportHistory:STATE.statusReportHistory,solicitacoes:STATE.solicitacoes,onDemandItems:STATE.onDemandItems,onDemandHistory:STATE.onDemandHistory,onDemandLanes:STATE.onDemandLanes};
@@ -2795,6 +2866,7 @@ async function excluirProjeto(id){
 async function selecionarProjeto(id){
   const p = STATE.projetos.find(x => x.id === id);
   if(!p) return;
+  if(CRONO_EDICAO.ativa&&CRONO_EDICAO.projetoId!==id){if(!confirm('Trocar de projeto descartará as alterações não salvas do cronograma. Deseja continuar?'))return;await cancelarEdicaoCronograma(false);}
   definirProjetoAtivo(p);
   const cargas=[];
   if(temPermissaoModulo('cronograma'))cargas.push(carregarTarefasSupabase(p.id));
@@ -3408,7 +3480,7 @@ function codigoSolicitacaoLocal(tipo){
 function mapearSolicitacaoSupabase(linha){return {...linha,id:linha.id,request_code:linha.request_code||'',criado_em:linha.created_at||linha.criado_em,atualizado_em:linha.updated_at||linha.atualizado_em};}
 function mapearProjetoSupabase(linha){
   const extra=linha.extra||{};
-  return {id:linha.id,owner_id:linha.owner_id,nome:linha.name||'',lecom:linha.control_code||'',tap_lecom:extra.tap_lecom||'',objetivo:linha.objective||'',gerente_projeto:linha.manager_name||'',data_abertura:linha.opening_date||'',data_inicio:linha.start_date||'',data_fim_prevista:linha.planned_end_date||'',data_replanejada:linha.replanned_end_date||'',data_entrega_final:linha.final_delivery_date||'',macro_entrega:linha.macro_delivery||'',entregaveis:linha.deliverables||'',status_portfolio:linha.portfolio_status||'a_iniciar',solicitacao_id:linha.source_request_id||extra.solicitacao_id||null,solicitante:extra.solicitante||'',areas_envolvidas:extra.areas_envolvidas||'',ganhos_esperados:extra.ganhos_esperados||'',patrocinador:extra.patrocinador||'',lider_ti:extra.lider_ti||'',direcao_ti:extra.direcao_ti||'Experiência do Cliente e Operações',status:extra.status||'planejamento',fases_ocultas:extra.fases_ocultas||[],arquivado:false,criado_em:linha.created_at};
+  return {id:linha.id,owner_id:linha.owner_id,nome:linha.name||'',lecom:linha.control_code||'',tap_lecom:extra.tap_lecom||'',objetivo:linha.objective||'',gerente_projeto:linha.manager_name||'',data_abertura:linha.opening_date||'',data_inicio:linha.start_date||'',data_fim_prevista:linha.planned_end_date||'',data_replanejada:linha.replanned_end_date||'',data_entrega_final:linha.final_delivery_date||'',macro_entrega:linha.macro_delivery||'',entregaveis:linha.deliverables||'',status_portfolio:linha.portfolio_status||'a_iniciar',solicitacao_id:linha.source_request_id||extra.solicitacao_id||null,solicitante:extra.solicitante||'',areas_envolvidas:extra.areas_envolvidas||'',ganhos_esperados:extra.ganhos_esperados||'',patrocinador:extra.patrocinador||'',lider_ti:extra.lider_ti||'',direcao_ti:extra.direcao_ti||'Experiência do Cliente e Operações',status:extra.status||'planejamento',fases_ocultas:extra.fases_ocultas||[],cronograma_ultima_atualizacao:extra.cronograma_ultima_atualizacao||'',cronograma_atualizado_por:extra.cronograma_atualizado_por||'',arquivado:false,criado_em:linha.created_at};
 }
 let carregamentoProjetosEmCurso=false;
 async function carregarProjetosSupabase(){
@@ -3428,10 +3500,11 @@ async function carregarProjetosSupabase(){
 function mapearLecomSupabase(l){const x=l.extra||{};return {...x,id:l.id,iniciativa:l.initiative,codigo:l.lecom_code,solicitante:l.requester,area_solicitante:l.requester_area,classificacao:l.classification,priorizacao_ti:l.it_priority,priorizacao_negocio:l.business_priority,compromisso:l.commitment,area_ti:l.it_area,diretor_ti:l.it_director,area_classificacao:l.classification_area,impacto_jornada:l.beneficiary_impact?'sim':'nao',impacto_nips:l.nips_impact?'sim':'nao',impacto_financeiro:l.financial_impact?'sim':'nao',risco_assistencial:l.care_risk?'sim':'nao',envolve_ia:l.involves_ai?'sim':'nao',plan_especificacao:l.specification_planned_date,final_especificacao:l.specification_final_date,status_especificacao:l.specification_status,plan_homologacao:l.approval_planned_date,final_homologacao:l.approval_final_date,status_homologacao:l.approval_status,plan_producao:l.production_planned_date,final_producao:l.production_final_date,status_producao:l.production_status,source_request_id:l.source_request_id||x.solicitacao_id||null,criado_em:l.created_at};}
 async function carregarLecomsSupabase(){if(!supabasePortal||!sessaoPortal)return false;try{const {data,error}=await supabasePortal.from('lecoms').select('*').order('created_at',{ascending:false});if(error)throw error;STATE.melhorias=(data||[]).map(mapearLecomSupabase);salvarState();renderLecoms();return true;}catch(e){registrarLogSistema('erro','Sincronização de LECOMs',e);return false;}}
 function mapearTarefaSupabase(linha){const extra=linha.extra||{};return {id:linha.id,projeto_id:linha.project_id,codigo:linha.activity_code||'',numero:extra.numero||0,nome:linha.title||'',fase:FASES_ANTIGAS_PARA_ATUAIS[linha.phase]||linha.phase||'SEM FASE',fase_id:linha.phase_id||null,tipo:extra.tipo||'comum',area:extra.area||'',responsavel:linha.responsible_name||'',data_inicio:linha.replanned_start_date||linha.planned_start_date||'',data_fim:linha.replanned_end_date||linha.planned_end_date||'',baseline_inicio:linha.baseline_start_date||linha.planned_start_date||'',baseline_fim:linha.baseline_end_date||linha.planned_end_date||'',status:linha.status||'a_iniciar',progresso:Number(linha.progress??extra.progresso??(PROGRESSO_STATUS[linha.status]??0)),dependencias:extra.dependencias||[],observacoes:linha.description||'',justificativa_atraso:extra.justificativa_atraso||'',data_replanejamento:extra.data_replanejamento||linha.replanned_end_date||'',historico_inicio:extra.historico_inicio||[linha.planned_start_date].filter(Boolean),historico_fim:extra.historico_fim||[linha.planned_end_date].filter(Boolean),criado_em:linha.created_at};}
-async function carregarTarefasSupabase(projetoId){if(!supabasePortal||!sessaoPortal||!projetoId)return false;try{const pendentesLocais=STATE.tarefas.filter(t=>t.projeto_id===projetoId&&t._sync_pendente),{data,error}=await supabasePortal.from('tasks').select('*').eq('project_id',projetoId).order('created_at');if(error)throw error;const tarefas=(data||[]).map(mapearTarefaSupabase),ids=tarefas.map(t=>t.id);if(ids.length){const {data:deps,error:erroDeps}=await supabasePortal.from('task_dependencies').select('*').in('task_id',ids);if(erroDeps)throw erroDeps;const porId=new Map(tarefas.map(t=>[t.id,t]));(deps||[]).forEach(d=>{const alvo=porId.get(d.task_id),origem=porId.get(d.depends_on_task_id);if(alvo&&origem&&!alvo.dependencias.includes(origem.numero))alvo.dependencias.push(origem.numero);});}const mescladas=tarefas.slice();pendentesLocais.forEach(local=>{const indice=mescladas.findIndex(remota=>remota.id===local.id);if(indice>=0)mescladas[indice]=local;else mescladas.push(local);});STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(mescladas);pendentesLocais.forEach(t=>agendarPersistenciaTarefaCronograma(t.id,250));salvarState();return true;}catch(e){registrarLogSistema('erro','Sincronização de cronograma',e);return false;}}
+async function carregarTarefasSupabase(projetoId){if(!supabasePortal||!sessaoPortal||!projetoId)return false;try{const {data,error}=await supabasePortal.from('tasks').select('*').eq('project_id',projetoId).order('created_at');if(error)throw error;const tarefas=(data||[]).map(mapearTarefaSupabase),ids=tarefas.map(t=>t.id);if(ids.length){const {data:deps,error:erroDeps}=await supabasePortal.from('task_dependencies').select('*').in('task_id',ids);if(erroDeps)throw erroDeps;const porId=new Map(tarefas.map(t=>[t.id,t]));(deps||[]).forEach(d=>{const alvo=porId.get(d.task_id),origem=porId.get(d.depends_on_task_id);if(alvo&&origem&&!alvo.dependencias.includes(origem.numero))alvo.dependencias.push(origem.numero);});}STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(tarefas);salvarState();return true;}catch(e){registrarLogSistema('erro','Sincronização de cronograma',e);return false;}}
 let atualizacaoCronogramaEmCurso=false;
 function cronogramaEstaVisivel(){return document.querySelector('#page-cronograma.active')&&document.visibilityState==='visible';}
 async function atualizarCronogramaDoBanco(notificar=false){
+  if(CRONO_EDICAO.ativa){if(notificar)toast('Salve ou cancele a edição antes de atualizar o cronograma.');return false;}
   if(!projetoAtivo||!supabasePortal||!sessaoPortal||!temPermissaoModulo('cronograma'))return false;
   if(atualizacaoCronogramaEmCurso)return false;
   atualizacaoCronogramaEmCurso=true;
@@ -3447,6 +3520,63 @@ async function atualizarCronogramaDoBanco(notificar=false){
     atualizacaoCronogramaEmCurso=false;
     if(botao){botao.disabled=false;botao.textContent=rotulo||'Atualizar';}
   }
+}
+
+const CRONO_EDICAO={ativa:false,suja:false,persistindo:false,projetoId:null,sessaoId:null,autorizadoPor:'',expiraEm:0,snapshot:null,timer:null,ultimoToque:0,ultimaAtividade:0};
+function cronogramaEdicaoAtiva(){return CRONO_EDICAO.ativa&&CRONO_EDICAO.projetoId===projetoAtivo?.id&&Date.now()<CRONO_EDICAO.expiraEm;}
+function copiarCronogramaProjeto(){return {tarefas:JSON.parse(JSON.stringify(STATE.tarefas.filter(t=>t.projeto_id===projetoAtivo.id))),projeto:JSON.parse(JSON.stringify(projetoAtivo))};}
+function atualizarInterfaceEdicaoCronograma(){
+  const ativa=cronogramaEdicaoAtiva(),conteudo=document.getElementById('crono-conteudo'),banner=document.getElementById('crono-lock-banner'),editar=document.getElementById('crono-editar-btn'),status=document.getElementById('crono-lock-status'),titulo=document.getElementById('crono-lock-titulo'),detalhe=document.getElementById('crono-lock-detalhe');
+  conteudo?.classList.toggle('crono-readonly',!ativa);banner?.classList.toggle('editing',ativa);if(editar)editar.style.display=ativa?'none':'';
+  if(status){status.className=`badge ${ativa?'badge-warn':'badge-neutral'}`;status.textContent=ativa?'Edição autorizada':'Somente leitura';}
+  if(titulo)titulo.textContent=ativa?'Cronograma em edição':'Cronograma protegido';
+  if(detalhe)detalhe.textContent=ativa?`Autorizado por ${CRONO_EDICAO.autorizadoPor||'administrador'} · alterações ainda não salvas`:(projetoAtivo?.cronograma_ultima_atualizacao?`Último salvamento por ${projetoAtivo.cronograma_atualizado_por||'usuário'} em ${new Date(projetoAtivo.cronograma_ultima_atualizacao).toLocaleString('pt-BR')}.`:'Modo somente leitura. Atualize para buscar dados mais recentes.');
+  document.querySelectorAll('#page-cronograma .crono-edit-only').forEach(el=>el.style.display=ativa?'':'none');
+}
+function limparEstadoEdicaoCronograma(){clearInterval(CRONO_EDICAO.timer);Object.assign(CRONO_EDICAO,{ativa:false,suja:false,persistindo:false,projetoId:null,sessaoId:null,autorizadoPor:'',expiraEm:0,snapshot:null,timer:null,ultimoToque:0,ultimaAtividade:0});atualizarInterfaceEdicaoCronograma();}
+function iniciarRelogioEdicaoCronograma(){
+  clearInterval(CRONO_EDICAO.timer);CRONO_EDICAO.timer=setInterval(()=>{if(!CRONO_EDICAO.ativa)return;const restante=CRONO_EDICAO.expiraEm-Date.now(),inativa=Date.now()-CRONO_EDICAO.ultimaAtividade,detalhe=document.getElementById('crono-lock-detalhe');if(restante<=0||inativa>=5*60000){cancelarEdicaoCronograma(false,true);return;}if(detalhe)detalhe.textContent=`Autorizado por ${CRONO_EDICAO.autorizadoPor||'administrador'} · expira em ${Math.ceil(Math.min(restante,5*60000-inativa)/60000)} min · ${CRONO_EDICAO.suja?'alterações não salvas':'sem alterações'}`;},1000);
+}
+function abrirAutenticacaoEdicaoCronograma(){
+  if(!projetoAtivo){toast('Selecione um projeto primeiro.');return;}if(CRONO_EDICAO.ativa)return;
+  document.getElementById('crono-auth-email').value='';document.getElementById('crono-auth-senha').value='';const erro=document.getElementById('crono-auth-erro');erro.style.display='none';erro.textContent='';abrirModal('modal-cronograma-auth');setTimeout(()=>document.getElementById('crono-auth-email')?.focus(),50);
+}
+async function registrarTentativaCronograma(resultado,motivo=''){
+  try{if(supabasePortal&&sessaoPortal)await supabasePortal.rpc('log_schedule_unlock_attempt',{p_project_id:projetoAtivo?.id,p_success:resultado,p_reason:String(motivo||'').slice(0,180)});}catch(e){}
+}
+async function confirmarAutenticacaoEdicaoCronograma(){
+  const email=document.getElementById('crono-auth-email').value.trim(),senha=document.getElementById('crono-auth-senha').value,erro=document.getElementById('crono-auth-erro'),botao=document.getElementById('crono-auth-confirmar');
+  if(!email||!senha){erro.textContent='Informe o e-mail e a senha do administrador.';erro.style.display='block';return;}
+  botao.disabled=true;botao.textContent='Validando…';erro.style.display='none';let clienteTemporario=null;
+  try{
+    clienteTemporario=window.supabase.createClient(SUPABASE_PORTAL_CONFIG.url,SUPABASE_PORTAL_CONFIG.publishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+    const {data:login,error:erroLogin}=await clienteTemporario.auth.signInWithPassword({email,password:senha});if(erroLogin||!login?.session)throw new Error('Credenciais administrativas inválidas.');
+    const {data:admin,error:erroAdmin}=await clienteTemporario.rpc('is_admin');if(erroAdmin||admin!==true)throw new Error('O usuário informado não possui perfil de administrador ativo.');
+    const {data:autorizacao,error:erroAutorizacao}=await clienteTemporario.rpc('grant_schedule_edit',{p_project_id:projetoAtivo.id,p_actor_id:sessaoPortal.user.id});if(erroAutorizacao)throw erroAutorizacao;
+    const concessao=Array.isArray(autorizacao)?autorizacao[0]:autorizacao;
+    CRONO_EDICAO.ativa=true;CRONO_EDICAO.projetoId=projetoAtivo.id;CRONO_EDICAO.sessaoId=concessao?.session_id||concessao?.id||null;CRONO_EDICAO.autorizadoPor=login.user?.email||email;CRONO_EDICAO.expiraEm=new Date(concessao?.expires_at||Date.now()+15*60000).getTime();CRONO_EDICAO.snapshot=copiarCronogramaProjeto();CRONO_EDICAO.suja=false;CRONO_EDICAO.ultimaAtividade=Date.now();tarefaSyncTimers.forEach(timer=>clearTimeout(timer));tarefaSyncTimers.clear();
+    fecharModal('modal-cronograma-auth');iniciarRelogioEdicaoCronograma();atualizarInterfaceEdicaoCronograma();renderCronograma();toast('Edição autorizada por 15 minutos.');
+  }catch(e){const mensagem=/CRONOGRAMA_EM_EDICAO/i.test(e.message||'')?'Este cronograma já está sendo editado por outro usuário.':(e.message||'Não foi possível autorizar a edição.');erro.textContent=mensagem;erro.style.display='block';await registrarTentativaCronograma(false,mensagem);}
+  finally{if(clienteTemporario)try{await clienteTemporario.auth.signOut({scope:'local'});}catch(e){}botao.disabled=false;botao.textContent='Autorizar edição';document.getElementById('crono-auth-senha').value='';}
+}
+function marcarCronogramaAlterado(){
+  if(!cronogramaEdicaoAtiva())return false;CRONO_EDICAO.suja=true;const agora=Date.now();CRONO_EDICAO.ultimaAtividade=agora;if(agora-CRONO_EDICAO.ultimoToque>45000){CRONO_EDICAO.ultimoToque=agora;supabasePortal?.rpc('touch_schedule_edit',{p_session_id:CRONO_EDICAO.sessaoId}).then(()=>{}).catch(()=>{});}atualizarInterfaceEdicaoCronograma();return true;
+}
+function tarefasCronogramaParaSalvar(){return tarefasDoProjeto().map(t=>({id:idUuid(t.id)?t.id:null,numero:Number(t.numero)||0,nome:t.nome||'',fase:t.fase||'SEM FASE',tipo:t.tipo||'comum',area:t.area||'',responsavel:t.responsavel||'',data_inicio:t.data_inicio||null,data_fim:t.data_fim||null,baseline_inicio:t.baseline_inicio||historicoInicio(t)[0]||null,baseline_fim:t.baseline_fim||historicoFim(t)[0]||null,status:t.status||'a_iniciar',progresso:Number(t.progresso??PROGRESSO_STATUS[t.status]??0),dependencias:t.dependencias||[],observacoes:t.observacoes||'',justificativa_atraso:t.justificativa_atraso||'',data_replanejamento:t.data_replanejamento||null,historico_inicio:historicoInicio(t),historico_fim:historicoFim(t)}));}
+async function salvarEdicaoCronograma(){
+  if(!cronogramaEdicaoAtiva()){toast('A autorização de edição expirou.');await cancelarEdicaoCronograma(false,true);return;}
+  const botao=document.getElementById('crono-salvar-edicao-btn');botao.disabled=true;botao.textContent='Salvando…';CRONO_EDICAO.persistindo=true;
+  try{
+    const {error}=await supabasePortal.rpc('save_schedule_draft',{p_project_id:projetoAtivo.id,p_tasks:tarefasCronogramaParaSalvar(),p_hidden_phases:projetoAtivo.fases_ocultas||[]});if(error)throw error;
+    const projetoId=projetoAtivo.id;STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId);limparEstadoEdicaoCronograma();await carregarTarefasSupabase(projetoId);await carregarProjetosSupabase();salvarState();renderCronograma();toast('Cronograma salvo e bloqueado para edição.');
+  }catch(e){CRONO_EDICAO.persistindo=false;registrarLogSistema('erro','Salvamento protegido do cronograma',e);toast(mensagemErroSupabase(e,'salvar o cronograma'));}
+  finally{botao.disabled=false;botao.textContent='Salvar alterações';}
+}
+async function cancelarEdicaoCronograma(perguntar=true,expirada=false){
+  if(!CRONO_EDICAO.ativa)return;if(perguntar&&CRONO_EDICAO.suja&&!confirm('Descartar todas as alterações não salvas do cronograma?'))return;
+  const snapshot=CRONO_EDICAO.snapshot,sessaoId=CRONO_EDICAO.sessaoId,projetoId=CRONO_EDICAO.projetoId;
+  if(snapshot){STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(snapshot.tarefas);const indice=STATE.projetos.findIndex(p=>p.id===projetoId);if(indice>=0)STATE.projetos[indice]=snapshot.projeto;if(projetoAtivo?.id===projetoId)projetoAtivo=STATE.projetos[indice]||snapshot.projeto;}
+  limparEstadoEdicaoCronograma();salvarState();renderCronograma();if(supabasePortal&&sessaoId)supabasePortal.rpc('release_schedule_edit',{p_session_id:sessaoId}).then(()=>{}).catch(()=>{});toast(expirada?'A autorização expirou. Alterações não salvas foram descartadas.':'Edição cancelada. Nenhuma alteração foi salva.');
 }
 function idUuid(valor){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(valor||''));}
 async function gravarRegistroProjetoSupabase(tabela,id,payload){
@@ -4214,6 +4344,8 @@ function renderCronograma(){
   document.getElementById('crono-empty').style.display = vazio ? 'block' : 'none';
   document.getElementById('crono-conteudo').style.display = vazio ? 'none' : 'block';
   if(vazio) return;
+  atualizarInterfaceEdicaoCronograma();
+  const editando=cronogramaEdicaoAtiva();
   Object.assign(CRONO_CONFIG, projetoAtivo.cronograma_config || {});
   atualizarKpisCronograma();
   const todasTarefas = tarefasDoProjeto();
@@ -4264,8 +4396,8 @@ function renderCronograma(){
       <span class="cg-toggle" onclick="toggleFase('${esc(fase)}')">${colapsada ? '▸' : '▾'}</span>
       <span class="cg-nome" onclick="toggleFase('${esc(fase)}')" style="cursor:pointer">${esc(fase)}</span>
       <span style="font-size:10px;opacity:.7">${itens.length}</span>
-      <button class="cg-phase-add" onclick="criarTarefaInline('${esc(fase)}')" title="Adicionar atividade nesta fase">+ atividade</button>
-      <button class="cg-phase-add" onclick="excluirFaseCronograma('${esc(fase)}')" title="Excluir fase e suas atividades" style="color:var(--red)">🗑</button>
+      <button class="cg-phase-add crono-edit-only" onclick="criarTarefaInline('${esc(fase)}')" title="Adicionar atividade nesta fase">+ atividade</button>
+      <button class="cg-phase-add crono-edit-only" onclick="excluirFaseCronograma('${esc(fase)}')" title="Excluir fase e suas atividades" style="color:var(--red)">🗑</button>
     </div>`;
     ganttHtml += `<div class="gantt-row phase"></div>`;
     rowIndex++;
@@ -4280,19 +4412,19 @@ function renderCronograma(){
       gridHtml += `<div class="cg-row" data-task-id="${t.id}">
         <span class="cg-toggle"></span>
         ${marcoIcon ? `<span class="cg-marco">${marcoIcon}</span>` : ''}
-        <input class="cg-input cg-nome" value="${esc(t.nome)}" placeholder="Nome da atividade"
+        <input class="cg-input cg-nome" value="${esc(t.nome)}" placeholder="Nome da atividade" ${editando?'':'disabled'}
           oninput="campoTarefa('${t.id}','nome',this.value,false)">
-        <input type="date" class="cg-input cg-data" value="${t.data_inicio||''}"
+        <input type="date" class="cg-input cg-data" value="${t.data_inicio||''}" ${editando?'':'disabled'}
           onchange="campoTarefa('${t.id}','data_inicio',this.value,true)">
-        <input type="date" class="cg-input cg-data" value="${t.data_fim||''}"
+        <input type="date" class="cg-input cg-data" value="${t.data_fim||''}" ${editando?'':'disabled'}
           onchange="campoTarefa('${t.id}','data_fim',this.value,true)">
-        <select class="cg-input cg-status-sel st-${statusEfetivo}" onchange="campoTarefa('${t.id}','status',this.value,true)" ${atrasada && t.status!=='atrasado' ? 'title="Marcado como atrasado automaticamente pela data — mude o status manualmente se necessário"' : ''}>
+        <select class="cg-input cg-status-sel st-${statusEfetivo}" onchange="campoTarefa('${t.id}','status',this.value,true)" ${editando?'':'disabled'} ${atrasada && t.status!=='atrasado' ? 'title="Marcado como atrasado automaticamente pela data — mude o status manualmente se necessário"' : ''}>
           ${Object.entries(STATUS_LABEL).map(([v,l]) => `<option value="${v}" ${t.status===v?'selected':''}>${l}</option>`).join('')}
         </select>
         <span class="cg-actions">
           <button onclick="verHistoricoCronograma('${t.id}')" title="Histórico de replanejamento">${Math.max(0,historicoInicio(t).length-1)+Math.max(0,historicoFim(t).length-1) ? '↺' : '·'}</button>
-          <button onclick="abrirModalTarefa('${t.id}')" title="Mais detalhes (área, tipo, dependências...)">⋯</button>
-          <button onclick="excluirTarefa('${t.id}')" title="Excluir">🗑️</button>
+          <button onclick="abrirModalTarefa('${t.id}')" title="Ver detalhes">⋯</button>
+          <button class="crono-edit-only" onclick="excluirTarefa('${t.id}')" title="Excluir">🗑️</button>
         </span>
       </div>`;
 
@@ -4353,12 +4485,13 @@ function toggleFase(fase){
 }
 
 async function excluirFaseCronograma(fase){
+  if(!cronogramaEdicaoAtiva()){toast('Clique em Editar cronograma e autorize a edição.');return;}
   if(!projetoAtivo)return;
   const atividades=tarefasDoProjeto().filter(t=>t.fase===fase);
   const aviso=atividades.length?`A fase “${fase}” possui ${atividades.length} atividade(s). Elas também serão excluídas. Deseja continuar?`:`Excluir a fase “${fase}”?`;
   if(!confirm(aviso))return;
   try{
-    if(supabasePortal&&sessaoPortal){
+    if(supabasePortal&&sessaoPortal&&!CRONO_EDICAO.ativa){
       const ids=atividades.filter(t=>idUuid(t.id)).map(t=>t.id);
       if(ids.length){const {error}=await supabasePortal.from('tasks').delete().in('id',ids);if(error)throw error;}
       const {data:faseRemota,error:erroFase}=await supabasePortal.from('project_phases').select('id').eq('project_id',projetoAtivo.id).eq('name',fase).maybeSingle();
@@ -4369,12 +4502,13 @@ async function excluirFaseCronograma(fase){
       const p=mapearProjetoSupabase(data),idx=STATE.projetos.findIndex(x=>x.id===p.id);if(idx>=0)STATE.projetos[idx]=p;projetoAtivo=p;
     }else projetoAtivo.fases_ocultas=[...new Set([...(projetoAtivo.fases_ocultas||[]),fase])];
     STATE.tarefas=STATE.tarefas.filter(t=>!(t.projeto_id===projetoAtivo.id&&t.fase===fase));
-    salvarState();renderCronograma();toast(`Fase “${fase}” excluída.`);
+    marcarCronogramaAlterado();salvarState();renderCronograma();toast(`Fase “${fase}” removida do rascunho.`);
   }catch(e){registrarLogSistema('erro','Exclusão de fase',e);toast('Não foi possível excluir a fase no banco.');}
 }
 
 /* ═══ FASE — criação inline, sem modal ═══ */
 function toggleFaseInlineInput(){
+  if(!cronogramaEdicaoAtiva()){toast('Clique em Editar cronograma e autorize a edição.');return;}
   if(!projetoAtivo){ toast('Selecione um projeto primeiro.'); return; }
   const box = document.getElementById('crono-fase-input');
   const abrindo = box.style.display === 'none';
@@ -4382,6 +4516,7 @@ function toggleFaseInlineInput(){
   if(abrindo){ document.getElementById('input-nova-fase').value = ''; document.getElementById('input-nova-fase').focus(); }
 }
 function confirmarNovaFase(){
+  if(!cronogramaEdicaoAtiva())return;
   const nome = document.getElementById('input-nova-fase').value.trim().toUpperCase();
   if(!nome){ toast('Informe o nome da fase.'); return; }
   if(fasesDoProjeto().includes(nome)){ toast('Essa fase já existe.'); return; }
@@ -4391,6 +4526,7 @@ function confirmarNovaFase(){
 
 /* ═══ TAREFA — criação inline direto na grade ═══ */
 function criarTarefaInline(faseAlvo){
+  if(!cronogramaEdicaoAtiva()){toast('Clique em Editar cronograma e autorize a edição.');return;}
   if(!projetoAtivo){ toast('Selecione um projeto primeiro.'); return; }
   const fases = fasesDoProjeto();
   const fase = faseAlvo || fases[0];
@@ -4405,6 +4541,7 @@ function criarTarefaInline(faseAlvo){
     dependencias: [], observacoes: '', criado_em: new Date().toISOString()
   };
   STATE.tarefas.push(nova);
+  marcarCronogramaAlterado();
   if(fasesColapsadas[fase]) fasesColapsadas[fase] = false;
   salvarStateDebounced();
   renderCronograma();
@@ -4438,12 +4575,14 @@ function payloadTarefaCronogramaSupabase(tarefa,faseId){
 }
 
 function agendarPersistenciaTarefaCronograma(id,atraso=1100){
+  if(CRONO_EDICAO.ativa)return;
   if(!id)return;
   clearTimeout(tarefaSyncTimers.get(id));
   tarefaSyncTimers.set(id,setTimeout(()=>{tarefaSyncTimers.delete(id);persistirTarefaCronogramaNoBanco(id);},atraso));
 }
 
 async function persistirTarefaCronogramaNoBanco(id){
+  if(CRONO_EDICAO.ativa)return;
   if(tarefaSyncCanceladas.has(id)||tarefaSyncEmCurso.has(id)){if(tarefaSyncEmCurso.has(id))agendarPersistenciaTarefaCronograma(id,500);return;}
   const tarefa=STATE.tarefas.find(t=>t.id===id);
   if(!tarefa||!tarefa._sync_pendente||!supabasePortal||!sessaoPortal)return;
@@ -4485,8 +4624,8 @@ async function persistirTarefaCronogramaNoBanco(id){
 }
 
 function sincronizarTarefasPendentes(){
-  if(!supabasePortal||!sessaoPortal)return;
-  STATE.tarefas.filter(t=>t._sync_pendente&&t.projeto_id===projetoAtivo?.id).forEach(t=>agendarPersistenciaTarefaCronograma(t.id,150));
+  /* O cronograma protegido só é persistido pelo botão Salvar alterações. */
+  return;
 }
 window.addEventListener('online',sincronizarTarefasPendentes);
 setInterval(sincronizarTarefasPendentes,30000);
@@ -4499,6 +4638,7 @@ document.addEventListener('visibilitychange',()=>{if(cronogramaEstaVisivel())atu
    campo é texto (perderia o foco no meio da digitação). Só re-renderiza
    quando o campo muda algo visual no Gantt (data/status). ═══ */
 function campoTarefa(id, campo, valor, precisaRedesenhar){
+  if(!cronogramaEdicaoAtiva()){toast('O cronograma está em modo somente leitura.');renderCronograma();return;}
   const t = STATE.tarefas.find(x => x.id === id);
   if(!t) return;
   if(campo === 'data_fim' && t.data_inicio && valor < t.data_inicio){
@@ -4524,6 +4664,7 @@ function campoTarefa(id, campo, valor, precisaRedesenhar){
     t.progresso = PROGRESSO_STATUS[valor] ?? 0;
   }else t[campo] = valor;
   t._sync_pendente=true;t._sync_erro_notificado=false;t._sync_revisao=Number(t._sync_revisao||0)+1;
+  marcarCronogramaAlterado();
   salvarStateDebounced();
   agendarPersistenciaTarefaCronograma(id);
   if(precisaRedesenhar) renderCronograma();
@@ -4541,7 +4682,7 @@ function aplicarCascataDependencias(origem){
       const versao=sucessora._sync_versao_pendente||{previous_start_date:sucessora.data_inicio||null,previous_end_date:sucessora.data_fim||null};
       (sucessora.historico_inicio ||= historicoInicio(sucessora)).push(novoInicio);
       (sucessora.historico_fim ||= historicoFim(sucessora)).push(novoFim);
-      sucessora.data_inicio = novoInicio; sucessora.data_fim = novoFim;sucessora._sync_versao_pendente={...versao,new_start_date:novoInicio,new_end_date:novoFim};sucessora._sync_pendente=true;sucessora._sync_erro_notificado=false;sucessora._sync_revisao=Number(sucessora._sync_revisao||0)+1;agendarPersistenciaTarefaCronograma(sucessora.id);alteradas++; propagar(sucessora);
+      sucessora.data_inicio = novoInicio; sucessora.data_fim = novoFim;sucessora._sync_versao_pendente={...versao,new_start_date:novoInicio,new_end_date:novoFim};sucessora._sync_pendente=true;sucessora._sync_erro_notificado=false;sucessora._sync_revisao=Number(sucessora._sync_revisao||0)+1;marcarCronogramaAlterado();agendarPersistenciaTarefaCronograma(sucessora.id);alteradas++; propagar(sucessora);
     });
   };
   propagar(origem);
@@ -4562,8 +4703,9 @@ function alternarOpcaoCrono(opcao){
   renderCronograma();
 }
 async function congelarBaselineCronograma(){
+  if(!cronogramaEdicaoAtiva()){toast('Clique em Editar cronograma e autorize a edição.');return;}
   if(!projetoAtivo || !confirm('Registrar as datas vigentes como uma nova versão de baseline? A baseline original permanecerá no histórico.')) return;
-  try{for(const t of tarefasDoProjeto()){if(supabasePortal&&sessaoPortal&&idUuid(t.id)){const {error}=await supabasePortal.from('tasks').update({baseline_start_date:t.data_inicio||null,baseline_end_date:t.data_fim||null,planned_start_date:t.data_inicio||null,planned_end_date:t.data_fim||null,replanned_start_date:null,replanned_end_date:null}).eq('id',t.id);if(error)throw error;const {error:erroVersao}=await supabasePortal.from('task_schedule_versions').insert({task_id:t.id,project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,change_type:'baseline',new_start_date:t.data_inicio||null,new_end_date:t.data_fim||null,reason:'Nova versão de baseline registrada manualmente.'});if(erroVersao)throw erroVersao;}t.baseline_inicio=t.data_inicio;t.baseline_fim=t.data_fim;t.historico_inicio=[...(t.historico_inicio||[]),t.data_inicio].filter(Boolean);t.historico_fim=[...(t.historico_fim||[]),t.data_fim].filter(Boolean);}salvarState();renderCronograma();toast('Nova baseline registrada sem apagar o histórico anterior.');}catch(e){registrarLogSistema('erro','Baseline do cronograma',e);toast('Não foi possível registrar a baseline no banco.');}
+  try{for(const t of tarefasDoProjeto()){t.baseline_inicio=t.data_inicio;t.baseline_fim=t.data_fim;t.historico_inicio=[...(t.historico_inicio||[]),t.data_inicio].filter(Boolean);t.historico_fim=[...(t.historico_fim||[]),t.data_fim].filter(Boolean);}marcarCronogramaAlterado();salvarState();renderCronograma();toast('Nova baseline adicionada ao rascunho.');}catch(e){registrarLogSistema('erro','Baseline do cronograma',e);toast('Não foi possível preparar a nova baseline.');}
 }
 function validarDependenciasCronograma(){
   const tarefas = tarefasDoProjeto(), porNumero = new Map(tarefas.map(t => [t.numero, t])); const inconsistencias = [];
@@ -4575,8 +4717,9 @@ function validarDependenciasCronograma(){
   if(!inconsistencias.length){ toast('Dependências validadas: nenhuma inconsistência encontrada.'); return; }
   alert(`${inconsistencias.length} inconsistência(s) encontrada(s):\n\n${inconsistencias.slice(0,12).join('\n')}${inconsistencias.length > 12 ? '\n…' : ''}`);
 }
-function abrirImportacaoCronograma(){ document.getElementById('crono-file').click(); }
+function abrirImportacaoCronograma(){if(!cronogramaEdicaoAtiva()){toast('Autorize a edição antes de importar.');return;}document.getElementById('crono-file').click(); }
 function importarCronogramaExcel(event){
+  if(!cronogramaEdicaoAtiva()){event.target.value='';return;}
   const arquivo = event.target.files?.[0]; if(!arquivo || !projetoAtivo) return;
   if(typeof XLSX === 'undefined'){ toast('Biblioteca de Excel indisponível. Verifique a conexão e tente novamente.'); return; }
   const leitor = new FileReader();
@@ -4596,7 +4739,7 @@ function importarCronogramaExcel(event){
         const nome = String(linha[mapa.nome] || '').trim(); if(!nome) return null; const hi = converterData(linha[mapa.inicio]), hf = converterData(linha[mapa.fim]); const st = status[String(linha[mapa.status] || '').trim().toUpperCase()] || 'a_iniciar';
         return { id:uid(), numero:parseInt(linha[mapa.id]) || indice + 1, projeto_id:projetoAtivo.id, fase:String(linha[mapa.fase] || 'SEM FASE').trim().toUpperCase(), nome, tipo:'comum', area:String(linha[mapa.area] || '').trim(), responsavel:String(linha[mapa.responsavel] || '').trim(), data_inicio:hi.at(-1) || '', data_fim:hf.at(-1) || '', historico_inicio:hi, historico_fim:hf, status:st, progresso:PROGRESSO_STATUS[st], dependencias:String(linha[mapa.dependencias] || '').split(/[,;]/).map(Number).filter(Number.isFinite), observacoes:String(linha[mapa.observacoes] || '').trim(), criado_em:new Date().toISOString() };
       }).filter(Boolean);
-      if(supabasePortal&&sessaoPortal){
+      if(supabasePortal&&sessaoPortal&&!CRONO_EDICAO.ativa){
         const {data:anteriores,error:erroLeitura}=await supabasePortal.from('tasks').select('id').eq('project_id',projetoAtivo.id);if(erroLeitura)throw erroLeitura;
         const persistidas=[],novosIds=[];
         try{
@@ -4605,7 +4748,7 @@ function importarCronogramaExcel(event){
           const idsAnteriores=(anteriores||[]).map(item=>item.id);if(idsAnteriores.length){const {error:erroLimpeza}=await supabasePortal.from('tasks').delete().in('id',idsAnteriores);if(erroLimpeza)throw erroLimpeza;}
         }catch(erroPersistencia){if(novosIds.length)await supabasePortal.from('tasks').delete().in('id',novosIds);throw erroPersistencia;}
         STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoAtivo.id).concat(persistidas);
-      }else STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoAtivo.id).concat(importadas);salvarState();renderCronograma();toast(`${importadas.length} atividade(s) importada(s).`);
+      }else STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoAtivo.id).concat(importadas);marcarCronogramaAlterado();salvarState();renderCronograma();toast(`${importadas.length} atividade(s) adicionada(s) ao rascunho.`);
     }catch(erro){ alert(`Não foi possível importar o cronograma: ${erro.message}`); }
   };
   leitor.readAsArrayBuffer(arquivo); event.target.value = '';
@@ -4685,6 +4828,10 @@ function abrirModalTarefa(id, faseFixa){
     if(faseFixa) selFase.value = faseFixa;
   }
   atualizarCamposAtrasoTarefa();
+  const editando=cronogramaEdicaoAtiva();
+  document.querySelectorAll('#modal-tarefa input:not([type="hidden"]),#modal-tarefa select,#modal-tarefa textarea').forEach(el=>el.disabled=!editando);
+  const salvar=document.getElementById('mt-salvar-btn');if(salvar)salvar.style.display=editando?'':'none';
+  document.getElementById('modal-tarefa-titulo').textContent=editando?(id?'Editar Atividade':'Nova Atividade'):'Detalhes da Atividade';
   abrirModal('modal-tarefa');
 }
 
@@ -4696,6 +4843,7 @@ function atualizarCamposAtrasoTarefa(){
 }
 
 async function salvarTarefa(){
+  if(!cronogramaEdicaoAtiva()){toast('O cronograma está em modo somente leitura.');return;}
   const nome = document.getElementById('mt-nome').value.trim();
   const fase = document.getElementById('mt-fase').value;
   const inicio = document.getElementById('mt-inicio').value;
@@ -4725,7 +4873,7 @@ async function salvarTarefa(){
   const vencida=fim<hojeISO()&&!['concluido','cancelado'].includes(dados.status);
   if(vencida){dados.status='atrasado';if(!dados.justificativa_atraso||!dados.data_replanejamento){toast('Informe a justificativa e a data de replanejamento para a atividade atrasada.');return;}}
 
-  if(supabasePortal&&sessaoPortal){
+  if(supabasePortal&&sessaoPortal&&!CRONO_EDICAO.ativa){
     const existente=id?STATE.tarefas.find(t=>t.id===id):null;
     const criando=!idUuid(id);
     let faseId=null;try{faseId=await garantirFaseProjetoSupabase(fase);}catch(erroFase){registrarLogSistema('erro','Fase do cronograma',erroFase);toast('Não foi possível localizar ou criar a fase no banco. Execute a migration de governança.');return;}
@@ -4751,18 +4899,19 @@ async function salvarTarefa(){
     });
     toast('Atividade cadastrada.');
   }
-  salvarState();
+  marcarCronogramaAlterado();salvarState();
   fecharModal('modal-tarefa');
   renderCronograma();
 }
 
 async function excluirTarefa(id){
+  if(!cronogramaEdicaoAtiva()){toast('O cronograma está em modo somente leitura.');return;}
   if(!confirm('Excluir esta atividade?')) return;
   const tarefa = STATE.tarefas.find(x => x.id === id);
   if(!tarefa) return;
   tarefaSyncCanceladas.add(id);clearTimeout(tarefaSyncTimers.get(id));tarefaSyncTimers.delete(id);
   /* IDs id_* pertencem ao cache local e não podem ser enviados ao campo UUID do Supabase. */
-  if(supabasePortal&&sessaoPortal&&idUuid(id)){
+  if(supabasePortal&&sessaoPortal&&idUuid(id)&&!CRONO_EDICAO.ativa){
     try{const {error}=await supabasePortal.from('tasks').delete().eq('id',id);if(error)throw error;}catch(e){registrarLogSistema('erro','Exclusão de atividade',e);toast('Não foi possível excluir a atividade no banco.');return;}
   }
   const numeroExcluido = tarefa.numero;
@@ -4777,7 +4926,7 @@ async function excluirTarefa(id){
     t.dependencias = dependenciasAtualizadas;
     if(removidas){t._sync_pendente=true;t._sync_erro_notificado=false;t._sync_revisao=Number(t._sync_revisao||0)+1;agendarPersistenciaTarefaCronograma(t.id);}
   });
-  salvarState();
+  marcarCronogramaAlterado();salvarState();
   renderCronograma();
   toast(referenciasRemovidas ? 'Atividade excluída e dependências atualizadas.' : 'Atividade excluída.');
 }
@@ -5244,6 +5393,7 @@ const PAGE_ON_ENTER = {
   statusreport: renderStatusReport,
   dashboardprojeto: renderDashboardProjeto,
   acessos: renderAcessos,
+  auditoria: ()=>{if(podeGerenciarAcessos())carregarAuditoriaSupabase(false);},
   configuracoes: ()=>{renderConsoleSistema();renderAuditoriaLocal();atualizarControlesConfiguracao();},
 };
 const _navigateOriginal = navigate;
