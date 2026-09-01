@@ -181,11 +181,12 @@ body.auth-locked{overflow:hidden}
 /* ═══════════════════════════════════════════
    TOPBAR + MAIN
 ═══════════════════════════════════════════ */
-#main{flex:1; margin-left:var(--sidebar-w); display:flex; flex-direction:column; min-height:100vh; transition:margin-left .28s var(--ease)}
+#main{flex:1; width:calc(100% - var(--sidebar-w)); min-width:0; margin-left:var(--sidebar-w); display:flex; flex-direction:column; min-height:100vh; transition:margin-left .28s var(--ease),width .28s var(--ease)}
+body.sidebar-collapsed #main{width:100%}
 
 .topbar{
   height:64px; background:#fff; border-bottom:1px solid var(--line);
-  display:flex; align-items:center; padding:0 24px; gap:16px; position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; min-width:0; padding:0 24px; gap:16px; position:sticky; top:0; z-index:50;
 }
 #btn-sidebar-toggle{
   width:34px; height:34px; border-radius:9px; border:1px solid var(--line); background:#fff; cursor:pointer;
@@ -195,7 +196,7 @@ body.sidebar-collapsed #btn-sidebar-toggle{display:flex}
 #btn-sidebar-toggle:hover{background:var(--blue-tint); border-color:var(--blue)}
 #btn-sidebar-toggle svg{width:16px; height:16px; stroke:var(--ink)}
 
-.topbar-title h2{font-size:16px; font-weight:800}
+.topbar-title{min-width:0;flex:0 1 auto}.topbar-title h2{font-size:16px; font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topbar-title p{font-size:11.5px; color:var(--ink-mute); margin:1px 0 0}
 .global-search{width:min(290px,28vw);min-width:180px;padding:8px 11px;border:1.5px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);font:inherit;font-size:12px;outline:none}
 .global-search:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,65,166,.1)}
@@ -223,7 +224,7 @@ html[data-theme="dark"] #preview-exportacao-conteudo,html[data-theme="dark"] #po
 .sol-category-picker label{display:block;font-size:12px;font-weight:800;color:var(--ink-soft);margin-bottom:7px}.sol-category-picker select{width:100%;min-height:44px;font-weight:700;border-color:var(--blue)}
 
 .project-switch{
-  margin-left:auto; display:flex; align-items:center; gap:10px; padding:7px 14px 7px 8px;
+  margin-left:auto; display:flex; align-items:center; min-width:0; max-width:min(280px,25vw); gap:10px; padding:7px 14px 7px 8px;
   border:1.5px solid var(--line); border-radius:11px; cursor:pointer; transition:border-color .16s var(--ease);
 }
 .project-switch:hover{border-color:var(--blue)}
@@ -231,7 +232,7 @@ html[data-theme="dark"] #preview-exportacao-conteudo,html[data-theme="dark"] #po
   width:30px; height:30px; border-radius:8px; background:var(--blue-tint); color:var(--blue);
   display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;
 }
-.project-switch .info b{display:block; font-size:12.5px; font-weight:700; line-height:1.2}
+.project-switch .info{min-width:0}.project-switch .info b{display:block; font-size:12.5px; font-weight:700; line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .project-switch .info span{display:block; font-size:10.5px; color:var(--ink-mute); font-family:'JetBrains Mono'}
 .project-switch .chev{font-size:10px; color:var(--ink-mute); margin-left:2px}
 
@@ -250,8 +251,8 @@ html[data-theme="dark"] #preview-exportacao-conteudo,html[data-theme="dark"] #po
 /* ═══════════════════════════════════════════
    PAGES / CONTENT
 ═══════════════════════════════════════════ */
-.content{flex:1; padding:28px 32px 60px}
-.page{display:none; animation:pageIn .22s var(--ease)}
+.content{flex:1; width:100%; min-width:0; max-width:100%; padding:28px 32px 60px}
+.page{display:none; width:100%; min-width:0; max-width:100%; animation:pageIn .22s var(--ease)}
 .page.active{display:block}
 @keyframes pageIn{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)} }
 @media (prefers-reduced-motion:reduce){ .page{animation:none} }
@@ -266,7 +267,7 @@ html[data-theme="dark"] #preview-exportacao-conteudo,html[data-theme="dark"] #po
 
 .card{
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-  box-shadow:var(--shadow-sm); padding:20px 22px;
+  min-width:0; max-width:100%; box-shadow:var(--shadow-sm); padding:20px 22px;
   transition:box-shadow .22s var(--ease), transform .22s var(--ease);
 }
 
@@ -335,7 +336,7 @@ button:focus-visible{outline:2.5px solid var(--orange);outline-offset:2px}
 /* ═══════════════════════════════════════════
    TABELAS
 ═══════════════════════════════════════════ */
-.dtable-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:#fff}
+.dtable-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:#fff;scrollbar-gutter:stable}
 .dtable{width:100%; border-collapse:collapse; font-size:13px}
 .dtable th{
   background:var(--paper); padding:11px 14px; text-align:left; font-size:10.5px; font-weight:800;
@@ -438,7 +439,7 @@ button:focus-visible{outline:2.5px solid var(--orange);outline-offset:2px}
 .crono-legend .sw{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:middle}
 
 .crono-split{display:flex; border:1px solid var(--line); border-radius:var(--radius); background:#fff; overflow:hidden}
-.crono-grid{width:520px; min-width:280px; flex-shrink:0; overflow:auto; max-height:560px}
+.crono-grid{width:520px; min-width:280px; max-width:calc(100% - 207px); flex-shrink:0; overflow:auto; max-height:560px}
 .crono-splitter{
   width:7px; flex-shrink:0; cursor:col-resize; background:var(--paper);
   border-left:1px solid var(--line); border-right:2px solid var(--line);
@@ -564,14 +565,67 @@ button:focus-visible{outline:2.5px solid var(--orange);outline-offset:2px}
 /* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
+@media (max-width:1440px){
+  :root{--sidebar-w:220px}
+  .content{padding:22px 22px 52px}
+  .topbar{padding:0 18px;gap:11px}
+  .global-search{width:min(230px,22vw);min-width:145px}
+  .user-greeting{max-width:135px}
+  .portf-kpis,.portfolio-exec-grid,.grid-3{grid-template-columns:repeat(auto-fit,minmax(155px,1fr))!important}
+}
+@media (max-width:1240px){
+  #sidebar{transform:translateX(-100%)}
+  body.sidebar-open #sidebar{transform:translateX(0);box-shadow:var(--shadow-lg)}
+  #main{width:100%;margin-left:0}
+  #btn-sidebar-toggle{display:flex}
+  .content{padding:22px 24px 52px}
+  .project-switch{max-width:240px}
+}
+@media (max-width:1050px){
+  .home-insights,.dash-insights,.raci-listas{grid-template-columns:1fr!important}
+  .portfolio-chart-grid{grid-template-columns:1fr!important}
+  .topbar-title p,.user-greeting{display:none}
+  .project-switch{max-width:210px}
+}
 @media (max-width:900px){
   #sidebar{transform:translateX(-100%)}
   body.sidebar-open #sidebar{transform:translateX(0); box-shadow:var(--shadow-lg)}
-  #main{margin-left:0}
+  #main{width:100%;margin-left:0}
   #btn-sidebar-toggle{display:flex}
   .project-switch .info{display:none}
   .global-search{width:min(220px,36vw);min-width:140px}
   .grid-3{grid-template-columns:repeat(2,minmax(140px,1fr)) !important}
+}
+@media (max-width:760px){
+  .content{padding:16px 14px 44px}
+  .topbar{height:58px;padding:0 12px;gap:8px}
+  .global-search{display:none}
+  .project-switch{max-width:170px;margin-left:auto}
+  .project-switch .info{display:block}
+  .health-pill{display:none!important}
+  .form-grid,.form-grid.cols-3{grid-template-columns:1fr}
+  .field.span2{grid-column:span 1}
+  .audit-filters,.sol-admin-filters{grid-template-columns:1fr!important}
+  .card{padding:16px}
+}
+@media (max-width:700px){
+  .crono-split{flex-direction:column;overflow:visible}
+  .crono-grid{width:100%!important;min-width:0;max-width:100%;max-height:380px;border-bottom:1px solid var(--line)}
+  .crono-splitter{display:none}
+  .crono-gantt{width:100%;min-width:0;min-height:300px;max-height:420px}
+  .crono-kpis{grid-template-columns:repeat(2,minmax(110px,1fr))!important}
+}
+@media (max-width:520px){
+  .content{padding:12px 10px 38px}
+  .topbar-title{max-width:125px}
+  .project-switch{max-width:132px;padding-right:8px}
+  .notification-button{width:34px;height:34px}
+  .topbar-account{gap:5px}
+  .portf-kpis,.portfolio-exec-grid,.grid-3,.sol-dashboard{grid-template-columns:1fr!important}
+  .crono-kpis{grid-template-columns:1fr!important}
+  .home-filter-controls{min-width:0!important;flex-wrap:wrap}
+  .home-filter-controls #home-filtro{width:100%;min-width:0!important;flex-basis:100%}
+  .home-filter-controls #portfolio-tipo-visao{width:100%;max-width:100%}
 }
 @media print{
   #sidebar,.topbar,#sr-empty,.sr-grid{display:none !important}
@@ -736,7 +790,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
     <div class="page active" id="page-home">
       <div class="card" style="margin-bottom:16px; padding:16px 20px">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
-          <div style="display:flex;gap:8px;align-items:center;flex:1;min-width:300px"><input type="text" id="home-filtro" placeholder="Filtrar por nome ou código de controle..." oninput="renderProjetosHome()" style="flex:1;min-width:220px;padding:9px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:13px"><select id="portfolio-tipo-visao" onchange="alternarVisaoPortfolio(this.value)" aria-label="Tipo de visão do portfólio"><option value="gerencial">Visão Gerencial</option><option value="executiva">Visão Executiva</option></select></div>
+          <div class="home-filter-controls" style="display:flex;gap:8px;align-items:center;flex:1;min-width:300px"><input type="text" id="home-filtro" placeholder="Filtrar por nome ou código de controle..." oninput="renderProjetosHome()" style="flex:1;min-width:220px;padding:9px 13px;border:1.5px solid var(--line);border-radius:9px;font-size:13px"><select id="portfolio-tipo-visao" onchange="alternarVisaoPortfolio(this.value)" aria-label="Tipo de visão do portfólio"><option value="gerencial">Visão Gerencial</option><option value="executiva">Visão Executiva</option></select></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="abrirModalExtrairReport()">Extrair report</button><button class="btn btn-outline btn-sm" onclick="abrirPreviewPortfolioAtual()">Preview / PDF</button><button class="btn btn-outline btn-sm" onclick="baixarModeloProjetos()">Modelo</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('projetos-importar').click()">Importar</button><button class="btn btn-outline btn-sm" onclick="exportarProjetosXlsx()">Exportar</button><button class="btn btn-primary" onclick="abrirModalProjeto()">+ Novo Projeto</button><input id="projetos-importar" type="file" accept=".xlsx,.xls" style="display:none" onchange="importarProjetos(this)"></div>
         </div>
       </div>
@@ -1684,7 +1738,7 @@ function navigate(page){
     healthEl.querySelector('.health-label').textContent = saude.label;
   }
 
-  if(window.innerWidth <= 900) document.body.classList.remove('sidebar-open');
+  if(window.innerWidth <= 1240) document.body.classList.remove('sidebar-open');
   if(page==='configuracoes') renderConsoleSistema();
   requestAnimationFrame(()=>aplicarPermissoesAcoesNaInterface(target||document));
 }
@@ -1695,7 +1749,7 @@ document.querySelectorAll('.nav-item[data-page]').forEach(el => {
 
 /* ═══ toggle de sidebar (desktop = colapsa, mobile = drawer) ═══ */
 function toggleSidebar(){
-  if(window.innerWidth <= 900){
+  if(window.innerWidth <= 1240){
     document.body.classList.toggle('sidebar-open');
   } else {
     document.body.classList.toggle('sidebar-collapsed');
