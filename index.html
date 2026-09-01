@@ -497,8 +497,21 @@ button:focus-visible{outline:2.5px solid var(--orange);outline-offset:2px}
 }
 .crono-splitter:hover::after, .crono-splitter.dragging::after{background:var(--blue)}
 .crono-gantt{flex:1; min-width:200px; overflow:auto; max-height:560px; position:relative;scrollbar-gutter:stable}
-.crono-kpis{grid-template-columns:repeat(4,minmax(120px,180px))!important;justify-content:start}
+.crono-kpis{grid-template-columns:repeat(5,minmax(135px,1fr))!important;width:100%;justify-content:stretch}
+.crono-kpis>.card{min-width:0}
+.crono-options-panel{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;margin-bottom:10px;border:1px solid var(--line);border-radius:11px;background:#fff}
+.crono-filterbar{display:grid;grid-template-columns:minmax(145px,.8fr) minmax(180px,1fr) minmax(145px,.8fr) minmax(220px,1.25fr) auto;gap:10px;align-items:end;padding:13px 14px;margin-bottom:14px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow-sm)}
+.crono-filter-heading{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:1px}
+.crono-filter-heading>span{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:12px;font-weight:800}.crono-filter-heading svg{width:15px;height:15px;fill:none;stroke:var(--blue);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.crono-filter-heading small{color:var(--ink-mute);font-size:10.5px;font-weight:500}
+.crono-filter-field{display:grid;gap:5px;min-width:0}.crono-filter-field>span{color:var(--ink-soft);font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.crono-filter-field select,.crono-filter-field input{width:100%;height:38px;min-width:0;padding:8px 34px 8px 11px;border:1.5px solid var(--line);border-radius:9px;background-color:#fbfcff;color:var(--ink);font:600 12px 'Inter',sans-serif;outline:none;transition:border-color .15s var(--ease),box-shadow .15s var(--ease),background .15s var(--ease)}
+.crono-filter-field select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7894' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.crono-filter-field input{padding-right:11px}.crono-filter-field select:hover,.crono-filter-field input:hover{border-color:#b9c8e4;background:#fff}.crono-filter-field select:focus,.crono-filter-field input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(1,59,166,.1)}
+.crono-filter-clear{height:38px;align-self:end;white-space:nowrap}
+@media(max-width:1100px){.crono-filterbar{grid-template-columns:repeat(2,minmax(160px,1fr))}.crono-filter-search{grid-column:1/-1}.crono-filter-clear{justify-self:start}}
 @media(max-width:900px){.crono-kpis{grid-template-columns:repeat(2,minmax(120px,1fr))!important}}
+@media(max-width:600px){.crono-filterbar{grid-template-columns:1fr}.crono-filter-search{grid-column:auto}.crono-filter-heading{align-items:flex-start;flex-direction:column}.crono-filter-clear{width:100%;justify-content:center}}
 
 .cg-row{
   display:flex; align-items:center; height:38px; border-bottom:1px solid var(--line);
@@ -1063,17 +1076,20 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
         </div>
       </div>
 
-      <div class="card" style="padding:10px 14px;margin-bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <button class="btn btn-sm btn-outline crono-edit-only" id="crono-baseline-btn" onclick="alternarOpcaoCrono('baseline')">Baseline</button>
-        <button class="btn btn-sm btn-outline crono-edit-only" id="crono-critico-btn" onclick="alternarOpcaoCrono('critico')">Caminho crítico</button>
-        <button class="btn btn-sm btn-outline crono-edit-only" id="crono-cascata-btn" onclick="alternarOpcaoCrono('cascata')">Cascata de dependências</button>
-        <button class="btn btn-sm btn-outline crono-edit-only" onclick="congelarBaselineCronograma()">Congelar baseline</button>
-        <button class="btn btn-sm btn-outline crono-edit-only" onclick="validarDependenciasCronograma()">Validar dependências</button>
-        <span style="width:1px;height:24px;background:var(--line);margin:0 2px"></span>
-        <select id="crono-filtro-status" onchange="renderCronograma()" style="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px"><option value="">Todos os status</option></select>
-        <select id="crono-filtro-responsavel" onchange="renderCronograma()" style="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px"><option value="">Todos os responsáveis</option></select>
-        <select id="crono-filtro-area" onchange="renderCronograma()" style="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px"><option value="">Todas as áreas</option></select>
-        <input id="crono-filtro-texto" oninput="renderCronograma()" placeholder="Buscar atividade..." style="padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px;min-width:160px">
+      <div class="crono-options-panel crono-edit-only">
+        <button class="btn btn-sm btn-outline" id="crono-baseline-btn" onclick="alternarOpcaoCrono('baseline')">Baseline</button>
+        <button class="btn btn-sm btn-outline" id="crono-critico-btn" onclick="alternarOpcaoCrono('critico')">Caminho crítico</button>
+        <button class="btn btn-sm btn-outline" id="crono-cascata-btn" onclick="alternarOpcaoCrono('cascata')">Cascata de dependências</button>
+        <button class="btn btn-sm btn-outline" onclick="congelarBaselineCronograma()">Congelar baseline</button>
+        <button class="btn btn-sm btn-outline" onclick="validarDependenciasCronograma()">Validar dependências</button>
+      </div>
+      <div class="crono-filterbar" aria-label="Filtros do cronograma">
+        <div class="crono-filter-heading"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M7 12h10M10 19h4"/></svg>Filtrar cronograma</span><small>Combine os campos para localizar atividades</small></div>
+        <label class="crono-filter-field"><span>Status</span><select id="crono-filtro-status" onchange="renderCronograma()"><option value="">Todos os status</option></select></label>
+        <label class="crono-filter-field"><span>Responsável</span><select id="crono-filtro-responsavel" onchange="renderCronograma()"><option value="">Todos os responsáveis</option></select></label>
+        <label class="crono-filter-field"><span>Área</span><select id="crono-filtro-area" onchange="renderCronograma()"><option value="">Todas as áreas</option></select></label>
+        <label class="crono-filter-field crono-filter-search"><span>Atividade</span><input id="crono-filtro-texto" oninput="renderCronograma()" placeholder="Digite o nome da atividade"></label>
+        <button type="button" class="btn btn-outline btn-sm crono-filter-clear" onclick="limparFiltrosCronograma()">Limpar filtros</button>
       </div>
 
       <div class="crono-phase-input" id="crono-fase-input" style="display:none">
@@ -1354,7 +1370,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
       <p style="font-size:11.5px; color:var(--ink-mute); margin:-6px 0 16px">Nome, datas e status já podem ser editados direto na grade — use aqui para os campos complementares.</p>
       <input type="hidden" id="mt-id">
       <div class="form-grid">
-        <div class="field span2"><label>Nome da Atividade <span class="req">*</span></label><input type="text" id="mt-nome" placeholder="Ex: Homologação com o time de negócio"></div>
+        <div class="field span2"><label>Nome da Atividade <span class="req">*</span></label><input type="text" id="mt-nome" placeholder="Ex: Homologação com o time de negócio" onkeydown="if(event.key==='Enter'){event.preventDefault();salvarTarefa();}"></div>
         <div class="field"><label>Fase <span class="req">*</span></label><select id="mt-fase"></select></div>
         <div class="field"><label>Tipo</label>
           <select id="mt-tipo"><option value="comum">Atividade comum</option><option value="marco">Marco</option><option value="golive">Go Live</option></select>
@@ -2877,7 +2893,7 @@ function renderGovernancaPortfolio(){
   const diasDesde=data=>{if(!data)return Infinity;const valor=new Date(data);return Number.isNaN(valor.getTime())?Infinity:Math.floor((Date.now()-valor.getTime())/86400000);};
   const diagnosticos=[
     {rotulo:'Sem PMO/Gerente',cor:'var(--orange)',projetos:ativos.filter(p=>!String(p.gerente_projeto||'').trim())},
-    {rotulo:'Sem cronograma',cor:'var(--red)',projetos:ativos.filter(p=>!STATE.tarefas.some(t=>t.projeto_id===p.id))},
+    {rotulo:'Sem cronograma',cor:'var(--red)',projetos:ativos.filter(p=>{const resumo=resumoCronogramasPortfolio.get(p.id);return resumo?resumo.task_count===0:!STATE.tarefas.some(t=>t.projeto_id===p.id);})},
     {rotulo:'Status Report pendente',cor:'#7C3AED',projetos:ativos.filter(p=>{const sr=STATE.statusReports[p.id];return !sr||diasDesde(sr.atualizado_em||sr.periodo_referencia)>14;})},
     {rotulo:'Com risco alto',cor:'var(--red)',projetos:ativos.filter(p=>STATE.riscos.some(r=>r.projeto_id===p.id&&r.status!=='Encerrado'&&nivelRisco(r.probabilidade,r.impacto).label==='Alto'))}
   ];
@@ -3686,7 +3702,21 @@ function codigoSolicitacaoLocal(tipo){
 function mapearSolicitacaoSupabase(linha){return {...linha,id:linha.id,request_code:linha.request_code||'',criado_em:linha.created_at||linha.criado_em,atualizado_em:linha.updated_at||linha.atualizado_em};}
 function mapearProjetoSupabase(linha){
   const extra=linha.extra||{};
-  return {id:linha.id,owner_id:linha.owner_id,nome:linha.name||'',lecom:linha.control_code||'',tap_lecom:extra.tap_lecom||'',objetivo:linha.objective||'',gerente_projeto:linha.manager_name||'',data_abertura:linha.opening_date||'',data_inicio:linha.start_date||'',data_fim_prevista:linha.planned_end_date||'',data_replanejada:linha.replanned_end_date||'',data_entrega_final:linha.final_delivery_date||'',macro_entrega:linha.macro_delivery||'',entregaveis:linha.deliverables||'',status_portfolio:linha.portfolio_status||'a_iniciar',solicitacao_id:linha.source_request_id||extra.solicitacao_id||null,solicitante:extra.solicitante||'',areas_envolvidas:extra.areas_envolvidas||'',ganhos_esperados:extra.ganhos_esperados||'',patrocinador:extra.patrocinador||'',lider_ti:extra.lider_ti||'',direcao_ti:extra.direcao_ti||'Experiência do Cliente e Operações',status:extra.status||'planejamento',fases_ocultas:extra.fases_ocultas||[],cronograma_fases_ordem:Array.isArray(extra.cronograma_fases_ordem)?extra.cronograma_fases_ordem:[],cronograma_ultima_atualizacao:extra.cronograma_ultima_atualizacao||'',cronograma_atualizado_por:extra.cronograma_atualizado_por||'',arquivado:false,criado_em:linha.created_at};
+  return {id:linha.id,owner_id:linha.owner_id,nome:linha.name||'',lecom:linha.control_code||'',tap_lecom:extra.tap_lecom||'',objetivo:linha.objective||'',gerente_projeto:linha.manager_name||'',data_abertura:linha.opening_date||'',data_inicio:linha.start_date||'',data_fim_prevista:linha.planned_end_date||'',data_replanejada:linha.replanned_end_date||'',data_entrega_final:linha.final_delivery_date||'',macro_entrega:linha.macro_delivery||'',entregaveis:linha.deliverables||'',status_portfolio:linha.portfolio_status||'a_iniciar',solicitacao_id:linha.source_request_id||extra.solicitacao_id||null,solicitante:extra.solicitante||'',areas_envolvidas:extra.areas_envolvidas||'',ganhos_esperados:extra.ganhos_esperados||'',patrocinador:extra.patrocinador||'',lider_ti:extra.lider_ti||'',direcao_ti:extra.direcao_ti||'Experiência do Cliente e Operações',status:extra.status||'planejamento',fases_ocultas:extra.fases_ocultas||[],cronograma_fases_ordem:Array.isArray(extra.cronograma_fases_ordem)?extra.cronograma_fases_ordem:[],cronograma_ultima_atualizacao:extra.cronograma_ultima_atualizacao||'',cronograma_atualizado_por:extra.cronograma_atualizado_por||'',arquivado:false,criado_em:linha.created_at,atualizado_em:linha.updated_at||''};
+}
+let resumoCronogramasPortfolio=new Map();
+async function carregarResumoCronogramasPortfolio(){
+  if(!supabasePortal||!sessaoPortal||!temPermissaoModulo('cronograma')){resumoCronogramasPortfolio=new Map();return false;}
+  try{
+    const {data,error}=await supabasePortal.rpc('get_portfolio_schedule_summary');
+    if(error)throw error;
+    const linhas=Array.isArray(data)?data:(Array.isArray(data?.projects)?data.projects:[]);
+    resumoCronogramasPortfolio=new Map(linhas.map(item=>[item.project_id,{task_count:Number(item.task_count||0),last_saved_at:item.last_saved_at||'',last_saved_by:item.last_saved_by||''}]));
+    return true;
+  }catch(e){
+    if(!['PGRST202','42883'].includes(String(e?.code||'')))registrarLogSistema('aviso','Resumo dos cronogramas',e);
+    return false;
+  }
 }
 let carregamentoProjetosEmCurso=false;
 async function carregarProjetosSupabase(){
@@ -3698,6 +3728,7 @@ async function carregarProjetosSupabase(){
     if(error)throw error;
     STATE.projetos=(data||[]).map(mapearProjetoSupabase);
     if(projetoAtivo){const atualizado=STATE.projetos.find(p=>p.id===projetoAtivo.id);definirProjetoAtivo(atualizado||null);}
+    await carregarResumoCronogramasPortfolio();
     salvarState();renderProjetosHome();renderPortfolioProjetos();
     return true;
   }catch(e){registrarLogSistema('erro','Sincronização de projetos',e);toast('Não foi possível carregar o Portfólio de Projetos.');return false;}
@@ -3712,22 +3743,32 @@ async function carregarTarefasSupabase(projetoId){
   if(!supabasePortal||!sessaoPortal||!projetoId)return false;
   ultimoErroCarregamentoCronograma=null;
   try{
-    let tarefasBrutas=[],dependencias=[],horaServidor=null;
+    let tarefasBrutas=[],dependencias=[],horaServidor=null,projetoBruto=null;
     const snapshot=await supabasePortal.rpc('get_schedule_snapshot',{p_project_id:projetoId});
     if(!snapshot.error&&snapshot.data){
       tarefasBrutas=Array.isArray(snapshot.data.tasks)?snapshot.data.tasks:[];
       dependencias=Array.isArray(snapshot.data.dependencies)?snapshot.data.dependencies:[];
       horaServidor=snapshot.data.server_time||null;
+      projetoBruto=snapshot.data.project||null;
     }else{
       if(snapshot.error&&!rpcSnapshotCronogramaIndisponivel(snapshot.error))throw snapshot.error;
       const consulta=await supabasePortal.from('tasks').select('*').eq('project_id',projetoId).order('created_at');
       if(consulta.error)throw consulta.error;tarefasBrutas=consulta.data||[];
       const ids=tarefasBrutas.map(t=>t.id);
       if(ids.length){const deps=await supabasePortal.from('task_dependencies').select('*').in('task_id',ids);if(deps.error)throw deps.error;dependencias=deps.data||[];}
+      const projetoConsulta=await supabasePortal.from('projects').select('*').eq('id',projetoId).maybeSingle();
+      if(projetoConsulta.error)throw projetoConsulta.error;projetoBruto=projetoConsulta.data||null;
     }
     const tarefas=tarefasBrutas.map(mapearTarefaSupabase),porId=new Map(tarefas.map(t=>[t.id,t]));
     dependencias.forEach(d=>{const alvo=porId.get(d.task_id),origem=porId.get(d.depends_on_task_id);if(alvo&&origem&&!alvo.dependencias.includes(origem.numero))alvo.dependencias.push(origem.numero);});
-    STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(tarefas);ultimaAtualizacaoCronogramaServidor=horaServidor||new Date().toISOString();salvarState();return true;
+    STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(tarefas);
+    if(projetoBruto){
+      const projetoMapeado=mapearProjetoSupabase(projetoBruto),indice=STATE.projetos.findIndex(p=>p.id===projetoId);
+      if(indice>=0)STATE.projetos[indice]=projetoMapeado;else STATE.projetos.push(projetoMapeado);
+      if(projetoAtivo?.id===projetoId)definirProjetoAtivo(projetoMapeado);
+      resumoCronogramasPortfolio.set(projetoId,{task_count:tarefas.length,last_saved_at:projetoMapeado.cronograma_ultima_atualizacao||'',last_saved_by:projetoMapeado.cronograma_atualizado_por||''});
+    }
+    ultimaAtualizacaoCronogramaServidor=horaServidor||new Date().toISOString();salvarState();return true;
   }catch(e){ultimoErroCarregamentoCronograma=e;registrarLogSistema('erro','Sincronização de cronograma',e);return false;}
 }
 let atualizacaoCronogramaEmCurso=false;
@@ -3765,7 +3806,7 @@ async function atualizarCronogramaDoBanco(notificar=false){
   }
 }
 
-const CRONO_EDICAO={ativa:false,suja:false,persistindo:false,projetoId:null,sessaoId:null,autorizadoPor:'',expiraEm:0,snapshot:null,timer:null,touchTimer:null,ultimoToque:0,ultimaAtividade:0};
+const CRONO_EDICAO={ativa:false,suja:false,persistindo:false,projetoId:null,sessaoId:null,autorizadoPor:'',expiraEm:0,snapshot:null,excluidas:[],saveToken:null,timer:null,touchTimer:null,ultimoToque:0,ultimaAtividade:0};
 function cronogramaEdicaoAtiva(){return CRONO_EDICAO.ativa&&CRONO_EDICAO.projetoId===projetoAtivo?.id&&Date.now()<CRONO_EDICAO.expiraEm;}
 function copiarCronogramaProjeto(){return {tarefas:JSON.parse(JSON.stringify(STATE.tarefas.filter(t=>t.projeto_id===projetoAtivo.id))),projeto:JSON.parse(JSON.stringify(projetoAtivo))};}
 function atualizarInterfaceEdicaoCronograma(){
@@ -3777,12 +3818,14 @@ function atualizarInterfaceEdicaoCronograma(){
   document.querySelectorAll('#page-cronograma .crono-edit-only').forEach(el=>el.style.display=ativa?'':'none');
   if(ativa)definirStatusSincronizacaoCronograma('paused','Atualização pausada durante a edição');
 }
-function limparEstadoEdicaoCronograma(){clearInterval(CRONO_EDICAO.timer);clearTimeout(CRONO_EDICAO.touchTimer);Object.assign(CRONO_EDICAO,{ativa:false,suja:false,persistindo:false,projetoId:null,sessaoId:null,autorizadoPor:'',expiraEm:0,snapshot:null,timer:null,touchTimer:null,ultimoToque:0,ultimaAtividade:0});atualizarInterfaceEdicaoCronograma();}
+function limparEstadoEdicaoCronograma(){clearInterval(CRONO_EDICAO.timer);clearTimeout(CRONO_EDICAO.touchTimer);Object.assign(CRONO_EDICAO,{ativa:false,suja:false,persistindo:false,projetoId:null,sessaoId:null,autorizadoPor:'',expiraEm:0,snapshot:null,excluidas:[],saveToken:null,timer:null,touchTimer:null,ultimoToque:0,ultimaAtividade:0});atualizarInterfaceEdicaoCronograma();}
 function iniciarRelogioEdicaoCronograma(){
   clearInterval(CRONO_EDICAO.timer);CRONO_EDICAO.timer=setInterval(()=>{if(!CRONO_EDICAO.ativa)return;const restante=CRONO_EDICAO.expiraEm-Date.now(),inativa=Date.now()-CRONO_EDICAO.ultimaAtividade,detalhe=document.getElementById('crono-lock-detalhe');if(restante<=0||inativa>=10*60000){cancelarEdicaoCronograma(false,true);return;}if(detalhe)detalhe.textContent=`Autorizado por ${CRONO_EDICAO.autorizadoPor||'administrador'} · bloqueia em ${Math.max(1,Math.ceil(Math.min(restante,10*60000-inativa)/60000))} min sem atividade · ${CRONO_EDICAO.suja?'alterações não salvas':'sem alterações'}`;},1000);
 }
-function abrirAutenticacaoEdicaoCronograma(){
+async function abrirAutenticacaoEdicaoCronograma(){
   if(!projetoAtivo){toast('Selecione um projeto primeiro.');return;}if(CRONO_EDICAO.ativa)return;
+  const sincronizado=await atualizarCronogramaDoBanco(false);
+  if(!sincronizado){toast('Não foi possível confirmar a versão mais recente do cronograma. Atualize a página e tente novamente.');return;}
   document.getElementById('crono-auth-email').value='';document.getElementById('crono-auth-senha').value='';const erro=document.getElementById('crono-auth-erro');erro.style.display='none';erro.textContent='';abrirModal('modal-cronograma-auth');setTimeout(()=>document.getElementById('crono-auth-email')?.focus(),50);
 }
 async function registrarTentativaCronograma(resultado,motivo=''){
@@ -3793,12 +3836,13 @@ async function confirmarAutenticacaoEdicaoCronograma(){
   if(!email||!senha){erro.textContent='Informe o e-mail e a senha do administrador.';erro.style.display='block';return;}
   botao.disabled=true;botao.textContent='Validando…';erro.style.display='none';let clienteTemporario=null;
   try{
-    clienteTemporario=window.supabase.createClient(SUPABASE_PORTAL_CONFIG.url,SUPABASE_PORTAL_CONFIG.publishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+    const storageKeyTemporaria=`schedule-auth-${crypto.randomUUID()}`;
+    clienteTemporario=window.supabase.createClient(SUPABASE_PORTAL_CONFIG.url,SUPABASE_PORTAL_CONFIG.publishableKey,{auth:{storageKey:storageKeyTemporaria,persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
     const {data:login,error:erroLogin}=await clienteTemporario.auth.signInWithPassword({email,password:senha});if(erroLogin||!login?.session)throw new Error('Credenciais administrativas inválidas.');
     const {data:admin,error:erroAdmin}=await clienteTemporario.rpc('is_admin');if(erroAdmin||admin!==true)throw new Error('O usuário informado não possui perfil de administrador ativo.');
     const {data:autorizacao,error:erroAutorizacao}=await clienteTemporario.rpc('grant_schedule_edit',{p_project_id:projetoAtivo.id,p_actor_id:sessaoPortal.user.id});if(erroAutorizacao)throw erroAutorizacao;
     const concessao=Array.isArray(autorizacao)?autorizacao[0]:autorizacao;
-    CRONO_EDICAO.ativa=true;CRONO_EDICAO.projetoId=projetoAtivo.id;CRONO_EDICAO.sessaoId=concessao?.session_id||concessao?.id||null;CRONO_EDICAO.autorizadoPor=login.user?.email||email;CRONO_EDICAO.expiraEm=new Date(concessao?.valid_until||concessao?.expires_at||Date.now()+10*60000).getTime();CRONO_EDICAO.snapshot=copiarCronogramaProjeto();CRONO_EDICAO.suja=false;CRONO_EDICAO.ultimaAtividade=Date.now();tarefaSyncTimers.forEach(timer=>clearTimeout(timer));tarefaSyncTimers.clear();
+    CRONO_EDICAO.ativa=true;CRONO_EDICAO.projetoId=projetoAtivo.id;CRONO_EDICAO.sessaoId=concessao?.session_id||concessao?.id||null;CRONO_EDICAO.autorizadoPor=login.user?.email||email;CRONO_EDICAO.expiraEm=new Date(concessao?.valid_until||concessao?.expires_at||Date.now()+10*60000).getTime();CRONO_EDICAO.snapshot=copiarCronogramaProjeto();CRONO_EDICAO.excluidas=[];CRONO_EDICAO.saveToken=null;CRONO_EDICAO.suja=false;CRONO_EDICAO.ultimaAtividade=Date.now();tarefaSyncTimers.forEach(timer=>clearTimeout(timer));tarefaSyncTimers.clear();
     fecharModal('modal-cronograma-auth');iniciarRelogioEdicaoCronograma();atualizarInterfaceEdicaoCronograma();renderCronograma();toast('Edição autorizada. O bloqueio ocorrerá após 10 minutos sem atividade.');
   }catch(e){const mensagem=/CRONOGRAMA_EM_EDICAO/i.test(e.message||'')?'Este cronograma já está sendo editado por outro usuário.':(e.message||'Não foi possível autorizar a edição.');erro.textContent=mensagem;erro.style.display='block';await registrarTentativaCronograma(false,mensagem);}
   finally{if(clienteTemporario)try{await clienteTemporario.auth.signOut({scope:'local'});}catch(e){}botao.disabled=false;botao.textContent='Autorizar edição';document.getElementById('crono-auth-senha').value='';}
@@ -3807,7 +3851,7 @@ function registrarAtividadeEdicaoCronograma(){
   if(!CRONO_EDICAO.ativa||CRONO_EDICAO.projetoId!==projetoAtivo?.id||Date.now()>=CRONO_EDICAO.expiraEm)return false;const agora=Date.now();CRONO_EDICAO.ultimaAtividade=agora;CRONO_EDICAO.expiraEm=agora+10*60000;clearTimeout(CRONO_EDICAO.touchTimer);CRONO_EDICAO.touchTimer=setTimeout(()=>{CRONO_EDICAO.ultimoToque=Date.now();supabasePortal?.rpc('touch_schedule_edit',{p_session_id:CRONO_EDICAO.sessaoId}).then(({data,error})=>{if(error||data!==true)cancelarEdicaoCronograma(false,true);}).catch(()=>{});},800);return true;
 }
 function marcarCronogramaAlterado(){
-  if(!cronogramaEdicaoAtiva())return false;CRONO_EDICAO.suja=true;registrarAtividadeEdicaoCronograma();atualizarInterfaceEdicaoCronograma();return true;
+  if(!cronogramaEdicaoAtiva())return false;CRONO_EDICAO.suja=true;CRONO_EDICAO.saveToken=null;registrarAtividadeEdicaoCronograma();atualizarInterfaceEdicaoCronograma();return true;
 }
 ['pointerdown','keydown','wheel','touchstart'].forEach(evento=>document.getElementById('page-cronograma')?.addEventListener(evento,registrarAtividadeEdicaoCronograma,{passive:true}));
 function tarefasCronogramaParaSalvar(){return tarefasDoProjeto().map(t=>({id:idUuid(t.id)?t.id:null,numero:Number(t.numero)||0,ordem:Number(t.ordem??t.numero)||0,nome:String(t.nome||'').trim(),fase:t.fase||'SEM FASE',tipo:t.tipo||'comum',area:t.area||'',responsavel:t.responsavel||'',data_inicio:t.data_inicio||null,data_fim:t.data_fim||null,baseline_inicio:t.baseline_inicio||historicoInicio(t)[0]||null,baseline_fim:t.baseline_fim||historicoFim(t)[0]||null,status:t.status||'a_iniciar',progresso:Number(t.progresso??PROGRESSO_STATUS[t.status]??0),dependencias:t.dependencias||[],observacoes:t.observacoes||'',justificativa_atraso:t.justificativa_atraso||'',data_replanejamento:t.data_replanejamento||null,historico_inicio:historicoInicio(t),historico_fim:historicoFim(t)}));}
@@ -3821,14 +3865,37 @@ function validarNomesAtividadesCronograma(){
   });
   const primeira=vazias[0],referencia=primeira.numero?`#${primeira.numero}`:'sem número';toast(`${vazias.length} atividade(s) sem nome. Preencha a atividade ${referencia} da fase “${primeira.fase||'Sem fase'}”.`);return false;
 }
+function validarLoteCronograma(payload){
+  const ids=new Set();
+  for(let i=0;i<payload.length;i++){
+    const tarefa=payload[i],referencia=tarefa.numero?`#${tarefa.numero}`:`na posição ${i+1}`;
+    if(!String(tarefa.nome||'').trim())return {ok:false,mensagem:`A atividade ${referencia} está sem nome.`};
+    if(!String(tarefa.fase||'').trim())return {ok:false,mensagem:`A atividade ${referencia} está sem fase.`};
+    if(tarefa.data_inicio&&tarefa.data_fim&&tarefa.data_fim<tarefa.data_inicio)return {ok:false,mensagem:`A atividade ${referencia} possui data final anterior à inicial.`};
+    if(tarefa.id){if(ids.has(tarefa.id))return {ok:false,mensagem:`A atividade ${referencia} está duplicada no lote.`};ids.add(tarefa.id);}
+  }
+  return {ok:true};
+}
 async function salvarEdicaoCronograma(){
   if(!cronogramaEdicaoAtiva()){toast('A autorização de edição expirou.');await cancelarEdicaoCronograma(false,true);return;}
   if(!validarNomesAtividadesCronograma())return;
-  const botao=document.getElementById('crono-salvar-edicao-btn');botao.disabled=true;botao.textContent='Salvando…';CRONO_EDICAO.persistindo=true;
+  const payload=tarefasCronogramaParaSalvar(),validacao=validarLoteCronograma(payload),totalEsperado=payload.length;
+  if(!validacao.ok){toast(validacao.mensagem);return;}
+  const botao=document.getElementById('crono-salvar-edicao-btn');botao.disabled=true;botao.textContent=`Salvando ${totalEsperado} atividade(s)…`;CRONO_EDICAO.persistindo=true;
+  const tokenSalvamento=CRONO_EDICAO.saveToken||(CRONO_EDICAO.saveToken=crypto.randomUUID());
+  let confirmadoPeloBanco=false;
   try{
-    const {error}=await supabasePortal.rpc('save_schedule_draft',{p_project_id:projetoAtivo.id,p_tasks:tarefasCronogramaParaSalvar(),p_hidden_phases:projetoAtivo.fases_ocultas||[],p_phase_order:fasesDoProjeto()});if(error)throw error;
-    const projetoId=projetoAtivo.id;STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId);limparEstadoEdicaoCronograma();const atualizado=await carregarTarefasSupabase(projetoId);await carregarProjetosSupabase();salvarState();renderCronograma();if(atualizado){const hora=new Date(ultimaAtualizacaoCronogramaServidor||Date.now()).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});definirStatusSincronizacaoCronograma('ok',`Sincronizado às ${hora}`);}toast('Cronograma salvo e bloqueado para edição.');
-  }catch(e){CRONO_EDICAO.persistindo=false;registrarLogSistema('erro','Salvamento protegido do cronograma',e);if(/TASK_NAME_REQUIRED/i.test(formatarDetalheErro(e))){validarNomesAtividadesCronograma();toast('Existe uma atividade sem nome. A linha foi destacada para correção.');}else toast(mensagemErroSupabase(e,'salvar o cronograma'));}
+    const revisaoEsperada=CRONO_EDICAO.snapshot?.projeto?.cronograma_ultima_atualizacao||null;
+    const {data,error}=await supabasePortal.rpc('save_schedule_draft',{p_project_id:projetoAtivo.id,p_tasks:payload,p_hidden_phases:projetoAtivo.fases_ocultas||[],p_phase_order:fasesDoProjeto(),p_deleted_task_ids:[...new Set(CRONO_EDICAO.excluidas||[])],p_expected_revision:revisaoEsperada,p_save_token:tokenSalvamento});if(error)throw error;
+    const resultado=Array.isArray(data)?data[0]:data,recebidas=Number(resultado?.received_count),salvas=Number(resultado?.saved_count),noBanco=Number(resultado?.database_task_count),idsConfirmados=Array.isArray(resultado?.saved_task_ids)?resultado.saved_task_ids:[];
+    if(![recebidas,salvas,noBanco].every(Number.isFinite)||recebidas!==totalEsperado||salvas!==totalEsperado||noBanco!==totalEsperado||idsConfirmados.length!==totalEsperado)throw new Error(`SCHEDULE_CONFIRMATION_INVALID: expected ${totalEsperado}, received ${recebidas}, saved ${salvas}, database ${noBanco}`);
+    confirmadoPeloBanco=true;botao.textContent=`Conferindo ${totalEsperado} atividade(s)…`;
+    const projetoId=projetoAtivo.id;limparEstadoEdicaoCronograma();const atualizado=await carregarTarefasSupabase(projetoId);
+    if(!atualizado)throw new Error('SCHEDULE_VERIFICATION_FAILED: não foi possível reler o cronograma salvo.');
+    const tarefasRecarregadas=STATE.tarefas.filter(t=>t.projeto_id===projetoId),idsRecarregados=new Set(tarefasRecarregadas.filter(t=>idUuid(t.id)).map(t=>t.id));
+    if(tarefasRecarregadas.length!==totalEsperado||idsConfirmados.some(id=>!idsRecarregados.has(id)))throw new Error(`SCHEDULE_VERIFICATION_MISMATCH: expected ${totalEsperado}, reloaded ${tarefasRecarregadas.length}`);
+    await carregarProjetosSupabase();salvarState();renderCronograma();const hora=new Date(ultimaAtualizacaoCronogramaServidor||Date.now()).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});definirStatusSincronizacaoCronograma('ok',`Sincronizado às ${hora}`);toast(`Cronograma salvo: ${totalEsperado} atividade(s) confirmada(s) no banco.`);
+  }catch(e){CRONO_EDICAO.persistindo=false;registrarLogSistema('erro','Salvamento protegido do cronograma',e);const detalhe=formatarDetalheErro(e);if(/TASK_NAME_REQUIRED/i.test(detalhe)){validarNomesAtividadesCronograma();toast('Existe uma atividade sem nome. A linha foi destacada para correção.');}else if(/SCHEDULE_STALE/i.test(detalhe))toast('O cronograma foi atualizado por outra pessoa. Cancele a edição, clique em Atualizar e refaça o ajuste.');else if(/EMPTY_SCHEDULE_REQUIRES_EXPLICIT_DELETE/i.test(detalhe))toast('O banco recusou um cronograma vazio para proteger atividades já salvas. Atualize antes de tentar novamente.');else if(/SCHEDULE_(RESULT_MISMATCH|CONFIRMATION_INVALID)/i.test(detalhe))toast('O banco não confirmou todas as atividades. Nada foi considerado concluído; atualize e tente novamente.');else if(confirmadoPeloBanco||/SCHEDULE_VERIFICATION/i.test(detalhe))toast('O banco confirmou o salvamento, mas a conferência da tela falhou. Clique em Atualizar antes de editar novamente.');else toast(mensagemErroSupabase(e,'salvar o cronograma'));}
   finally{botao.disabled=false;botao.textContent='Salvar alterações';}
 }
 async function cancelarEdicaoCronograma(perguntar=true,expirada=false){
@@ -4513,7 +4580,7 @@ let CRONO_ARRASTE={tipo:'',id:'',fase:''};
 function limparIndicadoresArrasteCronograma(){document.querySelectorAll('#crono-grid .crono-arrastando,#crono-grid .crono-drop-before,#crono-grid .crono-drop-after,#crono-grid .crono-drop-phase').forEach(el=>el.classList.remove('crono-arrastando','crono-drop-before','crono-drop-after','crono-drop-phase'));}
 function finalizarArrasteCronograma(){limparIndicadoresArrasteCronograma();CRONO_ARRASTE={tipo:'',id:'',fase:''};}
 function iniciarArrasteFaseCronograma(event,faseCodificada){
-  if(!cronogramaEdicaoAtiva()||event.target.closest('button:not(.crono-drag-handle),input,select')){event.preventDefault();return;}CRONO_ARRASTE={tipo:'fase',id:'',fase:decodeURIComponent(faseCodificada)};event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','fase');event.currentTarget.closest('.cg-row')?.classList.add('crono-arrastando');
+  if(!cronogramaEdicaoAtiva()){event.preventDefault();return;}event.stopPropagation();CRONO_ARRASTE={tipo:'fase',id:'',fase:decodeURIComponent(faseCodificada)};event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',`fase:${CRONO_ARRASTE.fase}`);event.currentTarget.closest('.cg-row')?.classList.add('crono-arrastando');
 }
 function iniciarArrasteTarefaCronograma(event,id){
   if(!cronogramaEdicaoAtiva()){event.preventDefault();return;}CRONO_ARRASTE={tipo:'tarefa',id:String(id),fase:''};event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','tarefa');event.currentTarget.closest('.cg-row')?.classList.add('crono-arrastando');
@@ -4593,6 +4660,9 @@ function preencherFiltrosCronograma(){
   if(statusEl){ const valor = statusEl.value; statusEl.innerHTML = '<option value="">Todos os status</option>' + Object.entries(STATUS_LABEL).map(([v,l]) => `<option value="${v}">${l}</option>`).join(''); statusEl.value = valor; }
   preencher('crono-filtro-responsavel', tarefas.map(t => t.responsavel), 'Todos os responsáveis');
   preencher('crono-filtro-area', tarefas.map(t => t.area), 'Todas as áreas');
+}
+function limparFiltrosCronograma(){
+  let alterou=false;['crono-filtro-status','crono-filtro-responsavel','crono-filtro-area','crono-filtro-texto'].forEach(id=>{const campo=document.getElementById(id);if(campo&&campo.value){campo.value='';alterou=true;}});renderCronograma();if(alterou)toast('Filtros do cronograma limpos.');
 }
 function filtrarTarefasCronograma(tarefas){
   const status = document.getElementById('crono-filtro-status')?.value || '';
@@ -4716,10 +4786,10 @@ function renderCronograma(){
     const colapsada = !!fasesColapsadas[fase];
     const faseCodificada=encodeURIComponent(fase);
 
-    gridHtml += `<div class="cg-row phase ${editando?'crono-phase-draggable':''}" draggable="${editando}" data-phase="${esc(fase)}" ondragstart="iniciarArrasteFaseCronograma(event,'${faseCodificada}')" ondragend="finalizarArrasteCronograma()" ondragover="sobreDestinoFaseCronograma(event)" ondrop="soltarFaseCronograma(event,'${faseCodificada}')">
-      <span class="crono-drag-handle crono-edit-only" title="Arraste a fase pela alça ou pelo nome">⋮⋮</span>
+    gridHtml += `<div class="cg-row phase ${editando?'crono-phase-draggable':''}" data-phase="${esc(fase)}" ondragover="sobreDestinoFaseCronograma(event)" ondrop="soltarFaseCronograma(event,'${faseCodificada}')">
+      <button class="crono-drag-handle crono-edit-only" draggable="${editando}" ondragstart="iniciarArrasteFaseCronograma(event,'${faseCodificada}')" ondragend="finalizarArrasteCronograma()" title="Arrastar fase">⋮⋮</button>
       <span class="cg-toggle" onclick="toggleFase('${esc(fase)}')">${colapsada ? '▸' : '▾'}</span>
-      <span class="cg-nome" onclick="toggleFase('${esc(fase)}')" style="cursor:pointer">${esc(fase)}</span>
+      <span class="cg-nome" draggable="${editando}" ondragstart="iniciarArrasteFaseCronograma(event,'${faseCodificada}')" ondragend="finalizarArrasteCronograma()" onclick="toggleFase('${esc(fase)}')" style="cursor:${editando?'grab':'pointer'}">${esc(fase)}</span>
       <span style="font-size:10px;opacity:.7">${itens.length}</span>
       <span class="crono-move-controls crono-phase-move crono-edit-only"><button onclick="event.stopPropagation();moverFaseCronograma(decodeURIComponent('${faseCodificada}'),-1)" title="Mover fase para cima">↑</button><button onclick="event.stopPropagation();moverFaseCronograma(decodeURIComponent('${faseCodificada}'),1)" title="Mover fase para baixo">↓</button></span>
       <button class="cg-phase-add crono-edit-only" onclick="criarTarefaInline('${esc(fase)}')" title="Adicionar atividade nesta fase">+ atividade</button>
@@ -4819,8 +4889,10 @@ async function excluirFaseCronograma(fase){
   const aviso=atividades.length?`A fase “${fase}” possui ${atividades.length} atividade(s). Elas também serão excluídas. Deseja continuar?`:`Excluir a fase “${fase}”?`;
   if(!confirm(aviso))return;
   try{
+    const idsRemovidos=atividades.filter(t=>idUuid(t.id)).map(t=>t.id);
+    CRONO_EDICAO.excluidas=[...new Set([...(CRONO_EDICAO.excluidas||[]),...idsRemovidos])];
     if(supabasePortal&&sessaoPortal&&!CRONO_EDICAO.ativa){
-      const ids=atividades.filter(t=>idUuid(t.id)).map(t=>t.id);
+      const ids=idsRemovidos;
       if(ids.length){const {error}=await supabasePortal.from('tasks').delete().in('id',ids);if(error)throw error;}
       const {data:faseRemota,error:erroFase}=await supabasePortal.from('project_phases').select('id').eq('project_id',projetoAtivo.id).eq('name',fase).maybeSingle();
       if(erroFase)throw erroFase;
@@ -4863,26 +4935,9 @@ function criarTarefaInline(faseAlvo){
   const fases = fasesDoProjeto();
   const fase = faseAlvo || fases[0];
   if(!fase){ toggleFaseInlineInput(); return; } // sem nenhuma fase ainda — pede pra criar uma primeiro
-
-  const hoje = hojeISO();
-  const ultimaOrdem=ordemAtividadesFase(fase).reduce((maior,t)=>Math.max(maior,Number(t.ordem??t.numero)||0),0);
-  const nova = {
-    id: uid(), numero: proximoIdTarefa(), projeto_id: projetoAtivo.id,
-    nome: '', fase, ordem:ultimaOrdem+10, tipo: 'comum', area: '', responsavel: '',
-    data_inicio: hoje, data_fim: addDias(hoje, 5), status: 'a_iniciar',
-    historico_inicio: [hoje], historico_fim: [addDias(hoje, 5)], progresso: 0,
-    dependencias: [], observacoes: '', criado_em: new Date().toISOString()
-  };
-  STATE.tarefas.push(nova);
-  marcarCronogramaAlterado();
-  if(fasesColapsadas[fase]) fasesColapsadas[fase] = false;
-  salvarStateDebounced();
-  renderCronograma();
-
-  requestAnimationFrame(() => {
-    const row = document.querySelector(`.cg-row[data-task-id="${nova.id}"] .cg-nome`);
-    if(row) row.focus();
-  });
+  if(fasesColapsadas[fase])fasesColapsadas[fase]=false;
+  abrirModalTarefa(null,fase);
+  requestAnimationFrame(()=>document.getElementById('mt-nome')?.focus());
 }
 
 /* ═══ sincronização da edição rápida com o Supabase ═══
@@ -5167,6 +5222,9 @@ function abrirModalTarefa(id, faseFixa){
   }else{
     document.getElementById('modal-tarefa-titulo').textContent = 'Nova Atividade';
     ['mt-nome','mt-area','mt-responsavel','mt-inicio','mt-fim','mt-baseline-inicio','mt-baseline-fim','mt-dep','mt-obs','mt-justificativa-atraso','mt-data-replanejamento'].forEach(f => document.getElementById(f).value = '');
+    const hoje=hojeISO(),fimPadrao=addDias(hoje,5);
+    document.getElementById('mt-inicio').value=hoje;document.getElementById('mt-fim').value=fimPadrao;
+    document.getElementById('mt-baseline-inicio').value=hoje;document.getElementById('mt-baseline-fim').value=fimPadrao;
     document.getElementById('mt-tipo').value = 'comum';
     document.getElementById('mt-status').value = 'a_iniciar';
     if(faseFixa) selFase.value = faseFixa;
@@ -5253,6 +5311,7 @@ async function excluirTarefa(id){
   if(!confirm('Excluir esta atividade?')) return;
   const tarefa = STATE.tarefas.find(x => x.id === id);
   if(!tarefa) return;
+  if(idUuid(id))CRONO_EDICAO.excluidas=[...new Set([...(CRONO_EDICAO.excluidas||[]),id])];
   tarefaSyncCanceladas.add(id);clearTimeout(tarefaSyncTimers.get(id));tarefaSyncTimers.delete(id);
   /* IDs id_* pertencem ao cache local e não podem ser enviados ao campo UUID do Supabase. */
   if(supabasePortal&&sessaoPortal&&idUuid(id)&&!CRONO_EDICAO.ativa){
