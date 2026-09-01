@@ -468,6 +468,17 @@ button:focus-visible{outline:2.5px solid var(--orange);outline-offset:2px}
 .cg-row .cg-actions button{border:none; background:transparent; cursor:pointer; font-size:11px; padding:3px 5px; border-radius:5px; color:var(--ink-mute)}
 .cg-row .cg-actions button:hover{background:var(--blue-tint); color:var(--blue)}
 .cg-row .cg-marco{color:var(--orange); flex-shrink:0}
+.crono-drag-handle{display:inline-grid;place-items:center;width:18px;height:26px;flex:0 0 18px;border:0;background:transparent;color:var(--ink-mute);cursor:grab;border-radius:6px;font-size:15px;line-height:1;user-select:none;touch-action:none}
+.crono-drag-handle:hover{background:rgba(0,65,166,.09);color:var(--blue)}
+.crono-drag-handle:active{cursor:grabbing}
+.cg-row.crono-arrastando{opacity:.42}
+.cg-row.crono-drop-before{box-shadow:inset 0 3px 0 var(--orange)}
+.cg-row.crono-drop-after{box-shadow:inset 0 -3px 0 var(--orange)}
+.cg-row.phase.crono-drop-phase{background:#fff1e6;box-shadow:inset 3px 0 0 var(--orange)}
+.crono-move-controls{display:inline-flex;gap:1px;flex-shrink:0}
+.crono-move-controls button{width:23px;height:25px;border:0;border-radius:5px;background:transparent;color:var(--ink-mute);cursor:pointer;font-size:12px}
+.crono-move-controls button:hover{background:rgba(0,65,166,.09);color:var(--blue)}
+@media(pointer:fine){.crono-move-controls{display:none}}
 
 /* ═══ campos editáveis inline na grade ═══ */
 .cg-input{
@@ -2765,7 +2776,7 @@ function abrirModalProjeto(id){
   abrirModal('modal-projeto');
 }
 
-function payloadProjetoSupabase(dados){const payload={name:dados.nome,objective:dados.objetivo,manager_name:dados.gerente_projeto,opening_date:dados.data_abertura||null,start_date:dados.data_inicio||null,planned_end_date:dados.data_fim_prevista||null,replanned_end_date:dados.data_replanejada||null,final_delivery_date:dados.data_entrega_final||null,macro_delivery:dados.macro_entrega,deliverables:dados.entregaveis,portfolio_status:dados.status_portfolio,extra:{solicitante:dados.solicitante,areas_envolvidas:dados.areas_envolvidas,ganhos_esperados:dados.ganhos_esperados,tap_lecom:dados.tap_lecom||'',patrocinador:dados.patrocinador||'',lider_ti:dados.lider_ti||'',direcao_ti:dados.direcao_ti||'Experiência do Cliente e Operações',status:dados.status||'planejamento',fases_ocultas:dados.fases_ocultas||[]}};if(dados.lecom)payload.control_code=dados.lecom;return payload;}
+function payloadProjetoSupabase(dados){const payload={name:dados.nome,objective:dados.objetivo,manager_name:dados.gerente_projeto,opening_date:dados.data_abertura||null,start_date:dados.data_inicio||null,planned_end_date:dados.data_fim_prevista||null,replanned_end_date:dados.data_replanejada||null,final_delivery_date:dados.data_entrega_final||null,macro_delivery:dados.macro_entrega,deliverables:dados.entregaveis,portfolio_status:dados.status_portfolio,extra:{solicitante:dados.solicitante,areas_envolvidas:dados.areas_envolvidas,ganhos_esperados:dados.ganhos_esperados,tap_lecom:dados.tap_lecom||'',patrocinador:dados.patrocinador||'',lider_ti:dados.lider_ti||'',direcao_ti:dados.direcao_ti||'Experiência do Cliente e Operações',status:dados.status||'planejamento',fases_ocultas:dados.fases_ocultas||[],cronograma_fases_ordem:dados.cronograma_fases_ordem||[]}};if(dados.lecom)payload.control_code=dados.lecom;return payload;}
 function codigoProjetoLocal(){const maior=STATE.projetos.reduce((n,p)=>Math.max(n,Number(String(p.lecom||'').match(/^PROJ(\d+)$/)?.[1]||0)),0);return `PROJ${String(maior+1).padStart(4,'0')}`;}
 async function salvarProjeto(){
   const nome = document.getElementById('mp-nome').value.trim();
@@ -3482,7 +3493,7 @@ function codigoSolicitacaoLocal(tipo){
 function mapearSolicitacaoSupabase(linha){return {...linha,id:linha.id,request_code:linha.request_code||'',criado_em:linha.created_at||linha.criado_em,atualizado_em:linha.updated_at||linha.atualizado_em};}
 function mapearProjetoSupabase(linha){
   const extra=linha.extra||{};
-  return {id:linha.id,owner_id:linha.owner_id,nome:linha.name||'',lecom:linha.control_code||'',tap_lecom:extra.tap_lecom||'',objetivo:linha.objective||'',gerente_projeto:linha.manager_name||'',data_abertura:linha.opening_date||'',data_inicio:linha.start_date||'',data_fim_prevista:linha.planned_end_date||'',data_replanejada:linha.replanned_end_date||'',data_entrega_final:linha.final_delivery_date||'',macro_entrega:linha.macro_delivery||'',entregaveis:linha.deliverables||'',status_portfolio:linha.portfolio_status||'a_iniciar',solicitacao_id:linha.source_request_id||extra.solicitacao_id||null,solicitante:extra.solicitante||'',areas_envolvidas:extra.areas_envolvidas||'',ganhos_esperados:extra.ganhos_esperados||'',patrocinador:extra.patrocinador||'',lider_ti:extra.lider_ti||'',direcao_ti:extra.direcao_ti||'Experiência do Cliente e Operações',status:extra.status||'planejamento',fases_ocultas:extra.fases_ocultas||[],cronograma_ultima_atualizacao:extra.cronograma_ultima_atualizacao||'',cronograma_atualizado_por:extra.cronograma_atualizado_por||'',arquivado:false,criado_em:linha.created_at};
+  return {id:linha.id,owner_id:linha.owner_id,nome:linha.name||'',lecom:linha.control_code||'',tap_lecom:extra.tap_lecom||'',objetivo:linha.objective||'',gerente_projeto:linha.manager_name||'',data_abertura:linha.opening_date||'',data_inicio:linha.start_date||'',data_fim_prevista:linha.planned_end_date||'',data_replanejada:linha.replanned_end_date||'',data_entrega_final:linha.final_delivery_date||'',macro_entrega:linha.macro_delivery||'',entregaveis:linha.deliverables||'',status_portfolio:linha.portfolio_status||'a_iniciar',solicitacao_id:linha.source_request_id||extra.solicitacao_id||null,solicitante:extra.solicitante||'',areas_envolvidas:extra.areas_envolvidas||'',ganhos_esperados:extra.ganhos_esperados||'',patrocinador:extra.patrocinador||'',lider_ti:extra.lider_ti||'',direcao_ti:extra.direcao_ti||'Experiência do Cliente e Operações',status:extra.status||'planejamento',fases_ocultas:extra.fases_ocultas||[],cronograma_fases_ordem:Array.isArray(extra.cronograma_fases_ordem)?extra.cronograma_fases_ordem:[],cronograma_ultima_atualizacao:extra.cronograma_ultima_atualizacao||'',cronograma_atualizado_por:extra.cronograma_atualizado_por||'',arquivado:false,criado_em:linha.created_at};
 }
 let carregamentoProjetosEmCurso=false;
 async function carregarProjetosSupabase(){
@@ -3501,7 +3512,7 @@ async function carregarProjetosSupabase(){
 }
 function mapearLecomSupabase(l){const x=l.extra||{};return {...x,id:l.id,iniciativa:l.initiative,codigo:l.lecom_code,solicitante:l.requester,area_solicitante:l.requester_area,classificacao:l.classification,priorizacao_ti:l.it_priority,priorizacao_negocio:l.business_priority,compromisso:l.commitment,area_ti:l.it_area,diretor_ti:l.it_director,area_classificacao:l.classification_area,impacto_jornada:l.beneficiary_impact?'sim':'nao',impacto_nips:l.nips_impact?'sim':'nao',impacto_financeiro:l.financial_impact?'sim':'nao',risco_assistencial:l.care_risk?'sim':'nao',envolve_ia:l.involves_ai?'sim':'nao',plan_especificacao:l.specification_planned_date,final_especificacao:l.specification_final_date,status_especificacao:l.specification_status,plan_homologacao:l.approval_planned_date,final_homologacao:l.approval_final_date,status_homologacao:l.approval_status,plan_producao:l.production_planned_date,final_producao:l.production_final_date,status_producao:l.production_status,source_request_id:l.source_request_id||x.solicitacao_id||null,criado_em:l.created_at};}
 async function carregarLecomsSupabase(){if(!supabasePortal||!sessaoPortal)return false;try{const {data,error}=await supabasePortal.from('lecoms').select('*').order('created_at',{ascending:false});if(error)throw error;STATE.melhorias=(data||[]).map(mapearLecomSupabase);salvarState();renderLecoms();return true;}catch(e){registrarLogSistema('erro','Sincronização de LECOMs',e);return false;}}
-function mapearTarefaSupabase(linha){const extra=linha.extra||{};return {id:linha.id,projeto_id:linha.project_id,codigo:linha.activity_code||'',numero:extra.numero||0,nome:linha.title||'',fase:FASES_ANTIGAS_PARA_ATUAIS[linha.phase]||linha.phase||'SEM FASE',fase_id:linha.phase_id||null,tipo:extra.tipo||'comum',area:extra.area||'',responsavel:linha.responsible_name||'',data_inicio:linha.replanned_start_date||linha.planned_start_date||'',data_fim:linha.replanned_end_date||linha.planned_end_date||'',baseline_inicio:linha.baseline_start_date||linha.planned_start_date||'',baseline_fim:linha.baseline_end_date||linha.planned_end_date||'',status:linha.status||'a_iniciar',progresso:Number(linha.progress??extra.progresso??(PROGRESSO_STATUS[linha.status]??0)),dependencias:extra.dependencias||[],observacoes:linha.description||'',justificativa_atraso:extra.justificativa_atraso||'',data_replanejamento:extra.data_replanejamento||linha.replanned_end_date||'',historico_inicio:extra.historico_inicio||[linha.planned_start_date].filter(Boolean),historico_fim:extra.historico_fim||[linha.planned_end_date].filter(Boolean),criado_em:linha.created_at};}
+function mapearTarefaSupabase(linha){const extra=linha.extra||{};return {id:linha.id,projeto_id:linha.project_id,codigo:linha.activity_code||'',numero:extra.numero||0,ordem:Number(extra.ordem??extra.numero??0),nome:linha.title||'',fase:FASES_ANTIGAS_PARA_ATUAIS[linha.phase]||linha.phase||'SEM FASE',fase_id:linha.phase_id||null,tipo:extra.tipo||'comum',area:extra.area||'',responsavel:linha.responsible_name||'',data_inicio:linha.replanned_start_date||linha.planned_start_date||'',data_fim:linha.replanned_end_date||linha.planned_end_date||'',baseline_inicio:linha.baseline_start_date||linha.planned_start_date||'',baseline_fim:linha.baseline_end_date||linha.planned_end_date||'',status:linha.status||'a_iniciar',progresso:Number(linha.progress??extra.progresso??(PROGRESSO_STATUS[linha.status]??0)),dependencias:extra.dependencias||[],observacoes:linha.description||'',justificativa_atraso:extra.justificativa_atraso||'',data_replanejamento:extra.data_replanejamento||linha.replanned_end_date||'',historico_inicio:extra.historico_inicio||[linha.planned_start_date].filter(Boolean),historico_fim:extra.historico_fim||[linha.planned_end_date].filter(Boolean),criado_em:linha.created_at};}
 async function carregarTarefasSupabase(projetoId){if(!supabasePortal||!sessaoPortal||!projetoId)return false;try{const {data,error}=await supabasePortal.from('tasks').select('*').eq('project_id',projetoId).order('created_at');if(error)throw error;const tarefas=(data||[]).map(mapearTarefaSupabase),ids=tarefas.map(t=>t.id);if(ids.length){const {data:deps,error:erroDeps}=await supabasePortal.from('task_dependencies').select('*').in('task_id',ids);if(erroDeps)throw erroDeps;const porId=new Map(tarefas.map(t=>[t.id,t]));(deps||[]).forEach(d=>{const alvo=porId.get(d.task_id),origem=porId.get(d.depends_on_task_id);if(alvo&&origem&&!alvo.dependencias.includes(origem.numero))alvo.dependencias.push(origem.numero);});}STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId).concat(tarefas);salvarState();return true;}catch(e){registrarLogSistema('erro','Sincronização de cronograma',e);return false;}}
 let atualizacaoCronogramaEmCurso=false;
 function cronogramaEstaVisivel(){return document.querySelector('#page-cronograma.active')&&document.visibilityState==='visible';}
@@ -3564,12 +3575,12 @@ async function confirmarAutenticacaoEdicaoCronograma(){
 function marcarCronogramaAlterado(){
   if(!cronogramaEdicaoAtiva())return false;CRONO_EDICAO.suja=true;const agora=Date.now();CRONO_EDICAO.ultimaAtividade=agora;if(agora-CRONO_EDICAO.ultimoToque>45000){CRONO_EDICAO.ultimoToque=agora;supabasePortal?.rpc('touch_schedule_edit',{p_session_id:CRONO_EDICAO.sessaoId}).then(()=>{}).catch(()=>{});}atualizarInterfaceEdicaoCronograma();return true;
 }
-function tarefasCronogramaParaSalvar(){return tarefasDoProjeto().map(t=>({id:idUuid(t.id)?t.id:null,numero:Number(t.numero)||0,nome:t.nome||'',fase:t.fase||'SEM FASE',tipo:t.tipo||'comum',area:t.area||'',responsavel:t.responsavel||'',data_inicio:t.data_inicio||null,data_fim:t.data_fim||null,baseline_inicio:t.baseline_inicio||historicoInicio(t)[0]||null,baseline_fim:t.baseline_fim||historicoFim(t)[0]||null,status:t.status||'a_iniciar',progresso:Number(t.progresso??PROGRESSO_STATUS[t.status]??0),dependencias:t.dependencias||[],observacoes:t.observacoes||'',justificativa_atraso:t.justificativa_atraso||'',data_replanejamento:t.data_replanejamento||null,historico_inicio:historicoInicio(t),historico_fim:historicoFim(t)}));}
+function tarefasCronogramaParaSalvar(){return tarefasDoProjeto().map(t=>({id:idUuid(t.id)?t.id:null,numero:Number(t.numero)||0,ordem:Number(t.ordem??t.numero)||0,nome:t.nome||'',fase:t.fase||'SEM FASE',tipo:t.tipo||'comum',area:t.area||'',responsavel:t.responsavel||'',data_inicio:t.data_inicio||null,data_fim:t.data_fim||null,baseline_inicio:t.baseline_inicio||historicoInicio(t)[0]||null,baseline_fim:t.baseline_fim||historicoFim(t)[0]||null,status:t.status||'a_iniciar',progresso:Number(t.progresso??PROGRESSO_STATUS[t.status]??0),dependencias:t.dependencias||[],observacoes:t.observacoes||'',justificativa_atraso:t.justificativa_atraso||'',data_replanejamento:t.data_replanejamento||null,historico_inicio:historicoInicio(t),historico_fim:historicoFim(t)}));}
 async function salvarEdicaoCronograma(){
   if(!cronogramaEdicaoAtiva()){toast('A autorização de edição expirou.');await cancelarEdicaoCronograma(false,true);return;}
   const botao=document.getElementById('crono-salvar-edicao-btn');botao.disabled=true;botao.textContent='Salvando…';CRONO_EDICAO.persistindo=true;
   try{
-    const {error}=await supabasePortal.rpc('save_schedule_draft',{p_project_id:projetoAtivo.id,p_tasks:tarefasCronogramaParaSalvar(),p_hidden_phases:projetoAtivo.fases_ocultas||[]});if(error)throw error;
+    const {error}=await supabasePortal.rpc('save_schedule_draft',{p_project_id:projetoAtivo.id,p_tasks:tarefasCronogramaParaSalvar(),p_hidden_phases:projetoAtivo.fases_ocultas||[],p_phase_order:fasesDoProjeto()});if(error)throw error;
     const projetoId=projetoAtivo.id;STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoId);limparEstadoEdicaoCronograma();await carregarTarefasSupabase(projetoId);await carregarProjetosSupabase();salvarState();renderCronograma();toast('Cronograma salvo e bloqueado para edição.');
   }catch(e){CRONO_EDICAO.persistindo=false;registrarLogSistema('erro','Salvamento protegido do cronograma',e);toast(mensagemErroSupabase(e,'salvar o cronograma'));}
   finally{botao.disabled=false;botao.textContent='Salvar alterações';}
@@ -4242,9 +4253,59 @@ const FASES_ANTIGAS_PARA_ATUAIS={
 function fasesDoProjeto(){
   const vistas = new Set(); const out = [];
   const ocultas=new Set(projetoAtivo?.fases_ocultas||[]);
-  FASES_PADRAO_PROJETO.filter(f=>!ocultas.has(f)).forEach(f=>{vistas.add(f);out.push(f);});
+  const armazenadas=Array.isArray(projetoAtivo?.cronograma_fases_ordem)?projetoAtivo.cronograma_fases_ordem:[];
+  armazenadas.filter(f=>f&&!ocultas.has(f)).forEach(f=>{const atual=FASES_ANTIGAS_PARA_ATUAIS[f]||f;if(!vistas.has(atual)){vistas.add(atual);out.push(atual);}});
+  FASES_PADRAO_PROJETO.filter(f=>!ocultas.has(f)).forEach(f=>{if(!vistas.has(f)){vistas.add(f);out.push(f);}});
   tarefasDoProjeto().forEach(t => { if(!vistas.has(t.fase)){ vistas.add(t.fase); out.push(t.fase); } });
   return out;
+}
+function ordemAtividadesFase(fase){
+  return tarefasDoProjeto().filter(t=>t.fase===fase).sort((a,b)=>(Number(a.ordem??a.numero)-Number(b.ordem??b.numero))||(Number(a.numero)-Number(b.numero)));
+}
+function normalizarOrdemAtividades(fase,itens=ordemAtividadesFase(fase)){itens.forEach((t,i)=>t.ordem=(i+1)*10);}
+let CRONO_ARRASTE={tipo:'',id:'',fase:''};
+function limparIndicadoresArrasteCronograma(){document.querySelectorAll('#crono-grid .crono-arrastando,#crono-grid .crono-drop-before,#crono-grid .crono-drop-after,#crono-grid .crono-drop-phase').forEach(el=>el.classList.remove('crono-arrastando','crono-drop-before','crono-drop-after','crono-drop-phase'));}
+function finalizarArrasteCronograma(){limparIndicadoresArrasteCronograma();CRONO_ARRASTE={tipo:'',id:'',fase:''};}
+function iniciarArrasteFaseCronograma(event,faseCodificada){
+  if(!cronogramaEdicaoAtiva()){event.preventDefault();return;}CRONO_ARRASTE={tipo:'fase',id:'',fase:decodeURIComponent(faseCodificada)};event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','fase');event.currentTarget.closest('.cg-row')?.classList.add('crono-arrastando');
+}
+function iniciarArrasteTarefaCronograma(event,id){
+  if(!cronogramaEdicaoAtiva()){event.preventDefault();return;}CRONO_ARRASTE={tipo:'tarefa',id:String(id),fase:''};event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','tarefa');event.currentTarget.closest('.cg-row')?.classList.add('crono-arrastando');
+}
+function sobreDestinoFaseCronograma(event){
+  if(!CRONO_ARRASTE.tipo||!cronogramaEdicaoAtiva())return;event.preventDefault();event.dataTransfer.dropEffect='move';limparIndicadoresArrasteCronograma();const linha=event.currentTarget;if(CRONO_ARRASTE.tipo==='tarefa')linha.classList.add('crono-drop-phase');else linha.classList.add(event.clientY<linha.getBoundingClientRect().top+linha.offsetHeight/2?'crono-drop-before':'crono-drop-after');
+}
+function sobreDestinoTarefaCronograma(event){
+  if(CRONO_ARRASTE.tipo!=='tarefa'||!cronogramaEdicaoAtiva())return;event.preventDefault();event.stopPropagation();event.dataTransfer.dropEffect='move';limparIndicadoresArrasteCronograma();const linha=event.currentTarget;linha.classList.add(event.clientY<linha.getBoundingClientRect().top+linha.offsetHeight/2?'crono-drop-before':'crono-drop-after');
+}
+function aplicarOrdemFasesCronograma(ordem){
+  projetoAtivo.cronograma_fases_ordem=ordem.slice();ordem.forEach((fase,i)=>tarefasDoProjeto().filter(t=>t.fase===fase).forEach(t=>t.ordem_fase=i+1));marcarCronogramaAlterado();salvarStateDebounced();renderCronograma();
+}
+function moverFaseCronograma(fase,delta){
+  if(!cronogramaEdicaoAtiva())return;const ordem=fasesDoProjeto(),origem=ordem.indexOf(fase),destino=Math.max(0,Math.min(ordem.length-1,origem+delta));if(origem<0||origem===destino)return;ordem.splice(destino,0,ordem.splice(origem,1)[0]);aplicarOrdemFasesCronograma(ordem);
+}
+function soltarFaseCronograma(event,faseCodificada){
+  if(!CRONO_ARRASTE.tipo||!cronogramaEdicaoAtiva())return;event.preventDefault();const destino=decodeURIComponent(faseCodificada),depois=event.clientY>=event.currentTarget.getBoundingClientRect().top+event.currentTarget.offsetHeight/2;
+  if(CRONO_ARRASTE.tipo==='fase'){
+    const origem=CRONO_ARRASTE.fase;if(origem!==destino){const ordem=fasesDoProjeto().filter(f=>f!==origem),indice=ordem.indexOf(destino)+(depois?1:0);ordem.splice(indice,0,origem);finalizarArrasteCronograma();aplicarOrdemFasesCronograma(ordem);return;}
+  }else moverTarefaParaFaseCronograma(CRONO_ARRASTE.id,destino,depois?'fim':'inicio');
+  finalizarArrasteCronograma();
+}
+function moverTarefaParaFaseCronograma(id,faseDestino,posicao='fim',idDestino=''){
+  const tarefa=STATE.tarefas.find(t=>String(t.id)===String(id));if(!tarefa||!cronogramaEdicaoAtiva())return;const faseOrigem=tarefa.fase;
+  const origem=ordemAtividadesFase(faseOrigem).filter(t=>String(t.id)!==String(id));
+  const destino=ordemAtividadesFase(faseDestino).filter(t=>String(t.id)!==String(id));
+  tarefa.fase=faseDestino;let indice=posicao==='inicio'?0:destino.length;
+  if(idDestino){const achado=destino.findIndex(t=>String(t.id)===String(idDestino));if(achado>=0)indice=achado+(posicao==='depois'?1:0);}
+  destino.splice(indice,0,tarefa);normalizarOrdemAtividades(faseOrigem,origem);normalizarOrdemAtividades(faseDestino,destino);marcarCronogramaAlterado();salvarStateDebounced();renderCronograma();
+}
+function soltarTarefaCronograma(event,idDestino){
+  if(CRONO_ARRASTE.tipo!=='tarefa'||!cronogramaEdicaoAtiva())return;event.preventDefault();event.stopPropagation();if(String(CRONO_ARRASTE.id)===String(idDestino)){finalizarArrasteCronograma();return;}const alvo=STATE.tarefas.find(t=>String(t.id)===String(idDestino));if(!alvo)return;const depois=event.clientY>=event.currentTarget.getBoundingClientRect().top+event.currentTarget.offsetHeight/2,id=CRONO_ARRASTE.id;finalizarArrasteCronograma();moverTarefaParaFaseCronograma(id,alvo.fase,depois?'depois':'antes',idDestino);
+}
+function moverTarefaCronograma(id,delta){
+  if(!cronogramaEdicaoAtiva())return;const tarefa=STATE.tarefas.find(t=>String(t.id)===String(id));if(!tarefa)return;const itens=ordemAtividadesFase(tarefa.fase),indice=itens.findIndex(t=>String(t.id)===String(id)),destino=indice+delta;
+  if(destino>=0&&destino<itens.length){itens.splice(destino,0,itens.splice(indice,1)[0]);normalizarOrdemAtividades(tarefa.fase,itens);marcarCronogramaAlterado();salvarStateDebounced();renderCronograma();return;}
+  const fases=fasesDoProjeto(),indiceFase=fases.indexOf(tarefa.fase),novaFase=fases[indiceFase+delta];if(novaFase)moverTarefaParaFaseCronograma(id,novaFase,delta<0?'fim':'inicio');
 }
 function dt(iso){ return iso ? new Date(iso + 'T00:00:00') : null; }
 function diffDias(a, b){ return Math.round((dt(b) - dt(a)) / 86400000); }
@@ -4391,13 +4452,16 @@ function renderCronograma(){
   let rowIndex = 0;
 
   fases.forEach(fase => {
-    const itens = ts.filter(t => t.fase === fase).sort((a,b) => a.numero - b.numero);
+    const itens = ts.filter(t => t.fase === fase).sort((a,b)=>(Number(a.ordem??a.numero)-Number(b.ordem??b.numero))||(Number(a.numero)-Number(b.numero)));
     const colapsada = !!fasesColapsadas[fase];
+    const faseCodificada=encodeURIComponent(fase);
 
-    gridHtml += `<div class="cg-row phase">
+    gridHtml += `<div class="cg-row phase" data-phase="${esc(fase)}" ondragover="sobreDestinoFaseCronograma(event)" ondrop="soltarFaseCronograma(event,'${faseCodificada}')">
+      <button class="crono-drag-handle crono-edit-only" draggable="${editando}" ondragstart="iniciarArrasteFaseCronograma(event,'${faseCodificada}')" ondragend="finalizarArrasteCronograma()" onclick="event.stopPropagation()" title="Arrastar fase">⋮⋮</button>
       <span class="cg-toggle" onclick="toggleFase('${esc(fase)}')">${colapsada ? '▸' : '▾'}</span>
       <span class="cg-nome" onclick="toggleFase('${esc(fase)}')" style="cursor:pointer">${esc(fase)}</span>
       <span style="font-size:10px;opacity:.7">${itens.length}</span>
+      <span class="crono-move-controls crono-edit-only"><button onclick="event.stopPropagation();moverFaseCronograma(decodeURIComponent('${faseCodificada}'),-1)" title="Mover fase para cima">↑</button><button onclick="event.stopPropagation();moverFaseCronograma(decodeURIComponent('${faseCodificada}'),1)" title="Mover fase para baixo">↓</button></span>
       <button class="cg-phase-add crono-edit-only" onclick="criarTarefaInline('${esc(fase)}')" title="Adicionar atividade nesta fase">+ atividade</button>
       <button class="cg-phase-add crono-edit-only" onclick="excluirFaseCronograma('${esc(fase)}')" title="Excluir fase e suas atividades" style="color:var(--red)">🗑</button>
     </div>`;
@@ -4411,8 +4475,8 @@ function renderCronograma(){
       const statusEfetivo = atrasada ? 'atrasado' : t.status;
       const marcoIcon = t.tipo === 'golive' ? '🏁' : (t.tipo === 'marco' ? '◆' : '');
 
-      gridHtml += `<div class="cg-row" data-task-id="${t.id}">
-        <span class="cg-toggle"></span>
+      gridHtml += `<div class="cg-row" data-task-id="${t.id}" ondragover="sobreDestinoTarefaCronograma(event)" ondrop="soltarTarefaCronograma(event,'${t.id}')">
+        <button class="crono-drag-handle crono-edit-only" draggable="${editando}" ondragstart="iniciarArrasteTarefaCronograma(event,'${t.id}')" ondragend="finalizarArrasteCronograma()" title="Arrastar atividade">⋮⋮</button>
         ${marcoIcon ? `<span class="cg-marco">${marcoIcon}</span>` : ''}
         <input class="cg-input cg-nome" value="${esc(t.nome)}" placeholder="Nome da atividade" ${editando?'':'disabled'}
           oninput="campoTarefa('${t.id}','nome',this.value,false)"
@@ -4425,6 +4489,7 @@ function renderCronograma(){
           ${Object.entries(STATUS_LABEL).map(([v,l]) => `<option value="${v}" ${t.status===v?'selected':''}>${l}</option>`).join('')}
         </select>
         <span class="cg-actions">
+          <span class="crono-move-controls crono-edit-only"><button onclick="moverTarefaCronograma('${t.id}',-1)" title="Mover para cima">↑</button><button onclick="moverTarefaCronograma('${t.id}',1)" title="Mover para baixo">↓</button></span>
           <button onclick="verHistoricoCronograma('${t.id}')" title="Histórico de replanejamento">${Math.max(0,historicoInicio(t).length-1)+Math.max(0,historicoFim(t).length-1) ? '↺' : '·'}</button>
           <button onclick="abrirModalTarefa('${t.id}')" title="Ver detalhes">⋯</button>
           <button class="crono-edit-only" onclick="excluirTarefa('${t.id}')" title="Excluir">🗑️</button>
@@ -4504,6 +4569,7 @@ async function excluirFaseCronograma(fase){
       const {data,error}=await supabasePortal.from('projects').update(payloadProjetoSupabase(projetoAtivo)).eq('id',projetoAtivo.id).select('*').single();if(error)throw error;
       const p=mapearProjetoSupabase(data),idx=STATE.projetos.findIndex(x=>x.id===p.id);if(idx>=0)STATE.projetos[idx]=p;projetoAtivo=p;
     }else projetoAtivo.fases_ocultas=[...new Set([...(projetoAtivo.fases_ocultas||[]),fase])];
+    projetoAtivo.cronograma_fases_ordem=(projetoAtivo.cronograma_fases_ordem||[]).filter(f=>f!==fase);
     STATE.tarefas=STATE.tarefas.filter(t=>!(t.projeto_id===projetoAtivo.id&&t.fase===fase));
     marcarCronogramaAlterado();salvarState();renderCronograma();toast(`Fase “${fase}” removida do rascunho.`);
   }catch(e){registrarLogSistema('erro','Exclusão de fase',e);toast('Não foi possível excluir a fase no banco.');}
@@ -4536,9 +4602,10 @@ function criarTarefaInline(faseAlvo){
   if(!fase){ toggleFaseInlineInput(); return; } // sem nenhuma fase ainda — pede pra criar uma primeiro
 
   const hoje = hojeISO();
+  const ultimaOrdem=ordemAtividadesFase(fase).reduce((maior,t)=>Math.max(maior,Number(t.ordem??t.numero)||0),0);
   const nova = {
     id: uid(), numero: proximoIdTarefa(), projeto_id: projetoAtivo.id,
-    nome: '', fase, tipo: 'comum', area: '', responsavel: '',
+    nome: '', fase, ordem:ultimaOrdem+10, tipo: 'comum', area: '', responsavel: '',
     data_inicio: hoje, data_fim: addDias(hoje, 5), status: 'a_iniciar',
     historico_inicio: [hoje], historico_fim: [addDias(hoje, 5)], progresso: 0,
     dependencias: [], observacoes: '', criado_em: new Date().toISOString()
