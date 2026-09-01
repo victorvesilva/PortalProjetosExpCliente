@@ -478,7 +478,9 @@ button:focus-visible{outline:2.5px solid var(--orange);outline-offset:2px}
 .crono-move-controls{display:inline-flex;gap:1px;flex-shrink:0}
 .crono-move-controls button{width:23px;height:25px;border:0;border-radius:5px;background:transparent;color:var(--ink-mute);cursor:pointer;font-size:12px}
 .crono-move-controls button:hover{background:rgba(0,65,166,.09);color:var(--blue)}
-@media(pointer:fine){.crono-move-controls{display:none}}
+@media(pointer:fine){.crono-move-controls:not(.crono-phase-move){display:none}.crono-phase-move{display:inline-flex}}
+.cg-row.phase.crono-phase-draggable{cursor:grab}
+.cg-row.phase.crono-phase-draggable:active{cursor:grabbing}
 
 /* ═══ campos editáveis inline na grade ═══ */
 .cg-input{
@@ -3535,7 +3537,7 @@ async function atualizarCronogramaDoBanco(notificar=false){
   }
 }
 
-const CRONO_EDICAO={ativa:false,suja:false,persistindo:false,projetoId:null,sessaoId:null,autorizadoPor:'',expiraEm:0,snapshot:null,timer:null,ultimoToque:0,ultimaAtividade:0};
+const CRONO_EDICAO={ativa:false,suja:false,persistindo:false,projetoId:null,sessaoId:null,autorizadoPor:'',expiraEm:0,snapshot:null,timer:null,touchTimer:null,ultimoToque:0,ultimaAtividade:0};
 function cronogramaEdicaoAtiva(){return CRONO_EDICAO.ativa&&CRONO_EDICAO.projetoId===projetoAtivo?.id&&Date.now()<CRONO_EDICAO.expiraEm;}
 function copiarCronogramaProjeto(){return {tarefas:JSON.parse(JSON.stringify(STATE.tarefas.filter(t=>t.projeto_id===projetoAtivo.id))),projeto:JSON.parse(JSON.stringify(projetoAtivo))};}
 function atualizarInterfaceEdicaoCronograma(){
@@ -3546,9 +3548,9 @@ function atualizarInterfaceEdicaoCronograma(){
   if(detalhe)detalhe.textContent=ativa?`Autorizado por ${CRONO_EDICAO.autorizadoPor||'administrador'} · alterações ainda não salvas`:(projetoAtivo?.cronograma_ultima_atualizacao?`Último salvamento por ${projetoAtivo.cronograma_atualizado_por||'usuário'} em ${new Date(projetoAtivo.cronograma_ultima_atualizacao).toLocaleString('pt-BR')}.`:'Modo somente leitura. Atualize para buscar dados mais recentes.');
   document.querySelectorAll('#page-cronograma .crono-edit-only').forEach(el=>el.style.display=ativa?'':'none');
 }
-function limparEstadoEdicaoCronograma(){clearInterval(CRONO_EDICAO.timer);Object.assign(CRONO_EDICAO,{ativa:false,suja:false,persistindo:false,projetoId:null,sessaoId:null,autorizadoPor:'',expiraEm:0,snapshot:null,timer:null,ultimoToque:0,ultimaAtividade:0});atualizarInterfaceEdicaoCronograma();}
+function limparEstadoEdicaoCronograma(){clearInterval(CRONO_EDICAO.timer);clearTimeout(CRONO_EDICAO.touchTimer);Object.assign(CRONO_EDICAO,{ativa:false,suja:false,persistindo:false,projetoId:null,sessaoId:null,autorizadoPor:'',expiraEm:0,snapshot:null,timer:null,touchTimer:null,ultimoToque:0,ultimaAtividade:0});atualizarInterfaceEdicaoCronograma();}
 function iniciarRelogioEdicaoCronograma(){
-  clearInterval(CRONO_EDICAO.timer);CRONO_EDICAO.timer=setInterval(()=>{if(!CRONO_EDICAO.ativa)return;const restante=CRONO_EDICAO.expiraEm-Date.now(),inativa=Date.now()-CRONO_EDICAO.ultimaAtividade,detalhe=document.getElementById('crono-lock-detalhe');if(restante<=0||inativa>=5*60000){cancelarEdicaoCronograma(false,true);return;}if(detalhe)detalhe.textContent=`Autorizado por ${CRONO_EDICAO.autorizadoPor||'administrador'} · expira em ${Math.ceil(Math.min(restante,5*60000-inativa)/60000)} min · ${CRONO_EDICAO.suja?'alterações não salvas':'sem alterações'}`;},1000);
+  clearInterval(CRONO_EDICAO.timer);CRONO_EDICAO.timer=setInterval(()=>{if(!CRONO_EDICAO.ativa)return;const restante=CRONO_EDICAO.expiraEm-Date.now(),inativa=Date.now()-CRONO_EDICAO.ultimaAtividade,detalhe=document.getElementById('crono-lock-detalhe');if(restante<=0||inativa>=10*60000){cancelarEdicaoCronograma(false,true);return;}if(detalhe)detalhe.textContent=`Autorizado por ${CRONO_EDICAO.autorizadoPor||'administrador'} · bloqueia em ${Math.max(1,Math.ceil(Math.min(restante,10*60000-inativa)/60000))} min sem atividade · ${CRONO_EDICAO.suja?'alterações não salvas':'sem alterações'}`;},1000);
 }
 function abrirAutenticacaoEdicaoCronograma(){
   if(!projetoAtivo){toast('Selecione um projeto primeiro.');return;}if(CRONO_EDICAO.ativa)return;
@@ -3567,14 +3569,18 @@ async function confirmarAutenticacaoEdicaoCronograma(){
     const {data:admin,error:erroAdmin}=await clienteTemporario.rpc('is_admin');if(erroAdmin||admin!==true)throw new Error('O usuário informado não possui perfil de administrador ativo.');
     const {data:autorizacao,error:erroAutorizacao}=await clienteTemporario.rpc('grant_schedule_edit',{p_project_id:projetoAtivo.id,p_actor_id:sessaoPortal.user.id});if(erroAutorizacao)throw erroAutorizacao;
     const concessao=Array.isArray(autorizacao)?autorizacao[0]:autorizacao;
-    CRONO_EDICAO.ativa=true;CRONO_EDICAO.projetoId=projetoAtivo.id;CRONO_EDICAO.sessaoId=concessao?.session_id||concessao?.id||null;CRONO_EDICAO.autorizadoPor=login.user?.email||email;CRONO_EDICAO.expiraEm=new Date(concessao?.valid_until||concessao?.expires_at||Date.now()+15*60000).getTime();CRONO_EDICAO.snapshot=copiarCronogramaProjeto();CRONO_EDICAO.suja=false;CRONO_EDICAO.ultimaAtividade=Date.now();tarefaSyncTimers.forEach(timer=>clearTimeout(timer));tarefaSyncTimers.clear();
-    fecharModal('modal-cronograma-auth');iniciarRelogioEdicaoCronograma();atualizarInterfaceEdicaoCronograma();renderCronograma();toast('Edição autorizada por 15 minutos.');
+    CRONO_EDICAO.ativa=true;CRONO_EDICAO.projetoId=projetoAtivo.id;CRONO_EDICAO.sessaoId=concessao?.session_id||concessao?.id||null;CRONO_EDICAO.autorizadoPor=login.user?.email||email;CRONO_EDICAO.expiraEm=new Date(concessao?.valid_until||concessao?.expires_at||Date.now()+10*60000).getTime();CRONO_EDICAO.snapshot=copiarCronogramaProjeto();CRONO_EDICAO.suja=false;CRONO_EDICAO.ultimaAtividade=Date.now();tarefaSyncTimers.forEach(timer=>clearTimeout(timer));tarefaSyncTimers.clear();
+    fecharModal('modal-cronograma-auth');iniciarRelogioEdicaoCronograma();atualizarInterfaceEdicaoCronograma();renderCronograma();toast('Edição autorizada. O bloqueio ocorrerá após 10 minutos sem atividade.');
   }catch(e){const mensagem=/CRONOGRAMA_EM_EDICAO/i.test(e.message||'')?'Este cronograma já está sendo editado por outro usuário.':(e.message||'Não foi possível autorizar a edição.');erro.textContent=mensagem;erro.style.display='block';await registrarTentativaCronograma(false,mensagem);}
   finally{if(clienteTemporario)try{await clienteTemporario.auth.signOut({scope:'local'});}catch(e){}botao.disabled=false;botao.textContent='Autorizar edição';document.getElementById('crono-auth-senha').value='';}
 }
-function marcarCronogramaAlterado(){
-  if(!cronogramaEdicaoAtiva())return false;CRONO_EDICAO.suja=true;const agora=Date.now();CRONO_EDICAO.ultimaAtividade=agora;if(agora-CRONO_EDICAO.ultimoToque>45000){CRONO_EDICAO.ultimoToque=agora;supabasePortal?.rpc('touch_schedule_edit',{p_session_id:CRONO_EDICAO.sessaoId}).then(()=>{}).catch(()=>{});}atualizarInterfaceEdicaoCronograma();return true;
+function registrarAtividadeEdicaoCronograma(){
+  if(!CRONO_EDICAO.ativa||CRONO_EDICAO.projetoId!==projetoAtivo?.id||Date.now()>=CRONO_EDICAO.expiraEm)return false;const agora=Date.now();CRONO_EDICAO.ultimaAtividade=agora;CRONO_EDICAO.expiraEm=agora+10*60000;clearTimeout(CRONO_EDICAO.touchTimer);CRONO_EDICAO.touchTimer=setTimeout(()=>{CRONO_EDICAO.ultimoToque=Date.now();supabasePortal?.rpc('touch_schedule_edit',{p_session_id:CRONO_EDICAO.sessaoId}).then(({data,error})=>{if(error||data!==true)cancelarEdicaoCronograma(false,true);}).catch(()=>{});},800);return true;
 }
+function marcarCronogramaAlterado(){
+  if(!cronogramaEdicaoAtiva())return false;CRONO_EDICAO.suja=true;registrarAtividadeEdicaoCronograma();atualizarInterfaceEdicaoCronograma();return true;
+}
+['pointerdown','keydown','wheel','touchstart'].forEach(evento=>document.getElementById('page-cronograma')?.addEventListener(evento,registrarAtividadeEdicaoCronograma,{passive:true}));
 function tarefasCronogramaParaSalvar(){return tarefasDoProjeto().map(t=>({id:idUuid(t.id)?t.id:null,numero:Number(t.numero)||0,ordem:Number(t.ordem??t.numero)||0,nome:t.nome||'',fase:t.fase||'SEM FASE',tipo:t.tipo||'comum',area:t.area||'',responsavel:t.responsavel||'',data_inicio:t.data_inicio||null,data_fim:t.data_fim||null,baseline_inicio:t.baseline_inicio||historicoInicio(t)[0]||null,baseline_fim:t.baseline_fim||historicoFim(t)[0]||null,status:t.status||'a_iniciar',progresso:Number(t.progresso??PROGRESSO_STATUS[t.status]??0),dependencias:t.dependencias||[],observacoes:t.observacoes||'',justificativa_atraso:t.justificativa_atraso||'',data_replanejamento:t.data_replanejamento||null,historico_inicio:historicoInicio(t),historico_fim:historicoFim(t)}));}
 async function salvarEdicaoCronograma(){
   if(!cronogramaEdicaoAtiva()){toast('A autorização de edição expirou.');await cancelarEdicaoCronograma(false,true);return;}
@@ -4267,7 +4273,7 @@ let CRONO_ARRASTE={tipo:'',id:'',fase:''};
 function limparIndicadoresArrasteCronograma(){document.querySelectorAll('#crono-grid .crono-arrastando,#crono-grid .crono-drop-before,#crono-grid .crono-drop-after,#crono-grid .crono-drop-phase').forEach(el=>el.classList.remove('crono-arrastando','crono-drop-before','crono-drop-after','crono-drop-phase'));}
 function finalizarArrasteCronograma(){limparIndicadoresArrasteCronograma();CRONO_ARRASTE={tipo:'',id:'',fase:''};}
 function iniciarArrasteFaseCronograma(event,faseCodificada){
-  if(!cronogramaEdicaoAtiva()){event.preventDefault();return;}CRONO_ARRASTE={tipo:'fase',id:'',fase:decodeURIComponent(faseCodificada)};event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','fase');event.currentTarget.closest('.cg-row')?.classList.add('crono-arrastando');
+  if(!cronogramaEdicaoAtiva()||event.target.closest('button:not(.crono-drag-handle),input,select')){event.preventDefault();return;}CRONO_ARRASTE={tipo:'fase',id:'',fase:decodeURIComponent(faseCodificada)};event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','fase');event.currentTarget.closest('.cg-row')?.classList.add('crono-arrastando');
 }
 function iniciarArrasteTarefaCronograma(event,id){
   if(!cronogramaEdicaoAtiva()){event.preventDefault();return;}CRONO_ARRASTE={tipo:'tarefa',id:String(id),fase:''};event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','tarefa');event.currentTarget.closest('.cg-row')?.classList.add('crono-arrastando');
@@ -4276,7 +4282,7 @@ function sobreDestinoFaseCronograma(event){
   if(!CRONO_ARRASTE.tipo||!cronogramaEdicaoAtiva())return;event.preventDefault();event.dataTransfer.dropEffect='move';limparIndicadoresArrasteCronograma();const linha=event.currentTarget;if(CRONO_ARRASTE.tipo==='tarefa')linha.classList.add('crono-drop-phase');else linha.classList.add(event.clientY<linha.getBoundingClientRect().top+linha.offsetHeight/2?'crono-drop-before':'crono-drop-after');
 }
 function sobreDestinoTarefaCronograma(event){
-  if(CRONO_ARRASTE.tipo!=='tarefa'||!cronogramaEdicaoAtiva())return;event.preventDefault();event.stopPropagation();event.dataTransfer.dropEffect='move';limparIndicadoresArrasteCronograma();const linha=event.currentTarget;linha.classList.add(event.clientY<linha.getBoundingClientRect().top+linha.offsetHeight/2?'crono-drop-before':'crono-drop-after');
+  if(!CRONO_ARRASTE.tipo||!cronogramaEdicaoAtiva())return;event.preventDefault();event.stopPropagation();event.dataTransfer.dropEffect='move';limparIndicadoresArrasteCronograma();const linha=event.currentTarget;if(CRONO_ARRASTE.tipo==='fase')linha.classList.add('crono-drop-phase');else linha.classList.add(event.clientY<linha.getBoundingClientRect().top+linha.offsetHeight/2?'crono-drop-before':'crono-drop-after');
 }
 function aplicarOrdemFasesCronograma(ordem){
   projetoAtivo.cronograma_fases_ordem=ordem.slice();ordem.forEach((fase,i)=>tarefasDoProjeto().filter(t=>t.fase===fase).forEach(t=>t.ordem_fase=i+1));marcarCronogramaAlterado();salvarStateDebounced();renderCronograma();
@@ -4299,8 +4305,12 @@ function moverTarefaParaFaseCronograma(id,faseDestino,posicao='fim',idDestino=''
   if(idDestino){const achado=destino.findIndex(t=>String(t.id)===String(idDestino));if(achado>=0)indice=achado+(posicao==='depois'?1:0);}
   destino.splice(indice,0,tarefa);normalizarOrdemAtividades(faseOrigem,origem);normalizarOrdemAtividades(faseDestino,destino);marcarCronogramaAlterado();salvarStateDebounced();renderCronograma();
 }
-function soltarTarefaCronograma(event,idDestino){
-  if(CRONO_ARRASTE.tipo!=='tarefa'||!cronogramaEdicaoAtiva())return;event.preventDefault();event.stopPropagation();if(String(CRONO_ARRASTE.id)===String(idDestino)){finalizarArrasteCronograma();return;}const alvo=STATE.tarefas.find(t=>String(t.id)===String(idDestino));if(!alvo)return;const depois=event.clientY>=event.currentTarget.getBoundingClientRect().top+event.currentTarget.offsetHeight/2,id=CRONO_ARRASTE.id;finalizarArrasteCronograma();moverTarefaParaFaseCronograma(id,alvo.fase,depois?'depois':'antes',idDestino);
+function soltarTarefaCronograma(event,idDestino,faseCodificada=''){
+  if(!CRONO_ARRASTE.tipo||!cronogramaEdicaoAtiva())return;event.preventDefault();event.stopPropagation();
+  if(CRONO_ARRASTE.tipo==='fase'){
+    const origem=CRONO_ARRASTE.fase,destino=decodeURIComponent(faseCodificada);if(origem!==destino){const ordem=fasesDoProjeto().filter(f=>f!==origem),indice=ordem.indexOf(destino);ordem.splice(indice+1,0,origem);finalizarArrasteCronograma();aplicarOrdemFasesCronograma(ordem);return;}finalizarArrasteCronograma();return;
+  }
+  if(String(CRONO_ARRASTE.id)===String(idDestino)){finalizarArrasteCronograma();return;}const alvo=STATE.tarefas.find(t=>String(t.id)===String(idDestino));if(!alvo)return;const depois=event.clientY>=event.currentTarget.getBoundingClientRect().top+event.currentTarget.offsetHeight/2,id=CRONO_ARRASTE.id;finalizarArrasteCronograma();moverTarefaParaFaseCronograma(id,alvo.fase,depois?'depois':'antes',idDestino);
 }
 function moverTarefaCronograma(id,delta){
   if(!cronogramaEdicaoAtiva())return;const tarefa=STATE.tarefas.find(t=>String(t.id)===String(id));if(!tarefa)return;const itens=ordemAtividadesFase(tarefa.fase),indice=itens.findIndex(t=>String(t.id)===String(id)),destino=indice+delta;
@@ -4456,12 +4466,12 @@ function renderCronograma(){
     const colapsada = !!fasesColapsadas[fase];
     const faseCodificada=encodeURIComponent(fase);
 
-    gridHtml += `<div class="cg-row phase" data-phase="${esc(fase)}" ondragover="sobreDestinoFaseCronograma(event)" ondrop="soltarFaseCronograma(event,'${faseCodificada}')">
-      <button class="crono-drag-handle crono-edit-only" draggable="${editando}" ondragstart="iniciarArrasteFaseCronograma(event,'${faseCodificada}')" ondragend="finalizarArrasteCronograma()" onclick="event.stopPropagation()" title="Arrastar fase">⋮⋮</button>
+    gridHtml += `<div class="cg-row phase ${editando?'crono-phase-draggable':''}" draggable="${editando}" data-phase="${esc(fase)}" ondragstart="iniciarArrasteFaseCronograma(event,'${faseCodificada}')" ondragend="finalizarArrasteCronograma()" ondragover="sobreDestinoFaseCronograma(event)" ondrop="soltarFaseCronograma(event,'${faseCodificada}')">
+      <span class="crono-drag-handle crono-edit-only" title="Arraste a fase pela alça ou pelo nome">⋮⋮</span>
       <span class="cg-toggle" onclick="toggleFase('${esc(fase)}')">${colapsada ? '▸' : '▾'}</span>
       <span class="cg-nome" onclick="toggleFase('${esc(fase)}')" style="cursor:pointer">${esc(fase)}</span>
       <span style="font-size:10px;opacity:.7">${itens.length}</span>
-      <span class="crono-move-controls crono-edit-only"><button onclick="event.stopPropagation();moverFaseCronograma(decodeURIComponent('${faseCodificada}'),-1)" title="Mover fase para cima">↑</button><button onclick="event.stopPropagation();moverFaseCronograma(decodeURIComponent('${faseCodificada}'),1)" title="Mover fase para baixo">↓</button></span>
+      <span class="crono-move-controls crono-phase-move crono-edit-only"><button onclick="event.stopPropagation();moverFaseCronograma(decodeURIComponent('${faseCodificada}'),-1)" title="Mover fase para cima">↑</button><button onclick="event.stopPropagation();moverFaseCronograma(decodeURIComponent('${faseCodificada}'),1)" title="Mover fase para baixo">↓</button></span>
       <button class="cg-phase-add crono-edit-only" onclick="criarTarefaInline('${esc(fase)}')" title="Adicionar atividade nesta fase">+ atividade</button>
       <button class="cg-phase-add crono-edit-only" onclick="excluirFaseCronograma('${esc(fase)}')" title="Excluir fase e suas atividades" style="color:var(--red)">🗑</button>
     </div>`;
@@ -4475,7 +4485,7 @@ function renderCronograma(){
       const statusEfetivo = atrasada ? 'atrasado' : t.status;
       const marcoIcon = t.tipo === 'golive' ? '🏁' : (t.tipo === 'marco' ? '◆' : '');
 
-      gridHtml += `<div class="cg-row" data-task-id="${t.id}" ondragover="sobreDestinoTarefaCronograma(event)" ondrop="soltarTarefaCronograma(event,'${t.id}')">
+      gridHtml += `<div class="cg-row" data-task-id="${t.id}" ondragover="sobreDestinoTarefaCronograma(event)" ondrop="soltarTarefaCronograma(event,'${t.id}','${faseCodificada}')">
         <button class="crono-drag-handle crono-edit-only" draggable="${editando}" ondragstart="iniciarArrasteTarefaCronograma(event,'${t.id}')" ondragend="finalizarArrasteCronograma()" title="Arrastar atividade">⋮⋮</button>
         ${marcoIcon ? `<span class="cg-marco">${marcoIcon}</span>` : ''}
         <input class="cg-input cg-nome" value="${esc(t.nome)}" placeholder="Nome da atividade" ${editando?'':'disabled'}
