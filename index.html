@@ -5125,19 +5125,53 @@ function importarCronogramaExcel(event){
   leitor.onload = async e => {
     try{
       const livro = XLSX.read(e.target.result, { type:'array', cellDates:true }); const aba = livro.Sheets[livro.SheetNames.find(n => /crono/i.test(n)) || livro.SheetNames[0]];
-      const linhas = XLSX.utils.sheet_to_json(aba, { header:1, raw:false, defval:'' }); let cabecalho = -1, mapa = {};
+      const linhas = XLSX.utils.sheet_to_json(aba, { header:1, raw:true, defval:'' }); let cabecalho = -1, mapa = {};
+      const normalizarCabecalho = valor => String(valor ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase().replace(/\s+/g,' ');
       for(let i=0; i<Math.min(20, linhas.length); i++){
-        const colunas = linhas[i].map(v => String(v).trim().toUpperCase());
-        if(colunas.some(v => /AÇÕES|ACOES|ATIVIDADE/.test(v))){ cabecalho=i; colunas.forEach((v,j) => { if(v==='ID')mapa.id=j; else if(v==='FASE')mapa.fase=j; else if(/AÇÕES|ACOES|ATIVIDADE/.test(v))mapa.nome=j; else if(/ÁREA|AREA/.test(v))mapa.area=j; else if(/RESPONS/.test(v))mapa.responsavel=j; else if(/DEPEND/.test(v))mapa.dependencias=j; else if(v==='STATUS')mapa.status=j; else if(/INÍCIO|INICIO/.test(v))mapa.inicio=j; else if(/CONCLUS|FIM/.test(v))mapa.fim=j; else if(/OBS/.test(v))mapa.observacoes=j; }); break; }
+        const colunas = linhas[i].map(normalizarCabecalho);
+        if(colunas.some(v => ['ATIVIDADE','ACOES','ACAO','NOME DA ATIVIDADE'].includes(v))){
+          cabecalho=i;
+          colunas.forEach((v,j) => {
+            if(v==='ID')mapa.id=j;
+            else if(v==='FASE')mapa.fase=j;
+            else if(v==='OBSERVACOES'||v==='OBSERVACAO')mapa.observacoes=j;
+            else if(['ATIVIDADE','ACOES','ACAO','NOME DA ATIVIDADE'].includes(v))mapa.nome=j;
+            else if(v==='AREA')mapa.area=j;
+            else if(v.startsWith('RESPONS'))mapa.responsavel=j;
+            else if(v.startsWith('DEPEND'))mapa.dependencias=j;
+            else if(v==='STATUS')mapa.status=j;
+            else if(v==='INICIO'||v==='DATA DE INICIO')mapa.inicio=j;
+            else if(['CONCLUSAO','FIM','DATA DE CONCLUSAO','DATA FIM'].includes(v))mapa.fim=j;
+            else if(v==='PROGRESSO')mapa.progresso=j;
+          });
+          break;
+        }
       }
       if(cabecalho < 0) throw new Error('Cabeçalho não encontrado. Use as colunas AÇÕES/ATIVIDADE, FASE, STATUS, INÍCIO e CONCLUSÃO.');
+      if(mapa.nome===undefined||mapa.fase===undefined)throw new Error('As colunas ATIVIDADE e FASE são obrigatórias.');
       if(!confirm('A importação substituirá o cronograma atual deste projeto. Deseja continuar?')) return;
-      const status = { 'CONCLUÍDO':'concluido', 'CONCLUIDO':'concluido', 'EM ANDAMENTO':'andamento', 'A INICIAR':'a_iniciar', 'ATRASADO':'atrasado', 'IMPEDIDO':'impedido', 'CANCELADO':'cancelado' };
-      const converterData = valor => { const texto = String(valor || '').trim(); const achadas = texto.match(/\d{4}-\d{2}-\d{2}|\d{1,2}[/-]\d{1,2}[/-]\d{4}/g) || []; return achadas.map(d => { const p=d.includes('-') && d.length===10 ? d.split('-') : d.split(/[/-]/).reverse(); return d.length===10 && d[4]==='-' ? d : `${p[0]}-${String(p[1]).padStart(2,'0')}-${String(p[2]).padStart(2,'0')}`; }); };
+      const status = { 'CONCLUIDO':'concluido', 'EM ANDAMENTO':'andamento', 'ANDAMENTO':'andamento', 'A INICIAR':'a_iniciar', 'NAO INICIADO':'a_iniciar', 'ATRASADO':'atrasado', 'IMPEDIDO':'impedido', 'CANCELADO':'cancelado' };
+      const dataIso = (ano,mes,dia) => { const d=new Date(Number(ano),Number(mes)-1,Number(dia)); return d.getFullYear()===Number(ano)&&d.getMonth()===Number(mes)-1&&d.getDate()===Number(dia)?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:''; };
+      const converterData = valor => {
+        if(valor instanceof Date&&!Number.isNaN(valor.getTime()))return [dataIso(valor.getFullYear(),valor.getMonth()+1,valor.getDate())].filter(Boolean);
+        if(typeof valor==='number'&&Number.isFinite(valor)){
+          const partes=XLSX.SSF?.parse_date_code(valor);return partes?[dataIso(partes.y,partes.m,partes.d)].filter(Boolean):[];
+        }
+        const texto=String(valor ?? '').trim();if(!texto)return [];
+        if(/^\d{4,5}(?:[.,]\d+)?$/.test(texto)){
+          const partes=XLSX.SSF?.parse_date_code(Number(texto.replace(',','.')));if(partes)return [dataIso(partes.y,partes.m,partes.d)].filter(Boolean);
+        }
+        const achadas=texto.match(/\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[/-]\d{1,2}[/-]\d{2,4}/g)||[];
+        return achadas.map(data=>{if(/^\d{4}-/.test(data)){const [a,m,d]=data.split('-');return dataIso(a,m,d);}const [d,m,aCurto]=data.split(/[/-]/),a=String(aCurto).length===2?(Number(aCurto)>=70?1900:2000)+Number(aCurto):Number(aCurto);return dataIso(a,m,d);}).filter(Boolean);
+      };
+      const converterProgresso = (valor,padrao) => { if(valor===''||valor===null||valor===undefined)return padrao;const texto=String(valor).trim().replace('%','').replace(',','.');let numero=Number(texto);if(!Number.isFinite(numero))return padrao;if(!String(valor).includes('%')&&numero>0&&numero<=1)numero*=100;return Math.max(0,Math.min(100,numero)); };
       const importadas = linhas.slice(cabecalho + 1).map((linha, indice) => {
-        const nome = String(linha[mapa.nome] || '').trim(); if(!nome) return null; const hi = converterData(linha[mapa.inicio]), hf = converterData(linha[mapa.fim]); const st = status[String(linha[mapa.status] || '').trim().toUpperCase()] || 'a_iniciar';
-        return { id:uid(), numero:parseInt(linha[mapa.id]) || indice + 1, projeto_id:projetoAtivo.id, fase:String(linha[mapa.fase] || 'SEM FASE').trim().toUpperCase(), nome, tipo:'comum', area:String(linha[mapa.area] || '').trim(), responsavel:String(linha[mapa.responsavel] || '').trim(), data_inicio:hi.at(-1) || '', data_fim:hf.at(-1) || '', historico_inicio:hi, historico_fim:hf, status:st, progresso:PROGRESSO_STATUS[st], dependencias:String(linha[mapa.dependencias] || '').split(/[,;]/).map(Number).filter(Number.isFinite), observacoes:String(linha[mapa.observacoes] || '').trim(), criado_em:new Date().toISOString() };
+        const nome = String(linha[mapa.nome] ?? '').trim(); if(!nome) return null; const hi = converterData(mapa.inicio===undefined?'':linha[mapa.inicio]), hf = converterData(mapa.fim===undefined?'':linha[mapa.fim]); const st = status[normalizarCabecalho(mapa.status===undefined?'':linha[mapa.status])] || 'a_iniciar';
+        return { id:uid(), numero:parseInt(mapa.id===undefined?'':linha[mapa.id]) || indice + 1, projeto_id:projetoAtivo.id, fase:String(linha[mapa.fase] || 'SEM FASE').trim().toUpperCase(), nome, tipo:'comum', area:String(mapa.area===undefined?'':linha[mapa.area]).trim(), responsavel:String(mapa.responsavel===undefined?'':linha[mapa.responsavel]).trim(), data_inicio:hi.at(-1) || '', data_fim:hf.at(-1) || '', historico_inicio:hi, historico_fim:hf, status:st, progresso:converterProgresso(mapa.progresso===undefined?'':linha[mapa.progresso],PROGRESSO_STATUS[st]), dependencias:String(mapa.dependencias===undefined?'':linha[mapa.dependencias]).split(/[,;]/).map(v=>Number(String(v).trim())).filter(Number.isFinite), observacoes:String(mapa.observacoes===undefined?'':linha[mapa.observacoes]).trim(), criado_em:new Date().toISOString() };
       }).filter(Boolean);
+      if(!importadas.length)throw new Error('Nenhuma atividade válida foi encontrada na planilha.');
+      const atividadesAnteriores=STATE.tarefas.filter(t=>t.projeto_id===projetoAtivo.id),idsAnterioresBanco=atividadesAnteriores.map(t=>t.id).filter(idUuid);
+      if(CRONO_EDICAO.ativa&&idsAnterioresBanco.length)CRONO_EDICAO.excluidas=[...new Set([...(CRONO_EDICAO.excluidas||[]),...idsAnterioresBanco])];
       if(supabasePortal&&sessaoPortal&&!CRONO_EDICAO.ativa){
         const {data:anteriores,error:erroLeitura}=await supabasePortal.from('tasks').select('id').eq('project_id',projetoAtivo.id);if(erroLeitura)throw erroLeitura;
         const persistidas=[],novosIds=[];
@@ -5147,7 +5181,7 @@ function importarCronogramaExcel(event){
           const idsAnteriores=(anteriores||[]).map(item=>item.id);if(idsAnteriores.length){const {error:erroLimpeza}=await supabasePortal.from('tasks').delete().in('id',idsAnteriores);if(erroLimpeza)throw erroLimpeza;}
         }catch(erroPersistencia){if(novosIds.length)await supabasePortal.from('tasks').delete().in('id',novosIds);throw erroPersistencia;}
         STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoAtivo.id).concat(persistidas);
-      }else STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoAtivo.id).concat(importadas);marcarCronogramaAlterado();salvarState();renderCronograma();toast(`${importadas.length} atividade(s) adicionada(s) ao rascunho.`);
+      }else STATE.tarefas=STATE.tarefas.filter(t=>t.projeto_id!==projetoAtivo.id).concat(importadas);marcarCronogramaAlterado();salvarState();renderCronograma();const semDatas=importadas.filter(t=>!t.data_inicio||!t.data_fim).length;toast(`${importadas.length} atividade(s) importada(s). ${atividadesAnteriores.length} atividade(s) anterior(es) serão substituída(s) ao salvar.${semDatas?` ${semDatas} sem datas para exibição no Gantt.`:''}`);
     }catch(erro){ alert(`Não foi possível importar o cronograma: ${erro.message}`); }
   };
   leitor.readAsArrayBuffer(arquivo); event.target.value = '';
