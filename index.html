@@ -1616,6 +1616,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
 </div>
 <div class="modal-overlay" id="modal-solicitacao-detalhe"><div class="modal modal-lg" style="width:min(980px,94vw)"><div class="modal-header"><h3>Detalhes da solicitação</h3><button class="modal-close" onclick="fecharModal('modal-solicitacao-detalhe')">✕</button></div><div class="modal-body" id="sol-detalhe-conteudo"></div><div class="modal-footer"><button class="btn btn-danger" id="sol-excluir-btn" style="display:none;margin-right:auto">Excluir solicitação</button><button class="btn btn-outline" id="sol-cancelar-btn" style="display:none;margin-right:auto">Cancelar solicitação</button><button class="btn btn-outline" onclick="fecharModal('modal-solicitacao-detalhe')">Fechar</button></div></div></div>
 <div class="modal-overlay" id="modal-cancelar-solicitacao"><div class="modal" style="width:min(540px,92vw)"><div class="modal-header"><h3>Cancelar solicitação</h3><button class="modal-close" onclick="fecharModal('modal-cancelar-solicitacao')">✕</button></div><div class="modal-body"><input type="hidden" id="sol-cancelar-id"><p style="margin-top:0;color:var(--ink-soft);font-size:13px;line-height:1.55">Informe o motivo do cancelamento. O chamado será preservado no histórico como cancelado pelo solicitante.</p><div class="field"><label>Justificativa <span class="req">*</span></label><textarea id="sol-cancelar-justificativa" rows="4" placeholder="Ex.: a demanda não é mais necessária."></textarea></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="fecharModal('modal-cancelar-solicitacao')">Voltar</button><button class="btn btn-danger" id="sol-confirmar-cancelamento-btn" onclick="confirmarCancelamentoSolicitacao()">Confirmar cancelamento</button></div></div></div>
+<div class="modal-overlay" id="modal-diagnostico-cancelamento"><div class="modal" style="width:min(720px,94vw)"><div class="modal-header"><h3>Console de diagnóstico da solicitação</h3><button class="modal-close" onclick="fecharModal('modal-diagnostico-cancelamento')">✕</button></div><div class="modal-body"><p style="margin-top:0;color:var(--ink-soft);font-size:12px;line-height:1.55">Informações técnicas do último cancelamento. Compartilhe este conteúdo com a Administração caso o problema persista.</p><pre id="sol-cancelamento-console" style="margin:0;max-height:330px;overflow:auto;padding:14px;border-radius:9px;background:#172033;color:#d7e2f4;font:11px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap">Nenhum erro registrado.</pre></div><div class="modal-footer"><button class="btn btn-outline" onclick="copiarDiagnosticoCancelamento()">Copiar diagnóstico</button><button class="btn btn-primary" onclick="fecharModal('modal-diagnostico-cancelamento')">Fechar</button></div></div></div>
 
 <!-- ═══ MODAL: Nova/Editar melhoria ═══ -->
 <div class="modal-overlay" id="modal-melhoria">
@@ -2151,6 +2152,7 @@ function formatarDetalheErro(detalhe){
 function mensagemErroSupabase(erro,contexto='operação'){
   const detalhe=formatarDetalheErro(erro),codigo=String(erro?.code||'');
   if(codigo==='42501'||/row-level security|permission denied|SCHEDULE_VIEW_DENIED|PROJECT_VIEW_DENIED/i.test(detalhe))return `Sem permissão para ${contexto}. Confirme o perfil, os módulos permitidos e as políticas RLS no Supabase.`;
+  if(codigo==='P0001'&&/solicitante s[oó] pode enviar um rascunho|reenviar uma solicita[cç][aã]o devolvida/i.test(detalhe))return 'O banco ainda está usando a regra anterior de solicitações e bloqueou o cancelamento. A correção do gatilho de atualização precisa ser aplicada no Supabase.';
   if(codigo==='PGRST202'||codigo==='42883'||/cancel_own_request|add_request_observation|function .* does not exist/i.test(detalhe))return `O banco ainda não possui a rotina necessária para ${contexto}. Solicite à Administração a execução da atualização SQL do portal.`;
   if(codigo==='42703'||/column .* does not exist|schema cache/i.test(detalhe))return `O banco ainda não possui todos os campos necessários para ${contexto}. Execute a migration SQL corrigida e atualize o schema.`;
   if(codigo==='23505'||/duplicate key|unique constraint/i.test(detalhe))return `Já existe um registro com este código de controle.`;
@@ -4256,6 +4258,9 @@ function abrirCancelamentoSolicitacao(id){
   if(!s||(s.owner_id||'local-user')!==usuarioSolicitacaoAtual()||!permitidos.includes(s.status)){toast('Esta solicitação não está disponível para cancelamento.');return;}
   document.getElementById('sol-cancelar-id').value=id;document.getElementById('sol-cancelar-justificativa').value='';abrirModal('modal-cancelar-solicitacao');
 }
+function textoDiagnosticoCancelamento(){const registros=LOGS_SISTEMA.filter(log=>String(log.origem||'').toLowerCase().includes('cancelamento de solicitação')).slice(0,10);return registros.length?registros.map(formatarLogSistema).join('\n\n'):'Nenhum erro de cancelamento foi registrado nesta sessão.';}
+function abrirDiagnosticoCancelamento(){const consoleCancelamento=document.getElementById('sol-cancelamento-console');if(consoleCancelamento)consoleCancelamento.textContent=textoDiagnosticoCancelamento();abrirModal('modal-diagnostico-cancelamento');}
+async function copiarDiagnosticoCancelamento(){try{await navigator.clipboard.writeText(textoDiagnosticoCancelamento());toast('Diagnóstico copiado.');}catch(e){toast('Não foi possível copiar o diagnóstico.');}}
 async function confirmarCancelamentoSolicitacao(){
   const id=document.getElementById('sol-cancelar-id').value,justificativa=document.getElementById('sol-cancelar-justificativa').value.trim(),s=STATE.solicitacoes.find(item=>item.id===id);
   if(!justificativa){toast('Informe a justificativa do cancelamento.');return;}if(!s||(s.owner_id||'local-user')!==usuarioSolicitacaoAtual()){toast('Solicitação não disponível para cancelamento.');return;}
@@ -4265,12 +4270,21 @@ async function confirmarCancelamentoSolicitacao(){
     let atualizada=null;
     if(supabasePortal&&sessaoPortal){
       const resposta=await supabasePortal.rpc('cancel_own_request',{p_request_id:id,p_reason:justificativa});
-      if(resposta.error)throw resposta.error;atualizada=resposta.data;
+      if(!resposta.error)atualizada=resposta.data;
+      else{
+        const codigo=String(resposta.error?.code||''),detalhe=formatarDetalheErro(resposta.error),rotinaIndisponivel=['PGRST202','42883','42703'].includes(codigo)||/cancel_own_request|function .* does not exist|schema cache|cancelamento_justificativa/i.test(detalhe);
+        if(!rotinaIndisponivel)throw resposta.error;
+        const filtro=supabasePortal.from('solicitacoes').update({status:'cancelada',cancelamento_justificativa:justificativa,admin_descricao:`Cancelada pelo solicitante: ${justificativa}`}).eq('id',id).eq('owner_id',sessaoPortal.user.id).in('status',['rascunho','enviada','reenviada']);
+        let fallback=await filtro.select('*').single();
+        if(fallback.error&&String(fallback.error.code||'')==='42703')fallback=await supabasePortal.from('solicitacoes').update({status:'cancelada',admin_descricao:`Cancelada pelo solicitante: ${justificativa}`}).eq('id',id).eq('owner_id',sessaoPortal.user.id).in('status',['rascunho','enviada','reenviada']).select('*').single();
+        if(fallback.error)throw fallback.error;atualizada=fallback.data;
+        registrarLogSistema('aviso','Cancelamento de solicitação','Rotina SQL indisponível; aplicado cancelamento compatível do próprio solicitante.');
+      }
     }
     Object.assign(s,atualizada?mapearSolicitacaoSupabase(atualizada):{status:'cancelada',cancelamento_justificativa:justificativa,atualizado_em:agora});
     s.historico=s.historico||[];if(!s.historico.some(ev=>ev.event_type==='cancelada_pelo_solicitante'&&ev.description===justificativa))s.historico.push({id:uid(),event_type:'cancelada_pelo_solicitante',old_status:statusAnterior,new_status:'cancelada',description:`Cancelada pelo solicitante: ${justificativa}`,actor_name:perfilPortal?.full_name||sessaoPortal?.user?.email||'Solicitante',created_at:agora});
     salvarState();registrarAuditoria('cancelar','solicitação',`${s.request_code||s.id} · ${justificativa}`);fecharModal('modal-cancelar-solicitacao');fecharModal('modal-solicitacao-detalhe');renderSolicitacoes();renderNotificacoes();toast('Solicitação cancelada e registrada no histórico.');
-  }catch(e){registrarLogSistema('erro','Cancelamento de solicitação',e);const mensagem=mensagemErroSupabase(e,'cancelar a solicitação');toast(mensagem.includes('Consulte Configurações > Console')?'Não foi possível cancelar a solicitação neste momento. Tente novamente ou solicite apoio à Administração do portal.':mensagem);}finally{if(botao){botao.disabled=false;botao.textContent='Confirmar cancelamento';}}
+  }catch(e){registrarLogSistema('erro','Cancelamento de solicitação',e);const mensagem=mensagemErroSupabase(e,'cancelar a solicitação');fecharModal('modal-cancelar-solicitacao');abrirDiagnosticoCancelamento();toast(mensagem.includes('Consulte Configurações > Console')?'Não foi possível cancelar a solicitação neste momento. Tente novamente ou solicite apoio à Administração do portal.':mensagem);}finally{if(botao){botao.disabled=false;botao.textContent='Confirmar cancelamento';}}
 }
 function coletarSolicitacaoFormulario(){
   const v=id=>String(document.getElementById(id)?.value||'').trim();
