@@ -2263,7 +2263,9 @@ function atualizarNavegacaoAcessos(){
     const modulo=MODULO_POR_PAGINA[nav.dataset.page];
     if(!modulo)return;
     const bloqueado=!temPermissaoModulo(modulo);
-    const ocultar=colaborador ? nav.dataset.page!=='solicitacoes' : operador ? nav.dataset.page==='solicitacoes'||bloqueado : false;
+    /* Para Operadores, a matriz CRUD é a fonte de verdade: Solicitações só
+       fica oculta quando a permissão de visualização não estiver concedida. */
+    const ocultar=colaborador ? nav.dataset.page!=='solicitacoes' : operador ? bloqueado : false;
     nav.style.display=ocultar?'none':'';
     nav.classList.toggle('locked',bloqueado&&!colaborador);
     nav.setAttribute('aria-disabled',String(bloqueado));
