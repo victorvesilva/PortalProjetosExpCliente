@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Projetos - Experiência do Cliente e Operações</title>
+<title>Portal Melhoria Contínua - Experiência do Cliente e Operações</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -805,10 +805,10 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
 </svg>
 <div id="auth-gate" aria-live="polite">
   <div class="auth-layout">
-    <aside class="auth-brand" aria-label="Portal Projetos Hapvida">
+    <aside class="auth-brand" aria-label="Portal Melhoria Contínua Hapvida">
       <img src="hapvida-logo.png" alt="Hapvida" class="auth-brand-logo">
       <div class="auth-brand-rule"></div>
-      <h1>Portal Projetos</h1>
+      <h1>Portal Melhoria Contínua</h1>
       <p>Experiência do Cliente e Operações</p>
       <div class="auth-brand-copy">Governança, visibilidade e acompanhamento da carteira em um único ambiente.</div>
       <div class="auth-brand-footer">Acesso corporativo protegido</div>
@@ -856,7 +856,7 @@ button:focus-visible, .nav-item:focus-visible, [tabindex]:focus-visible{
   <div class="sidebar-logo">
     <div class="mark" style="overflow:hidden"><img src="hapvida-logo.png" alt="Hapvida" style="width:100%;height:100%;object-fit:contain;padding:3px;box-sizing:border-box"></div>
     <div class="txt">
-      <b>Portal Projetos</b>
+      <b>Portal Melhoria Contínua</b>
       <span>Experiência do Cliente e Operações</span>
     </div>
   </div>
@@ -2911,7 +2911,7 @@ function carregarDadosDemo(silencioso=false){
       eventos.push({id:`hist-${s.id}-3`,event_type:'status_changed',old_status:'em_analise',new_status:'devolvida',description:'Complementar informações e anexar evidências do fluxo proposto.',actor_name:'Administrador',created_at:new Date(new Date(fim).getTime()-86400000).toISOString()});
       eventos.push({id:`hist-${s.id}-4`,event_type:'status_changed',old_status:'devolvida',new_status:'reenviada',description:'Solicitação ajustada e reenviada pelo solicitante.',actor_name:s.solicitante,actor_email:s.owner_email,created_at:fim});s.current_revision=2;
     }else if(!['rascunho','enviada','em_analise'].includes(s.status))eventos.push({id:`hist-${s.id}-3`,event_type:'status_changed',old_status:'em_analise',new_status:s.status,description:s.admin_descricao||`Status atualizado para ${s.status}.`,actor_name:'Administrador',created_at:fim});
-    if(s.projeto_id)eventos.push({id:`hist-${s.id}-projeto`,event_type:'project_created',old_status:'aprovada',new_status:'aprovada',description:'Projeto criado automaticamente e vinculado ao Portfólio.',actor_name:'Portal Projetos',created_at:fim});
+    if(s.projeto_id)eventos.push({id:`hist-${s.id}-projeto`,event_type:'project_created',old_status:'aprovada',new_status:'aprovada',description:'Projeto criado automaticamente e vinculado ao Portfólio.',actor_name:'Portal Melhoria Contínua',created_at:fim});
     s.historico=eventos;
   });
   STATE.statusReportHistory=Object.entries(STATE.statusReports).map(([projeto_id,relatorio],indice)=>({id:'sr-demo-'+(indice+1),projeto_id,...relatorio,autor_nome:'Equipe de demonstração',created_at:relatorio.atualizado_em||new Date().toISOString()}));
@@ -3381,7 +3381,7 @@ function pdfTabela(doc,cabecalho,linhas,larguras){
 }
 function finalizarPdfPadrao(pdf,nomeArquivo){
   const paginas=pdf.getNumberOfPages();
-  for(let pagina=1;pagina<=paginas;pagina++){pdf.setPage(pagina);const largura=pdf.internal.pageSize.getWidth(),altura=pdf.internal.pageSize.getHeight();pdf.setDrawColor(218,226,241);pdf.line(14,altura-14,largura-14,altura-14);pdf.setTextColor(96,115,150);pdf.setFontSize(6.5);pdf.text('Portal Projetos - Experiência do Cliente e Operações',14,altura-8);pdf.text('Emitido em '+fmtData(hojeISO())+' · Página '+pagina+' de '+paginas,largura-65,altura-8);aplicarLogoPdf(pdf,largura-39,altura-13,24,9);}
+  for(let pagina=1;pagina<=paginas;pagina++){pdf.setPage(pagina);const largura=pdf.internal.pageSize.getWidth(),altura=pdf.internal.pageSize.getHeight();pdf.setDrawColor(218,226,241);pdf.line(14,altura-14,largura-14,altura-14);pdf.setTextColor(96,115,150);pdf.setFontSize(6.5);pdf.text('Portal Melhoria Contínua - Experiência do Cliente e Operações',14,altura-8);pdf.text('Emitido em '+fmtData(hojeISO())+' · Página '+pagina+' de '+paginas,largura-65,altura-8);aplicarLogoPdf(pdf,largura-39,altura-13,24,9);}
   pdf.__marcaInstitucionalAplicada=true;pdf.save(nomeArquivo);
 }
 function salvarPdfDocumento(doc,prefixo){finalizarPdfPadrao(doc.pdf,prefixo+'_'+(projetoAtivo.lecom || 'PROJETO').replace(/[^\w-]/g,'_')+'.pdf');}
@@ -3391,7 +3391,7 @@ if(window.jspdf?.jsPDF&&!window.jspdf.jsPDF.prototype.__marcaPortalProjetos){
     const nome=String(nomeArquivo || '');
     if(!this.__marcaInstitucionalAplicada){
       const largura=this.internal.pageSize.getWidth(),altura=this.internal.pageSize.getHeight(),paginas=this.getNumberOfPages();
-      for(let pagina=1;pagina<=paginas;pagina++){this.setPage(pagina);this.setDrawColor(218,226,241);this.line(14,altura-14,largura-14,altura-14);this.setTextColor(96,115,150);this.setFontSize(6.5);this.text('Portal Projetos - Experiência do Cliente e Operações',14,altura-8);this.text('Emitido em '+fmtData(hojeISO())+' · Página '+pagina+' de '+paginas,largura-65,altura-8);aplicarLogoPdf(this,largura-39,altura-13,24,9);}
+      for(let pagina=1;pagina<=paginas;pagina++){this.setPage(pagina);this.setDrawColor(218,226,241);this.line(14,altura-14,largura-14,altura-14);this.setTextColor(96,115,150);this.setFontSize(6.5);this.text('Portal Melhoria Contínua - Experiência do Cliente e Operações',14,altura-8);this.text('Emitido em '+fmtData(hojeISO())+' · Página '+pagina+' de '+paginas,largura-65,altura-8);aplicarLogoPdf(this,largura-39,altura-13,24,9);}
       for(let pagina=1;pagina<=paginas;pagina++){this.setPage(pagina);aplicarLogoPdf(this,largura-20,4,14,14);}
       this.__marcaInstitucionalAplicada=true;
     }
@@ -3827,7 +3827,7 @@ function desenharPainelRoscaLecom(pdf,x,y,w,h,titulo,subtitulo,dados){
   try{pdf.addImage(graficoRoscaLecom(dados),'PNG',x+14,y+29,50,50);}catch(e){}
   let ly=y+84;dados.slice(0,7).forEach((item,indice)=>{const pct=Math.round(item.value/(dados.reduce((s,i)=>s+i.value,0)||1)*100);pdf.setFillColor(paletaLecom(indice));pdf.rect(x+8,ly-3,3,3,'F');pdf.setFont('helvetica','normal');pdf.setTextColor(84,97,122);pdf.setFontSize(6.5);pdf.text(pdf.splitTextToSize(item.label,Math.max(30,w-38))[0],x+14,ly);pdf.setFont('helvetica','bold');pdf.setTextColor(43,59,93);pdf.text(`${item.value} · ${pct}%`,x+w-8,ly,{align:'right'});ly+=7;});
 }
-function rodapeExecutivoLecom(pdf,W,H){pdf.setFillColor(0,57,143);pdf.rect(0,H-14,W,14,'F');pdf.setTextColor(255);pdf.setFont('helvetica','italic');pdf.setFontSize(7.5);pdf.text(`Backlog consolidado e validado | ${fmtData(hojeISO())} – Experiência do Cliente e Operações`,12,H-5);pdf.setFont('helvetica','bold');pdf.text('Portal Projetos',W-12,H-5,{align:'right'});}
+function rodapeExecutivoLecom(pdf,W,H){pdf.setFillColor(0,57,143);pdf.rect(0,H-14,W,14,'F');pdf.setTextColor(255);pdf.setFont('helvetica','italic');pdf.setFontSize(7.5);pdf.text(`Backlog consolidado e validado | ${fmtData(hojeISO())} – Experiência do Cliente e Operações`,12,H-5);pdf.setFont('helvetica','bold');pdf.text('Portal Melhoria Contínua',W-12,H-5,{align:'right'});}
 function desenharCartaoResponsavelLecom(pdf,x,y,w,h,nome,itens){
   const status=['andamento','concluido','especificacao','atrasado','a_iniciar'],cores=['#4d90d9','#34a266','#8a5bb3','#c73a2d','#a5adbd'],rotulos={andamento:'Andamento',concluido:'Conclusão',especificacao:'Especificação',atrasado:'Atrasado',a_iniciar:'A iniciar'},total=itens.length||1,contagens=status.map(s=>itens.filter(i=>statusLecom(i.status_producao)===s).length);
   pdf.setFillColor(248,249,252);pdf.setDrawColor(220,226,237);pdf.roundedRect(x,y,w,h,3,3,'FD');pdf.setTextColor(104,114,133);pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.text('DIREÇÃO / RESPONSÁVEL TI',x+8,y+12);pdf.setTextColor(32,54,102);pdf.setFontSize(10);pdf.text(pdf.splitTextToSize(nome,w-16),x+8,y+25);pdf.setTextColor(38,43,55);pdf.setFontSize(27);pdf.text(String(itens.length),x+8,y+53);pdf.setFont('helvetica','normal');pdf.setTextColor(104,114,133);pdf.setFontSize(7);pdf.text('itens',x+8,y+62);
@@ -4330,13 +4330,13 @@ async function salvarSolicitacaoInterna(){
   }
   const inputAnexos=document.getElementById('sol-anexos');if(dados.tipo_solicitacao==='lecom'&&!validarAnexosSolicitacao(inputAnexos))return;
   const inputTipo=dados.tipo_solicitacao==='lecom'?inputAnexos:dados.tipo_solicitacao==='sac'?document.getElementById('sol-sac-anexo'):dados.tipo_solicitacao==='assuntos'?document.getElementById('sol-assunto-anexo'):dados.tipo_solicitacao==='canais_digitais'?document.getElementById('sol-dcd-anexos'):null,arquivosOriginais=[...(inputTipo?.files||[])],files=arquivosOriginais.map(f=>({nome:f.name,tamanho:f.size,tipo:f.type}));
-  const agora=new Date().toISOString(),observacaoAnterior=existente?.observacoes||'',base={...dados,owner_id:usuarioSolicitacaoAtual(),owner_email:sessaoPortal?.user?.email||'',status:existente?.status==='devolvida'?'reenviada':'enviada',anexos:files.length?files:(existente?.anexos||[]),admin_descricao:existente?.admin_descricao||''};
+  const agora=new Date().toISOString(),observacaoAnterior=existente?.observacoes||'',statusInicial=dados.tipo_solicitacao==='canais_digitais'?(existente?.status||'aprovada'):(existente?.status==='devolvida'?'reenviada':'enviada'),base={...dados,owner_id:usuarioSolicitacaoAtual(),owner_email:sessaoPortal?.user?.email||'',status:statusInicial,anexos:files.length?files:(existente?.anexos||[]),admin_descricao:existente?.admin_descricao||''};
   let item=null;
   if(supabasePortal&&sessaoPortal){
     try{const registroId=edicaoId||crypto.randomUUID();if(arquivosOriginais.length){const novos=await enviarAnexosSolicitacaoSupabase(registroId,arquivosOriginais);base.anexos=[...(existente?.anexos||[]),...novos];}if(!edicaoId)base.id=registroId;const query=edicaoId?supabasePortal.from('solicitacoes').update(base).eq('id',edicaoId):supabasePortal.from('solicitacoes').insert(base),{data,error}=await query.select('*').single();if(error)throw error;item=mapearSolicitacaoSupabase(data);}catch(e){registrarLogSistema('erro','Envio de solicitação ao Supabase',e);}
   }
   if(!item){item=existente?{...existente,...base,atualizado_em:agora}:{id:uid(),request_code:codigoSolicitacaoLocal(dados.tipo_solicitacao),...base,criado_em:agora,atualizado_em:agora};toast('Solicitação salva no cache local. A sincronização com o Supabase está pendente.');}
-  item.historico=item.historico||[{id:uid(),event_type:'created',old_status:null,new_status:'enviada',description:'Solicitação enviada.',actor_name:item.solicitante,created_at:agora}];
+  item.historico=item.historico||[{id:uid(),event_type:'created',old_status:null,new_status:item.status,description:item.status==='aprovada'?'Solicitação aprovada automaticamente.':'Solicitação enviada.',actor_name:item.solicitante,created_at:agora}];
   if(dados.observacoes&&dados.observacoes!==observacaoAnterior){const eventoObservacao={id:uid(),event_type:'observacao_solicitante',old_status:null,new_status:item.status,description:`Observação do solicitante: ${dados.observacoes}`,actor_name:item.solicitante,created_at:agora};item.historico.push(eventoObservacao);if(supabasePortal&&sessaoPortal&&idUuid(item.id)){const {data,error}=await supabasePortal.rpc('add_request_observation',{p_request_id:item.id,p_observation:dados.observacoes});if(!error&&data)Object.assign(eventoObservacao,data);else if(error)registrarLogSistema('aviso','Histórico de solicitação',error);}}
   STATE.solicitacoes=STATE.solicitacoes.filter(s=>s.id!==item.id&&s.id!==edicaoId);STATE.solicitacoes.unshift(item);salvarState();registrarAuditoria(edicaoId?'reenviar':'criar','solicitação',`${item.request_code||item.id} · ${rotuloTipoSolicitacao(item.tipo_solicitacao)}: ${item.titulo}`);limparRascunhoSolicitacao(item.tipo_solicitacao);fechamentoSolicitacaoLiberado=true;fecharModal('modal-solicitacao');renderSolicitacoes();if(item.created_at||item.request_code)toast(edicaoId?'Solicitação reenviada com sucesso.':'Solicitação enviada com sucesso.');
 }
