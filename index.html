@@ -2151,6 +2151,7 @@ function formatarDetalheErro(detalhe){
 function mensagemErroSupabase(erro,contexto='operação'){
   const detalhe=formatarDetalheErro(erro),codigo=String(erro?.code||'');
   if(codigo==='42501'||/row-level security|permission denied|SCHEDULE_VIEW_DENIED|PROJECT_VIEW_DENIED/i.test(detalhe))return `Sem permissão para ${contexto}. Confirme o perfil, os módulos permitidos e as políticas RLS no Supabase.`;
+  if(codigo==='PGRST202'||codigo==='42883'||/cancel_own_request|add_request_observation|function .* does not exist/i.test(detalhe))return `O banco ainda não possui a rotina necessária para ${contexto}. Solicite à Administração a execução da atualização SQL do portal.`;
   if(codigo==='42703'||/column .* does not exist|schema cache/i.test(detalhe))return `O banco ainda não possui todos os campos necessários para ${contexto}. Execute a migration SQL corrigida e atualize o schema.`;
   if(codigo==='23505'||/duplicate key|unique constraint/i.test(detalhe))return `Já existe um registro com este código de controle.`;
   if(codigo==='42P01'||/relation .* does not exist/i.test(detalhe))return `A estrutura do banco está incompleta para ${contexto}. Execute a migration SQL corrigida.`;
@@ -4251,7 +4252,7 @@ async function excluirSolicitacaoAdministrativa(id){
   try{if(supabasePortal&&sessaoPortal){const {error}=await supabasePortal.from('solicitacoes').delete().eq('id',id);if(error)throw error;const caminhos=(s.anexos||[]).map(a=>a.path).filter(Boolean);if(caminhos.length){const {error:erroArquivos}=await supabasePortal.storage.from('solicitacoes').remove(caminhos);if(erroArquivos)registrarLogSistema('erro','Limpeza de anexos excluídos',erroArquivos);}}STATE.solicitacoes=STATE.solicitacoes.filter(item=>item.id!==id);salvarState();registrarAuditoria('excluir','solicitação',`${s.request_code||s.id} · ${s.titulo}`);fecharModal('modal-solicitacao-detalhe');renderSolicitacoes();renderNotificacoes();toast('Solicitação excluída.');}catch(e){registrarLogSistema('erro','Exclusão de solicitação',e);toast('Não foi possível excluir a solicitação.');}finally{if(botao){botao.disabled=false;botao.textContent='Excluir solicitação';}}
 }
 function abrirCancelamentoSolicitacao(id){
-  const s=STATE.solicitacoes.find(item=>item.id===id),permitidos=['rascunho','enviada','reenviada','devolvida'];
+  const s=STATE.solicitacoes.find(item=>item.id===id),permitidos=['rascunho','enviada','reenviada'];
   if(!s||(s.owner_id||'local-user')!==usuarioSolicitacaoAtual()||!permitidos.includes(s.status)){toast('Esta solicitação não está disponível para cancelamento.');return;}
   document.getElementById('sol-cancelar-id').value=id;document.getElementById('sol-cancelar-justificativa').value='';abrirModal('modal-cancelar-solicitacao');
 }
@@ -4269,7 +4270,7 @@ async function confirmarCancelamentoSolicitacao(){
     Object.assign(s,atualizada?mapearSolicitacaoSupabase(atualizada):{status:'cancelada',cancelamento_justificativa:justificativa,atualizado_em:agora});
     s.historico=s.historico||[];if(!s.historico.some(ev=>ev.event_type==='cancelada_pelo_solicitante'&&ev.description===justificativa))s.historico.push({id:uid(),event_type:'cancelada_pelo_solicitante',old_status:statusAnterior,new_status:'cancelada',description:`Cancelada pelo solicitante: ${justificativa}`,actor_name:perfilPortal?.full_name||sessaoPortal?.user?.email||'Solicitante',created_at:agora});
     salvarState();registrarAuditoria('cancelar','solicitação',`${s.request_code||s.id} · ${justificativa}`);fecharModal('modal-cancelar-solicitacao');fecharModal('modal-solicitacao-detalhe');renderSolicitacoes();renderNotificacoes();toast('Solicitação cancelada e registrada no histórico.');
-  }catch(e){registrarLogSistema('erro','Cancelamento de solicitação',e);toast(mensagemErroSupabase(e,'cancelar a solicitação'));}finally{if(botao){botao.disabled=false;botao.textContent='Confirmar cancelamento';}}
+  }catch(e){registrarLogSistema('erro','Cancelamento de solicitação',e);const mensagem=mensagemErroSupabase(e,'cancelar a solicitação');toast(mensagem.includes('Consulte Configurações > Console')?'Não foi possível cancelar a solicitação neste momento. Tente novamente ou solicite apoio à Administração do portal.':mensagem);}finally{if(botao){botao.disabled=false;botao.textContent='Confirmar cancelamento';}}
 }
 function coletarSolicitacaoFormulario(){
   const v=id=>String(document.getElementById(id)?.value||'').trim();
@@ -4382,7 +4383,7 @@ async function abrirDetalheSolicitacao(id){
   const codigoDetalhe=document.querySelector('#sol-detalhe-conteudo .mono');if(codigoDetalhe)codigoDetalhe.textContent=`${s.request_code||s.id} · ${fmtData((s.criado_em||s.created_at||'').slice(0,10))}`;marcarSolicitacaoVista(s.id);
   if(admin){const descricaoAdmin=document.getElementById('sol-admin-descricao');if(descricaoAdmin)descricaoAdmin.value='';}
   const excluirBtn=document.getElementById('sol-excluir-btn'),podeExcluir=adminSistema||podeGerenciarSolicitacoes('delete');if(excluirBtn){excluirBtn.style.display=podeExcluir?'inline-flex':'none';excluirBtn.onclick=podeExcluir?()=>excluirSolicitacaoAdministrativa(s.id):null;}
-  const cancelarBtn=document.getElementById('sol-cancelar-btn'),podeCancelar=!admin&&s.owner_id===usuarioSolicitacaoAtual()&&['rascunho','enviada','reenviada','devolvida'].includes(s.status);if(cancelarBtn){cancelarBtn.style.display=podeCancelar?'inline-flex':'none';cancelarBtn.onclick=podeCancelar?()=>abrirCancelamentoSolicitacao(s.id):null;}
+  const cancelarBtn=document.getElementById('sol-cancelar-btn'),podeCancelar=!admin&&s.owner_id===usuarioSolicitacaoAtual()&&['rascunho','enviada','reenviada'].includes(s.status);if(cancelarBtn){cancelarBtn.style.display=podeCancelar?'inline-flex':'none';cancelarBtn.onclick=podeCancelar?()=>abrirCancelamentoSolicitacao(s.id):null;}
   atualizarCamposGestaoSolicitacao();
   abrirModal('modal-solicitacao-detalhe');
 }
