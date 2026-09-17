@@ -2412,12 +2412,15 @@ async function atualizarPermissoesSessaoPortal({forcar=false,notificar=false}={}
     atualizarNavegacaoAcessos();aplicarPermissoesAcoesNaInterface(document);
     const alterou=anterior!==assinaturaPermissoesSessao();
     if(alterou){
-      await carregarProjetosSupabase();
-      if(projetoAtivo&&!STATE.projetos.some(p=>p.id===projetoAtivo.id))definirProjetoAtivo(null);
-      if(projetoAtivo&&temPermissaoModulo('cronograma'))await carregarTarefasSupabase(projetoAtivo.id);
+      /* A atualização de permissões não pode substituir o rascunho de um
+         cronograma em edição. A releitura ocorrerá depois de salvar/cancelar. */
+      const cronogramaEmEdicao=typeof cronogramaEdicaoAtiva==='function'&&cronogramaEdicaoAtiva();
+      if(!cronogramaEmEdicao)await carregarProjetosSupabase();
+      if(!cronogramaEmEdicao&&projetoAtivo&&!STATE.projetos.some(p=>p.id===projetoAtivo.id))definirProjetoAtivo(null);
+      if(!cronogramaEmEdicao&&projetoAtivo&&temPermissaoModulo('cronograma'))await carregarTarefasSupabase(projetoAtivo.id);
       const pagina=document.querySelector('.page.active')?.id?.replace('page-',''),modulo=MODULO_POR_PAGINA[pagina];
       if(modulo&&!temPermissaoModulo(modulo)){if(pagina==='cronograma')renderCronograma();else navigate('home');}
-      else if(pagina==='cronograma')renderCronograma();
+      else if(pagina==='cronograma'&&!cronogramaEmEdicao)renderCronograma();
       if(notificar)toast('Suas permissões foram atualizadas.');
     }
     return alterou;
@@ -4929,7 +4932,12 @@ function sobreDestinoTarefaCronograma(event){
   if(!CRONO_ARRASTE.tipo||!cronogramaEdicaoAtiva())return;event.preventDefault();event.stopPropagation();event.dataTransfer.dropEffect='move';limparIndicadoresArrasteCronograma();const linha=event.currentTarget;if(CRONO_ARRASTE.tipo==='fase')linha.classList.add('crono-drop-phase');else linha.classList.add(event.clientY<linha.getBoundingClientRect().top+linha.offsetHeight/2?'crono-drop-before':'crono-drop-after');
 }
 function aplicarOrdemFasesCronograma(ordem){
-  projetoAtivo.cronograma_fases_ordem=ordem.slice();ordem.forEach((fase,i)=>tarefasDoProjeto().filter(t=>t.fase===fase).forEach(t=>t.ordem_fase=i+1));marcarCronogramaAlterado();salvarStateDebounced();renderCronograma();
+  const ordemNormalizada=[...new Set((ordem||[]).map(f=>String(f||'').trim()).filter(Boolean))];
+  projetoAtivo.cronograma_fases_ordem=ordemNormalizada;
+  const indiceProjeto=STATE.projetos.findIndex(p=>p.id===projetoAtivo.id);
+  if(indiceProjeto>=0){STATE.projetos[indiceProjeto].cronograma_fases_ordem=ordemNormalizada.slice();projetoAtivo=STATE.projetos[indiceProjeto];}
+  ordemNormalizada.forEach((fase,i)=>tarefasDoProjeto().filter(t=>t.fase===fase).forEach(t=>t.ordem_fase=i+1));
+  marcarCronogramaAlterado();salvarStateDebounced();renderCronograma();
 }
 function moverFaseCronograma(fase,delta){
   if(!cronogramaEdicaoAtiva())return;const ordem=fasesDoProjeto(),origem=ordem.indexOf(fase),destino=Math.max(0,Math.min(ordem.length-1,origem+delta));if(origem<0||origem===destino)return;ordem.splice(destino,0,ordem.splice(origem,1)[0]);aplicarOrdemFasesCronograma(ordem);
@@ -5791,7 +5799,8 @@ function renderStatusReport(){
   const ts = tarefasDoProjeto();
   const concluidas = ts.filter(t => t.status === 'concluido').length;
   const atrasadas = ts.filter(isAtrasada).length;
-  const pct = ts.length ? Math.round((concluidas / ts.length) * 100) : 0;
+  const indicadoresCronograma=indicadoresCronogramaStatusReport(ts);
+  const pct = indicadoresCronograma.realizado;
   const riscosAbertos = riscosDoProjeto().filter(r => r.status !== 'Encerrado').length;
   const encVencidos = encaminhamentosDoProjeto().filter(e => {
     const hoje = hojeISO();
@@ -5799,6 +5808,7 @@ function renderStatusReport(){
   }).length;
 
   document.getElementById('sr-auto-stats').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"><div class="sr-stat"><b>${indicadoresCronograma.planejado}%</b><span>Planejado até hoje</span></div><div class="sr-stat"><b>${indicadoresCronograma.realizado}%</b><span>Realizado</span></div><div class="sr-stat"><b style="color:${indicadoresCronograma.desvio<0?'var(--red)':'var(--green)'}">${indicadoresCronograma.desvio>0?'+':''}${indicadoresCronograma.desvio} p.p.</b><span>Desvio</span></div></div>
     <div class="sr-stat"><b>${pct}%</b><span>Progresso do cronograma (${concluidas}/${ts.length} atividades)</span></div>
     <div class="sr-stat"><b>${atrasadas}</b><span>Atividade(s) em atraso</span></div>
     <div class="sr-stat"><b>${riscosAbertos}</b><span>Risco(s) em aberto</span></div>
@@ -5866,13 +5876,26 @@ function estadoFaseStatus(itens){
   if(itens.some(t=>t.status==='andamento')) return 'andamento';
   return 'a_iniciar';
 }
+function indicadoresCronogramaStatusReport(tarefas=tarefasDoProjeto()){
+  const elegiveis=(tarefas||[]).filter(t=>t.status!=='cancelado'),total=elegiveis.length||1,hoje=hojeISO();
+  const planejadas=elegiveis.filter(t=>{const fim=historicoFim(t)[0];return fim&&fim<=hoje;}).length;
+  const concluidas=elegiveis.filter(t=>t.status==='concluido').length;
+  const planejado=Math.round(planejadas/total*100),realizado=Math.round(concluidas/total*100);
+  return {planejado,realizado,desvio:realizado-planejado,planejadas,concluidas,total:elegiveis.length};
+}
+function limparClassificacoesStatusReport(alvo){
+  if(!alvo)return;
+  [...alvo.querySelectorAll('*')].forEach(el=>{
+    if(el.children.length===0&&/^(interno|público|publico)$/i.test(String(el.textContent||'').trim()))el.remove();
+  });
+}
 function renderStatusReportOnePage(sr, dados){
   const relatorio = dadosOnePageStatus(sr), saude = calcularSaudeProjeto();
-  const farol = sr.farol_geral || 'verde'; const cor = { verde:'var(--green)', amarelo:'var(--yellow)', vermelho:'var(--red)' }[farol];
+  const farol = sr.farol_geral || 'verde'; const cor = { verde:'var(--green)', amarelo:'var(--yellow)', vermelho:'var(--red)' }[farol]; const indicadores=indicadoresCronogramaStatusReport();
   const meses = []; if(relatorio.inicio && relatorio.fim){ let d = new Date(dt(relatorio.inicio)); d.setDate(1); const limite = dt(relatorio.fim); while(d <= limite){ meses.push(`${d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','')}/${String(d.getFullYear()).slice(2)}`); d.setMonth(d.getMonth()+1); } }
   const barra = fase => { const left = Math.max(0, diffDias(relatorio.inicio, fase.ini) / relatorio.totalDias * 100); const width = Math.min(100-left, Math.max(2, (diffDias(fase.ini, fase.fim)+1) / relatorio.totalDias * 100)); const estado=estadoFaseStatus(fase.itens), corBarra={atrasado:'var(--red)',andamento:'var(--yellow)',concluido:'var(--green)',a_iniciar:'#94A3B8'}[estado]; const divisorias=meses.slice(1).map((_,indice)=>`<i aria-hidden="true" style="position:absolute;left:${(indice+1)/meses.length*100}%;top:0;bottom:0;width:1px;background:#e7ecf5;transform:translateX(-.5px)"></i>`).join(''); return `<div style="display:grid;grid-template-columns:240px 1fr;border-bottom:1px solid var(--line);min-height:46px"><div style="padding:12px 14px;font-size:12px;font-weight:700">${esc(fase.fase)}<small style="display:block;color:var(--ink-mute);font-weight:500">${fase.itens.length} atividade(s) · ${fmtData(fase.ini)} a ${fmtData(fase.fim)}</small></div><div class="sr-gantt-track" style="position:relative;background:#fff">${divisorias}<span title="${esc(fase.fase)}" style="position:absolute;left:${left}%;width:${width}%;height:12px;top:17px;border-radius:4px;background:${corBarra};z-index:2"></span></div></div>`; };
-  document.getElementById('sr-executivo').innerHTML = `<div class="card" style="padding:0;overflow:hidden"><div style="padding:20px 24px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:18px"><div><span style="display:block;width:5px;height:34px;background:var(--orange);float:left;margin:1px 12px 0 0"></span><h2 style="font-size:24px;color:var(--blue);margin:0">${esc(projetoAtivo.nome)}</h2><span class="mono" style="font-size:11px;color:var(--ink-mute)">${esc(projetoAtivo.lecom)} · Status Report · ${fmtData(sr.periodo_referencia || hojeISO())}</span></div><div style="text-align:right"><b style="display:block;color:var(--red);font-size:12px">Interno</b><button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="gerarPdfStatusReport()">Gerar PDF executivo</button></div></div><div style="display:grid;grid-template-columns:1.35fr 1.35fr .7fr;gap:14px;padding:16px 18px"><div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--paper)"><b style="font-size:13px;color:var(--blue)">Resumo do projeto</b><p style="font-size:12.5px;line-height:1.55;margin:9px 0 0;color:var(--ink-soft)">${esc(sr.resumo_executivo || projetoAtivo.objetivo || 'Preencha o resumo executivo do período.')}</p></div><div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--paper)"><b style="font-size:13px;color:var(--blue)">Equipe do projeto</b><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px;font-size:11.5px;color:var(--ink-soft)"><span><b>Patrocinador:</b> ${esc(projetoAtivo.patrocinador || '—')}</span><span><b>Área impactada:</b> ${esc(projetoAtivo.direcao_ti || '—')}</span><span><b>PMO/Gerente de projetos:</b> ${esc(projetoAtivo.gerente_projeto || '—')}</span><span><b>Pontos focais:</b> ${esc(projetoAtivo.lider_ti || '—')}</span></div></div><div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--paper);display:flex;justify-content:space-between;align-items:center"><div><b style="font-size:13px;color:var(--blue)">Status geral</b><span style="display:block;font-size:12px;margin-top:12px;color:var(--ink-soft)">Farol: ${farol}</span><span style="display:block;font-size:12px;color:var(--ink-soft);margin-top:4px">${saude.label}</span></div><i style="display:block;width:48px;height:48px;border-radius:50%;background:${cor}"></i></div></div><div style="margin:0 18px;border:1px solid var(--line);border-radius:10px;overflow:hidden"><div style="display:grid;grid-template-columns:240px 1fr;background:var(--blue);color:#fff;font-size:12px;font-weight:800"><div style="padding:12px 14px">Fases / entregas</div><div style="display:grid;grid-template-columns:repeat(${Math.max(1,meses.length)},1fr);text-align:center">${meses.map(m => `<span style="padding:12px 2px;border-left:1px solid rgba(255,255,255,.28)">${m}</span>`).join('')}</div></div>${relatorio.fases.length ? relatorio.fases.map(barra).join('') : '<p style="padding:18px;font-size:12px;color:var(--ink-mute)">Inclua atividades datadas no cronograma para gerar a linha do tempo.</p>'}</div><div style="padding:16px 18px"><b style="font-size:13px;color:var(--blue)">Pontos de atenção</b><div style="margin-top:8px;padding:12px 14px;border-radius:8px;background:var(--paper);font-size:12.5px;color:var(--ink-soft)">${relatorio.atencao.length ? `<ul style="margin:0;padding-left:18px">${relatorio.atencao.map(item => `<li style="margin:4px 0">${esc(item)}</li>`).join('')}</ul>` : 'Sem pontos de atenção no momento.'}</div></div><div style="background:var(--blue);color:#fff;padding:10px 18px;display:flex;justify-content:space-between;font-size:10.5px"><span>Iniciado em: ${fmtData(projetoAtivo.data_inicio)} · Atualizado em: ${fmtData(hojeISO())}</span><b>Projetos e transformação</b></div></div>`;
-  document.querySelectorAll('#sr-executivo b').forEach(el=>{if(el.textContent.trim()==='INTERNO')el.remove();});
+  document.getElementById('sr-executivo').innerHTML = `<div class="card" style="padding:0;overflow:hidden"><div style="padding:20px 24px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:18px"><div><span style="display:block;width:5px;height:34px;background:var(--orange);float:left;margin:1px 12px 0 0"></span><h2 style="font-size:24px;color:var(--blue);margin:0">${esc(projetoAtivo.nome)}</h2><span class="mono" style="font-size:11px;color:var(--ink-mute)">${esc(projetoAtivo.lecom)} · Status Report · ${fmtData(sr.periodo_referencia || hojeISO())}</span></div><div style="text-align:right"><button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="gerarPdfStatusReport()">Gerar PDF executivo</button></div></div><div style="display:grid;grid-template-columns:1.35fr 1.35fr .7fr;gap:14px;padding:16px 18px"><div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--paper)"><b style="font-size:13px;color:var(--blue)">Resumo do projeto</b><p style="font-size:12.5px;line-height:1.55;margin:9px 0 0;color:var(--ink-soft)">${esc(sr.resumo_executivo || projetoAtivo.objetivo || 'Preencha o resumo executivo do período.')}</p></div><div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--paper)"><b style="font-size:13px;color:var(--blue)">Equipe do projeto</b><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px;font-size:11.5px;color:var(--ink-soft)"><span><b>Patrocinador:</b> ${esc(projetoAtivo.patrocinador || '—')}</span><span><b>Área impactada:</b> ${esc(projetoAtivo.direcao_ti || '—')}</span><span><b>PMO/Gerente de projetos:</b> ${esc(projetoAtivo.gerente_projeto || '—')}</span><span><b>Pontos focais:</b> ${esc(projetoAtivo.lider_ti || '—')}</span></div></div><div style="border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--paper);display:flex;justify-content:space-between;align-items:center"><div><b style="font-size:13px;color:var(--blue)">Status geral</b><span style="display:block;font-size:12px;margin-top:12px;color:var(--ink-soft)">Farol: ${farol}</span><span style="display:block;font-size:12px;color:var(--ink-soft);margin-top:4px">${saude.label}</span></div><i style="display:block;width:48px;height:48px;border-radius:50%;background:${cor}"></i></div></div><div style="margin:0 18px 16px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--paper)"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px"><b style="font-size:13px;color:var(--blue)">Avanço do cronograma</b><small style="color:var(--ink-mute);font-size:10.5px">Posição até ${fmtData(hojeISO())}</small></div><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px"><div style="padding:10px 11px;border-radius:8px;background:#fff"><small style="display:block;color:var(--ink-mute);font-size:10px;font-weight:700">Planejado</small><b style="display:block;margin-top:4px;font-size:20px;color:var(--blue)">${indicadores.planejado}%</b><span style="display:block;margin-top:2px;font-size:10px;color:var(--ink-mute)">${indicadores.planejadas}/${indicadores.total} previstas</span></div><div style="padding:10px 11px;border-radius:8px;background:#fff"><small style="display:block;color:var(--ink-mute);font-size:10px;font-weight:700">Realizado</small><b style="display:block;margin-top:4px;font-size:20px;color:var(--green)">${indicadores.realizado}%</b><span style="display:block;margin-top:2px;font-size:10px;color:var(--ink-mute)">${indicadores.concluidas}/${indicadores.total} concluídas</span></div><div style="padding:10px 11px;border-radius:8px;background:#fff"><small style="display:block;color:var(--ink-mute);font-size:10px;font-weight:700">Desvio</small><b style="display:block;margin-top:4px;font-size:20px;color:${indicadores.desvio<0?'var(--red)':'var(--green)'}">${indicadores.desvio>0?'+':''}${indicadores.desvio} p.p.</b><span style="display:block;margin-top:2px;font-size:10px;color:var(--ink-mute)">Planejado x realizado</span></div></div></div><div style="margin:0 18px;border:1px solid var(--line);border-radius:10px;overflow:hidden"><div style="display:grid;grid-template-columns:240px 1fr;background:var(--blue);color:#fff;font-size:12px;font-weight:800"><div style="padding:12px 14px">Fases / entregas</div><div style="display:grid;grid-template-columns:repeat(${Math.max(1,meses.length)},1fr);text-align:center">${meses.map(m => `<span style="padding:12px 2px;border-left:1px solid rgba(255,255,255,.28)">${m}</span>`).join('')}</div></div>${relatorio.fases.length ? relatorio.fases.map(barra).join('') : '<p style="padding:18px;font-size:12px;color:var(--ink-mute)">Inclua atividades datadas no cronograma para gerar a linha do tempo.</p>'}</div><div style="padding:16px 18px"><b style="font-size:13px;color:var(--blue)">Pontos de atenção</b><div style="margin-top:8px;padding:12px 14px;border-radius:8px;background:var(--paper);font-size:12.5px;color:var(--ink-soft)">${relatorio.atencao.length ? `<ul style="margin:0;padding-left:18px">${relatorio.atencao.map(item => `<li style="margin:4px 0">${esc(item)}</li>`).join('')}</ul>` : 'Sem pontos de atenção no momento.'}</div></div><div style="background:var(--blue);color:#fff;padding:10px 18px;display:flex;justify-content:space-between;font-size:10.5px"><span>Iniciado em: ${fmtData(projetoAtivo.data_inicio)} · Atualizado em: ${fmtData(hojeISO())}</span><b>Projetos e transformação</b></div></div>`;
+  limparClassificacoesStatusReport(document.getElementById('sr-executivo'));
   adicionarMarcadorHojeStatus(relatorio);
 }
 function adicionarMarcadorHojeStatus(relatorio){
@@ -5891,6 +5914,7 @@ function abrirPreviewStatusReport(){
   if(!origem || !destino) return;
   destino.innerHTML = origem.innerHTML.replaceAll('Projetos e transformação','Experiência do Cliente e Operações - Melhoria Contínua');
   destino.querySelectorAll('button').forEach(botao => botao.remove());
+  limparClassificacoesStatusReport(destino);
   inserirMarcaNoRelatorio(destino);
   abrirModal('modal-preview-status');
 }
@@ -6305,3 +6329,6 @@ iniciarAuthPortal();
 </script>
 </body>
 </html>
+
+
+
