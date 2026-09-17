@@ -5987,7 +5987,7 @@ async function salvarStatusReport(){
   };
   STATE.statusReports[projetoAtivo.id]=dados;
   let versao={id:uid(),projeto_id:projetoAtivo.id,project_id:projetoAtivo.id,...dados,author_id:sessaoPortal?.user?.id||null,author_name:perfilPortal?.full_name||sessaoPortal?.user?.email||'Usuário',criado_em:new Date().toISOString(),created_at:new Date().toISOString()};
-  if(supabasePortal&&sessaoPortal){try{const atual={project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,reference_date:dados.periodo_referencia,overall_status:dados.farol_geral,executive_summary:dados.resumo_executivo,attention_points:relatorioStatusProjeto().atencao.join('\n'),report_data:dados},{data:reportPersistido,error:erroAtual}=await supabasePortal.from('status_reports').upsert(atual,{onConflict:'project_id'}).select('*').single();if(erroAtual)throw erroAtual;dados.codigo=reportPersistido?.control_code||dados.codigo||'';const payload={project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,reference_date:dados.periodo_referencia,report_data:dados,author_name:versao.author_name};const {data,error}=await supabasePortal.from('status_report_versions').insert(payload).select('*').single();if(error)throw error;versao={...versao,...data,...(data.report_data||{})};}catch(e){registrarLogSistema('erro','Persistência do Status Report',e);toast('Não foi possível salvar o Status Report no banco.');return;}}
+  if(supabasePortal&&sessaoPortal){try{const atual={project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,reference_date:dados.periodo_referencia,overall_status:dados.farol_geral,executive_summary:dados.resumo_executivo,attention_points:dadosOnePageStatus(dados).atencao.join('\n'),report_data:dados},{data:reportPersistido,error:erroAtual}=await supabasePortal.from('status_reports').upsert(atual,{onConflict:'project_id'}).select('*').single();if(erroAtual)throw erroAtual;dados.codigo=reportPersistido?.control_code||dados.codigo||'';const payload={project_id:projetoAtivo.id,owner_id:sessaoPortal.user.id,reference_date:dados.periodo_referencia,report_data:dados,author_name:versao.author_name};const {data,error}=await supabasePortal.from('status_report_versions').insert(payload).select('*').single();if(error)throw error;versao={...versao,...data,...(data.report_data||{})};}catch(e){registrarLogSistema('erro','Persistência do Status Report',e);toast('Não foi possível salvar o Status Report no banco.');return;}}
   STATE.statusReportHistory.unshift(versao);
   salvarState();
   renderStatusReport();
@@ -6329,6 +6329,8 @@ iniciarAuthPortal();
 </script>
 </body>
 </html>
+
+
 
 
 
