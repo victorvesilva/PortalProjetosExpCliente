@@ -327,6 +327,7 @@ html[data-theme="dark"] #preview-exportacao-conteudo,html[data-theme="dark"] #po
 @media(max-width:700px){.multi-select-options{grid-template-columns:1fr;gap:3px}}
 .btn-hapvida-orange{background:var(--orange)!important;border-color:var(--orange)!important;color:#fff!important;box-shadow:0 5px 12px rgba(244,91,31,.22)}.btn-hapvida-orange:hover{filter:brightness(.94)}
 .sol-dashboard{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:10px;margin-bottom:16px}.sol-dashboard .card{padding:14px}.sol-dashboard b{display:block;font:800 24px 'Manrope';color:var(--blue)}.sol-dashboard small{display:block;color:var(--ink-mute);font-size:11px;margin-top:3px}.sol-admin-filters{display:grid;grid-template-columns:1.2fr repeat(4,minmax(130px,.8fr));gap:9px;margin-bottom:16px}.sol-admin-filters input,.sol-admin-filters select{width:100%;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;font:inherit;font-size:12px;background:#fff}.pagination{display:flex;align-items:center;justify-content:flex-end;gap:7px;padding:12px 0}.pagination button{min-width:32px;height:30px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);cursor:pointer}.pagination button.active{background:var(--blue);color:#fff;border-color:var(--blue)}.pagination button:disabled{opacity:.45;cursor:not-allowed}.data-state{padding:28px 18px;text-align:center;color:var(--ink-mute);font-size:12.5px}.data-state.error{color:var(--red)}.draft-status{font-size:10.5px;color:var(--ink-mute);margin-right:auto}.timeline{position:relative;margin:18px 0 0;padding-left:20px}.timeline::before{content:'';position:absolute;left:5px;top:5px;bottom:5px;width:2px;background:var(--line)}.timeline-item{position:relative;padding:0 0 16px 12px}.timeline-item::before{content:'';position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--blue);border:2px solid var(--card)}.timeline-item b{font-size:12px}.timeline-item small{display:block;color:var(--ink-mute);margin-top:3px}.timeline-item p{font-size:12px;color:var(--ink-soft);margin:5px 0 0}.notification-unread{font-weight:800}.notification-unread::after{content:'Nova';float:right;color:var(--red);font-size:9px;text-transform:uppercase}
+.sol-management{margin-top:18px;padding:16px 16px 14px;background:var(--paper);border:1px solid var(--line);border-radius:10px}.sol-management-title{display:block;font-size:13px;color:var(--ink);margin-bottom:13px}.sol-management-grid{display:grid;grid-template-columns:minmax(150px,.65fr) minmax(220px,1fr) minmax(260px,1.45fr) auto;gap:12px;align-items:end}.sol-management-field{display:grid;gap:6px;min-width:0;font-size:12px;font-weight:750;color:var(--ink)}.sol-management-field select,.sol-management-field input{width:100%;height:40px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);font:inherit;color:var(--ink);box-sizing:border-box}.sol-management-field small{font-weight:400;line-height:1.35;color:var(--ink-mute)}.sol-management-action{height:40px;white-space:nowrap}.sol-management-empty{margin-top:9px;color:var(--red);font-size:11px}@media(max-width:820px){.sol-management-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.sol-management-action{justify-self:start}}@media(max-width:520px){.sol-management-grid{grid-template-columns:1fr}.sol-management-action{width:100%}}
 @media(max-width:900px){.sol-dashboard{grid-template-columns:repeat(2,1fr)}.sol-admin-filters{grid-template-columns:1fr 1fr}}@media(max-width:560px){.sol-admin-filters{grid-template-columns:1fr}}
 #sol-form-lecom[hidden],#sol-form-projeto[hidden],#sol-form-sac[hidden],#sol-form-assuntos[hidden],#sol-form-canais_digitais[hidden],#sol-observacoes-wrap[hidden]{display:none!important}
 .sol-category-picker{padding:14px 16px;margin-bottom:16px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
@@ -3952,9 +3953,10 @@ async function resolverNomeOperadorSolicitacao(s){
 }
 function classificacaoSolicitacaoLecom(s){return String(s?.classificacao||s?.classification||(s?.tipo_demanda==='transformacao'?'projeto':'melhoria')).trim().toLowerCase();}
 function atualizarCamposGestaoSolicitacao(){
-  const status=document.getElementById('sol-status-admin')?.value,solicitacaoId=document.getElementById('sol-operador-solicitacao-id')?.value,s=STATE.solicitacoes.find(item=>item.id===solicitacaoId),aprovadaLecom=s?.tipo_solicitacao==='lecom'&&status==='aprovada';
+  const status=document.getElementById('sol-status-admin')?.value;
   const operadorWrap=document.getElementById('sol-operador-wrap'),operador=document.getElementById('sol-operador-admin');
-  if(operadorWrap)operadorWrap.hidden=!aprovadaLecom;if(operador)operador.required=aprovadaLecom;
+  const atribuirNaAnalise=podeGerenciarAcessos()&&status==='em_analise';
+  if(operadorWrap)operadorWrap.hidden=!atribuirNaAnalise;if(operador)operador.required=atribuirNaAnalise;
 }
 function classeStatusSolicitacao(status){return ({rascunho:'badge-status-rascunho',enviada:'badge-status-enviada',em_analise:'badge-status-analise',devolvida:'badge-status-devolvida',reenviada:'badge-status-reenviada',aprovada:'badge-status-aprovada',em_execucao:'badge-status-andamento',concluida:'badge-status-concluida',reprovada:'badge-status-reprovada',cancelada:'badge-status-cancelada'})[status]||'badge-neutral';}
 const TIPOS_SOLICITACAO={lecom:{label:'LECOM',titulo:'Solicitar LECOM',prefixo:'LEC'},projeto:{label:'Novo projeto',titulo:'Solicitar Projeto',prefixo:'PROJ'},sac:{label:'Parametrização de tela SAC',titulo:'Solicitar Parametrização de tela SAC',prefixo:'SAC'},assuntos:{label:'Atualização/Criação de Assuntos',titulo:'Solicitar Atualização/Criação de Assuntos',prefixo:'ASS'},canais_digitais:{label:'Demandas Canais Digitais',titulo:'Demandas Canais Digitais',prefixo:'DCD'}};
@@ -3963,7 +3965,7 @@ function usuarioSolicitacaoAtual(){return sessaoPortal?.user?.id||'local-user';}
 const STATUS_SOLICITACAO_VISIVEL_OPERADOR=['aprovada','em_execucao','concluida'];
 function solicitacoesVisiveis(){
   if(podeGerenciarAcessos())return STATE.solicitacoes.slice();
-  if(papelPortal()==='operator'&&temPermissaoAcao('solicitacoes','view'))return STATE.solicitacoes.filter(s=>STATUS_SOLICITACAO_VISIVEL_OPERADOR.includes(s.status));
+  if(papelPortal()==='operator'&&temPermissaoAcao('solicitacoes','view'))return STATE.solicitacoes.filter(s=>STATUS_SOLICITACAO_VISIVEL_OPERADOR.includes(s.status)||(s.status==='em_analise'&&s.responsible_operator_id===usuarioSolicitacaoAtual()));
   return STATE.solicitacoes.filter(s=>(s.owner_id||'local-user')===usuarioSolicitacaoAtual());
 }
 function codigoSolicitacaoLocal(tipo){
@@ -4411,12 +4413,13 @@ function renderSolicitacoes(){
 }
 async function abrirDetalheSolicitacao(id){
   const s=STATE.solicitacoes.find(x=>x.id===id);if(!s||(!podeGerenciarSolicitacoes()&&(s.owner_id||'local-user')!==usuarioSolicitacaoAtual())){toast('Solicitação não disponível.');return;}
-  if(podeGerenciarSolicitacoes('edit')&&s.tipo_solicitacao==='lecom')await carregarOperadoresSolicitacoes();
+  if(podeGerenciarAcessos())await carregarOperadoresSolicitacoes();
   const nomeOperadorResolvido=await resolverNomeOperadorSolicitacao(s);
   const linha=(label,val)=>`<div style="border-bottom:1px solid var(--line);padding:9px 0"><small style="display:block;color:var(--ink-mute);font-weight:800;text-transform:uppercase;font-size:10px">${label}</small><span style="display:block;margin-top:4px;white-space:pre-wrap">${esc(val||'—')}</span></div>`;
   const admin=podeGerenciarSolicitacoes('edit'),adminSistema=podeGerenciarAcessos();
   const opcoesOperadores=operadoresSolicitacoesPortal.map(op=>`<option value="${op.id}" ${op.id===s.responsible_operator_id?'selected':''}>${esc(op.full_name)}</option>`).join('');
-  const gestaoHtml=admin?`<div style="margin-top:18px;padding:14px;background:#f6f8fc;border-radius:9px"><b style="font-size:12px">Gestão administrativa</b><input type="hidden" id="sol-operador-solicitacao-id" value="${s.id}"><div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-top:10px"><label style="font-size:12px;font-weight:700">Status do fluxo<select id="sol-status-admin" onchange="atualizarCamposGestaoSolicitacao()" style="display:block;margin-top:5px;padding:8px;border:1px solid var(--line);border-radius:7px">${STATUS_ADMIN_SOLICITACAO.map(status=>`<option value="${status}" ${status===s.status?'selected':''}>${STATUS_SOLICITACAO_LABEL[status]}</option>`).join('')}</select></label><label id="sol-operador-wrap" hidden style="font-size:12px;font-weight:700;min-width:230px">Operador responsável <span class="req">*</span><select id="sol-operador-admin" style="display:block;width:100%;margin-top:5px;padding:8px;border:1px solid var(--line);border-radius:7px"><option value="">Selecione um operador ativo</option>${opcoesOperadores}</select></label><input id="sol-admin-descricao" placeholder="Comentário obrigatório na devolução ou reprovação" style="flex:1;min-width:240px;padding:8px;border:1px solid var(--line);border-radius:7px"><button class="btn btn-primary btn-sm" onclick="salvarStatusSolicitacao('${s.id}')">Atualizar solicitação</button></div>${s.tipo_solicitacao==='lecom'&&!operadoresSolicitacoesPortal.length?'<small style="display:block;color:var(--red);margin-top:9px">Nenhum Operador ativo disponível. Cadastre ou ative um usuário com perfil Operador em Acessos.</small>':''}</div>`:'';
+  const statusDisponiveis=adminSistema?STATUS_ADMIN_SOLICITACAO:(s.status==='em_analise'?['em_analise','aprovada','devolvida','cancelada']:[s.status]);
+  const gestaoHtml=admin?`<section class="sol-management"><b class="sol-management-title">Gestão da solicitação</b><input type="hidden" id="sol-operador-solicitacao-id" value="${s.id}"><div class="sol-management-grid"><label class="sol-management-field">Status do fluxo<select id="sol-status-admin" onchange="atualizarCamposGestaoSolicitacao()">${statusDisponiveis.map(status=>`<option value="${status}" ${status===s.status?'selected':''}>${STATUS_SOLICITACAO_LABEL[status]}</option>`).join('')}</select></label><label class="sol-management-field" id="sol-operador-wrap" hidden>Operador responsável <span class="req">*</span><select id="sol-operador-admin"><option value="">Selecione um operador ativo</option>${opcoesOperadores}</select><small>Atribuição obrigatória apenas na etapa Em análise.</small></label><label class="sol-management-field">Comentário da análise<input id="sol-admin-descricao" placeholder="Obrigatório ao devolver ou cancelar"></label><button class="btn btn-primary sol-management-action" onclick="salvarStatusSolicitacao('${s.id}')">Atualizar solicitação</button></div>${adminSistema&&!operadoresSolicitacoesPortal.length?'<small class="sol-management-empty">Nenhum Operador ativo disponível. Cadastre ou ative um usuário com perfil Operador em Acessos.</small>':''}</section>`:'';
   const projeto=s.tipo_solicitacao==='projeto',areas=(s.areas_ti||[]).join(', '),anexos=(s.anexos||[]).map(a=>a.nome).join(', ');
   const resumo=projeto
     ? `<div style="display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;margin-top:18px">${linha('Solicitante',s.solicitante)}${linha('E-mail',s.owner_email||'Gerenciado pelo Supabase Auth')}${linha('Data de abertura',s.data_abertura_solicitacao?fmtData(s.data_abertura_solicitacao):fmtData((s.criado_em||'').slice(0,10)))}${linha('Responsável',s.responsavel||s.solicitante)}${linha('Áreas envolvidas',s.areas_envolvidas||s.areas_impactadas)}${linha('Data alvo',fmtData(s.data_alvo))}</div><div style="margin-top:16px">${linha('Objetivo',s.objetivo)}${linha('Escopo (macro entrega)',s.escopo_macro_entrega||s.macro_entrega||s.produto_funcionalidade)}${linha('Ganhos esperados',s.ganhos_esperados)}</div>`
@@ -4458,12 +4461,17 @@ function criarLecomAPartirDaSolicitacao(s){if(!s||s.tipo_solicitacao!=='lecom'||
 async function salvarStatusSolicitacao(id){
   const s=STATE.solicitacoes.find(x=>x.id===id);if(!s||!podeGerenciarSolicitacoes('edit'))return;
   const statusAnterior=s.status,novoStatus=document.getElementById('sol-status-admin').value,descricao=document.getElementById('sol-admin-descricao').value.trim();
-  if(['devolvida','reprovada'].includes(novoStatus)&&!descricao){toast('Informe o comentário/justificativa para devolver ou reprovar a solicitação.');return;}
+  const adminSistema=podeGerenciarAcessos();
+  if(!adminSistema){
+    const podeDecidir=s.status==='em_analise'&&s.responsible_operator_id===usuarioSolicitacaoAtual()&&['aprovada','devolvida','cancelada'].includes(novoStatus);
+    if(!podeDecidir){toast('Somente o operador responsável pode aprovar, cancelar ou devolver esta solicitação em análise.');return;}
+  }
+  if(['devolvida','reprovada','cancelada'].includes(novoStatus)&&!descricao){toast('Informe o comentário/justificativa para devolver, reprovar ou cancelar a solicitação.');return;}
   let operadorSelecionado=null;
-  if(s.tipo_solicitacao==='lecom'&&novoStatus==='aprovada'){
+  if(adminSistema&&novoStatus==='em_analise'){
     const operadorId=document.getElementById('sol-operador-admin')?.value||'';
     operadorSelecionado=operadoresSolicitacoesPortal.find(op=>op.id===operadorId)||null;
-    if(!operadorSelecionado){toast('Selecione um Operador responsável ativo antes de aprovar a solicitação LECOM.');return;}
+    if(!operadorSelecionado){toast('Selecione um Operador responsável ativo para iniciar a análise.');return;}
   }
   const atualizacao={status:novoStatus,admin_descricao:descricao};
   if(operadorSelecionado){atualizacao.responsible_operator_id=operadorSelecionado.id;atualizacao.responsible_operator_name=operadorSelecionado.full_name;}
@@ -5875,7 +5883,8 @@ function estadoFaseStatus(itens){
   /* A fase sempre destaca a situação mais crítica: atraso, andamento, conclusão total ou pendência. */
   if(tarefas.some(t=>isAtrasada(t)||t.status==='atrasado'||t.status==='impedido')) return 'atrasado';
   if(tarefas.length && tarefas.every(t=>t.status==='concluido')) return 'concluido';
-  if(tarefas.some(t=>t.status==='andamento')) return 'andamento';
+  /* Havendo entrega concluída junto de pendências, a fase está parcialmente executada. */
+  if(tarefas.some(t=>t.status==='andamento'||t.status==='concluido')) return 'andamento';
   return 'a_iniciar';
 }
 function indicadoresCronogramaStatusReport(tarefas=tarefasDoProjeto()){
