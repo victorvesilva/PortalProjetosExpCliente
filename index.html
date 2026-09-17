@@ -5863,7 +5863,7 @@ function dadosOnePageStatus(sr){
   const totalDias = inicio && fim ? Math.max(1, diffDias(inicio, fim) + 1) : 1;
   const fases = fasesDoProjeto().map(fase => { const itens = tarefas.filter(t => t.fase === fase); const ini = itens.map(t => t.data_inicio || t.data_fim).filter(Boolean).sort()[0]; const fimFase = itens.map(t => t.data_fim || t.data_inicio).filter(Boolean).sort().at(-1); return { fase, ini, fim:fimFase, itens }; }).filter(f => f.ini && f.fim);
   const atencao = [
-    ...tarefas.filter(isAtrasada).map(t => `Atividade atrasada: ${t.nome}`),
+    ...tarefas.filter(t => isAtrasada(t) || t.status === 'atrasado').map(t => `Atividade atrasada: ${t.nome} · Responsável: ${t.responsavel || 'Não informado'}`),
     ...tarefas.filter(t => t.status === 'impedido').map(t => `Atividade impedida: ${t.nome}`),
     ...riscosDoProjeto().filter(r => r.status !== 'Encerrado' && nivelRisco(r.probabilidade,r.impacto).label === 'Alto').map(r => `Risco alto: ${r.descricao}`),
     ...encaminhamentosDoProjeto().filter(e => e.prazo && e.prazo < hojeISO() && !['Concluído','Cancelado'].includes(e.status)).map(e => `Encaminhamento vencido: ${e.tema}`)
@@ -5871,9 +5871,11 @@ function dadosOnePageStatus(sr){
   return { inicio, fim, totalDias, fases, atencao, sr };
 }
 function estadoFaseStatus(itens){
-  if(itens.some(t=>isAtrasada(t)||t.status==='atrasado'||t.status==='impedido')) return 'atrasado';
-  if(itens.length && itens.every(t=>t.status==='concluido'||t.status==='cancelado')) return 'concluido';
-  if(itens.some(t=>t.status==='andamento')) return 'andamento';
+  const tarefas = Array.isArray(itens) ? itens.filter(Boolean) : [];
+  /* A fase sempre destaca a situação mais crítica: atraso, andamento, conclusão total ou pendência. */
+  if(tarefas.some(t=>isAtrasada(t)||t.status==='atrasado'||t.status==='impedido')) return 'atrasado';
+  if(tarefas.length && tarefas.every(t=>t.status==='concluido')) return 'concluido';
+  if(tarefas.some(t=>t.status==='andamento')) return 'andamento';
   return 'a_iniciar';
 }
 function indicadoresCronogramaStatusReport(tarefas=tarefasDoProjeto()){
