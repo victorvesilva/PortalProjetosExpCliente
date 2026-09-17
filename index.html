@@ -2355,27 +2355,38 @@ async function verificarAdministradorPortal(){
 }
 
 async function carregarPermissoesModuloPortal(){
-  permissoesModuloPortal=new Set();permissoesAcaoPortal=new Map();permissoesModuloProntas=false;
+  const modulosAnteriores=permissoesModuloPortal,acoesAnteriores=permissoesAcaoPortal,prontasAnterior=permissoesModuloProntas;
   if(!supabasePortal||!sessaoPortal?.user)return false;
-  if(podeGerenciarAcessos()){permissoesModuloProntas=true;return true;}
+  if(podeGerenciarAcessos()){permissoesModuloPortal=new Set();permissoesAcaoPortal=new Map();permissoesModuloProntas=true;return true;}
   /* A RPC usa auth.uid() no banco e não depende da política de leitura da tabela.
      Isso evita que uma política antiga devolva uma matriz vazia para o próprio Operador. */
   let consulta=await supabasePortal.rpc('get_my_module_permissions');
+  let leituraAutoritativa=!consulta.error;
   if(consulta.error&&['PGRST202','42883'].includes(String(consulta.error.code||''))){
     consulta=await supabasePortal.from('user_module_permissions').select('module_key,can_view,can_create,can_edit,can_delete').eq('user_id',sessaoPortal.user.id);
+    leituraAutoritativa=false;
   }
   if(consulta.error){
     consulta=await supabasePortal.from('user_module_permissions').select('module_key').eq('user_id',sessaoPortal.user.id);
-    if(consulta.error)return false;
+    leituraAutoritativa=false;
+    if(consulta.error){permissoesModuloPortal=modulosAnteriores;permissoesAcaoPortal=acoesAnteriores;permissoesModuloProntas=prontasAnterior;return false;}
   }
   const {data}=consulta;
-  permissoesModuloPortal=new Set((data||[]).map(item=>item.module_key));
-  (data||[]).forEach(item=>permissoesAcaoPortal.set(item.module_key,{
+  /* Uma consulta alternativa vazia pode ser efeito de RLS legado, não uma revogação.
+     Nunca derrube uma sessão já liberada por esse retorno incerto. */
+  if(!leituraAutoritativa&&papelPortal()==='operator'&&!data?.length&&acoesAnteriores.size){
+    permissoesModuloPortal=modulosAnteriores;permissoesAcaoPortal=acoesAnteriores;permissoesModuloProntas=true;
+    registrarLogSistema('info','Permissões','A leitura alternativa retornou uma matriz vazia; a última permissão válida foi preservada.');
+    return true;
+  }
+  const novosModulos=new Set((data||[]).map(item=>item.module_key)),novasAcoes=new Map();
+  (data||[]).forEach(item=>novasAcoes.set(item.module_key,{
     view:item.can_view===undefined||item.can_view===null?true:String(item.can_view).toLowerCase()==='true',
     create:item.can_create===undefined||item.can_create===null?true:String(item.can_create).toLowerCase()==='true',
     edit:item.can_edit===undefined||item.can_edit===null?true:String(item.can_edit).toLowerCase()==='true',
     delete:item.can_delete===undefined||item.can_delete===null?true:String(item.can_delete).toLowerCase()==='true'
   }));
+  permissoesModuloPortal=novosModulos;permissoesAcaoPortal=novasAcoes;
   permissoesModuloProntas=true;
   return true;
 }
@@ -2530,7 +2541,7 @@ async function excluirUsuarioAcesso(userId){
 
 async function aplicarSessaoPortal(session){
   sessaoPortal=session||null;
-  if(!sessaoPortal){perfilPortal=null;perfilPortalPendente=false;adminPortalConfirmado=false;if(typeof encerrarAtualizacoesNotificacoes==='function')encerrarAtualizacoesNotificacoes();NOTIFICACOES_BANCO=[];NOTIFICACOES_PERSISTENTES=false;atualizarNavegacaoAcessos();exibirLogin();return;}
+  if(!sessaoPortal){perfilPortal=null;perfilPortalPendente=false;adminPortalConfirmado=false;permissoesModuloPortal=new Set();permissoesAcaoPortal=new Map();permissoesModuloProntas=false;if(typeof encerrarAtualizacoesNotificacoes==='function')encerrarAtualizacoesNotificacoes();NOTIFICACOES_BANCO=[];NOTIFICACOES_PERSISTENTES=false;atualizarNavegacaoAcessos();exibirLogin();return;}
   ativarCacheDoUsuario(sessaoPortal.user.id);
   await verificarAdministradorPortal();
   await carregarPerfilPortal();
