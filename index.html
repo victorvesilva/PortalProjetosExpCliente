@@ -2358,7 +2358,12 @@ async function carregarPermissoesModuloPortal(){
   permissoesModuloPortal=new Set();permissoesAcaoPortal=new Map();permissoesModuloProntas=false;
   if(!supabasePortal||!sessaoPortal?.user)return false;
   if(podeGerenciarAcessos()){permissoesModuloProntas=true;return true;}
-  let consulta=await supabasePortal.from('user_module_permissions').select('module_key,can_view,can_create,can_edit,can_delete').eq('user_id',sessaoPortal.user.id);
+  /* A RPC usa auth.uid() no banco e não depende da política de leitura da tabela.
+     Isso evita que uma política antiga devolva uma matriz vazia para o próprio Operador. */
+  let consulta=await supabasePortal.rpc('get_my_module_permissions');
+  if(consulta.error&&['PGRST202','42883'].includes(String(consulta.error.code||''))){
+    consulta=await supabasePortal.from('user_module_permissions').select('module_key,can_view,can_create,can_edit,can_delete').eq('user_id',sessaoPortal.user.id);
+  }
   if(consulta.error){
     consulta=await supabasePortal.from('user_module_permissions').select('module_key').eq('user_id',sessaoPortal.user.id);
     if(consulta.error)return false;
@@ -2366,7 +2371,10 @@ async function carregarPermissoesModuloPortal(){
   const {data}=consulta;
   permissoesModuloPortal=new Set((data||[]).map(item=>item.module_key));
   (data||[]).forEach(item=>permissoesAcaoPortal.set(item.module_key,{
-    view:item.can_view??true,create:item.can_create??true,edit:item.can_edit??true,delete:item.can_delete??true
+    view:item.can_view===undefined||item.can_view===null?true:String(item.can_view).toLowerCase()==='true',
+    create:item.can_create===undefined||item.can_create===null?true:String(item.can_create).toLowerCase()==='true',
+    edit:item.can_edit===undefined||item.can_edit===null?true:String(item.can_edit).toLowerCase()==='true',
+    delete:item.can_delete===undefined||item.can_delete===null?true:String(item.can_delete).toLowerCase()==='true'
   }));
   permissoesModuloProntas=true;
   return true;
