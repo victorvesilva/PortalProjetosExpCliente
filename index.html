@@ -2339,19 +2339,23 @@ function ativarCacheDoUsuario(userId){
   }catch(e){ console.warn('Não foi possível restaurar o cache local do usuário.'); }
 }
 
-async function carregarPerfilPortal(){
-  perfilPortal=null;perfilPortalPendente=false;
-  if(!supabasePortal||!sessaoPortal?.user)return;
+async function carregarPerfilPortal({preservarAtual=false}={}){
+  const perfilAnterior=perfilPortal;
+  if(!supabasePortal||!sessaoPortal?.user)return false;
   const {data,error}=await supabasePortal.from('profiles').select('id,full_name,role,active,created_at').eq('id',sessaoPortal.user.id).maybeSingle();
-  if(error||!data){perfilPortalPendente=true;return;}
-  perfilPortal=data;
+  if(error||!data){
+    if(preservarAtual&&perfilAnterior){perfilPortal=perfilAnterior;perfilPortalPendente=false;registrarLogSistema('info','Perfil da sessão','A consulta de perfil falhou durante a atualização; o último perfil válido foi preservado.');return false;}
+    perfilPortal=null;perfilPortalPendente=true;return false;
+  }
+  perfilPortal=data;perfilPortalPendente=false;return true;
 }
 
-async function verificarAdministradorPortal(){
-  adminPortalConfirmado=false;
-  if(!supabasePortal||!sessaoPortal?.user)return;
+async function verificarAdministradorPortal({preservarAtual=false}={}){
+  const confirmacaoAnterior=adminPortalConfirmado;
+  if(!supabasePortal||!sessaoPortal?.user)return false;
   const {data,error}=await supabasePortal.rpc('is_admin');
-  adminPortalConfirmado=!error&&data===true;
+  if(error&&preservarAtual){adminPortalConfirmado=confirmacaoAnterior;registrarLogSistema('info','Perfil da sessão','A confirmação administrativa falhou durante a atualização; o estado anterior foi preservado.');return false;}
+  adminPortalConfirmado=!error&&data===true;return !error;
 }
 
 async function carregarPermissoesModuloPortal(){
@@ -2401,7 +2405,8 @@ async function atualizarPermissoesSessaoPortal({forcar=false,notificar=false}={}
   if(!forcar&&Date.now()-ultimaAtualizacaoPermissoesSessao<15000)return false;
   atualizacaoPermissoesSessaoEmCurso=true;const anterior=assinaturaPermissoesSessao();
   try{
-    await verificarAdministradorPortal();await carregarPerfilPortal();
+    await verificarAdministradorPortal({preservarAtual:true});await carregarPerfilPortal({preservarAtual:true});
+    if(!perfilPortal){registrarLogSistema('aviso','Atualização de permissões','Perfil indisponível; a interface atual foi mantida.');return false;}
     if(perfilPortal?.active===false){atualizarNavegacaoAcessos();exibirLogin('Este usuário foi inativado. Solicite a liberação a um administrador.');return false;}
     const ok=await carregarPermissoesModuloPortal();if(!ok&&!podeGerenciarAcessos())return false;
     atualizarNavegacaoAcessos();aplicarPermissoesAcoesNaInterface(document);
@@ -2636,6 +2641,9 @@ async function iniciarAuthPortal(){
   supabasePortal.auth.onAuthStateChange((evento,sessionAtual)=>{
     if(evento==='PASSWORD_RECOVERY'){sessaoPortal=sessionAtual||null;mostrarAtualizacaoSenhaAuth();return;}
     if(fluxoRecuperacaoSenha)return;
+    /* A renovação do token não deve desmontar perfil, permissões e cronograma.
+       A sessão já está válida; apenas substituímos o token em memória. */
+    if(evento==='TOKEN_REFRESHED'&&sessionAtual?.user?.id===sessaoPortal?.user?.id){sessaoPortal=sessionAtual;return;}
     setTimeout(()=>aplicarSessaoPortal(sessionAtual),0);
   });
   const {data:{session}}=await supabasePortal.auth.getSession();
