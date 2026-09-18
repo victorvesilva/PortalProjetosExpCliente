@@ -515,6 +515,7 @@ button:focus-visible{outline:2.5px solid var(--orange);outline-offset:2px}
 }
 .modal-overlay.open .modal{ animation:modalIn .22s var(--ease) }
 .modal.modal-lg{width:760px}
+.project-picker-modal{width:min(860px,94vw);max-height:90vh}
 @keyframes modalIn{ from{opacity:0; transform:translateY(12px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)} }
 @media (prefers-reduced-motion:reduce){ .modal-overlay.open, .modal-overlay.open .modal{animation:none} }
 .modal-header{
@@ -1426,6 +1427,10 @@ body *, body *::before, body *::after{text-transform:none!important}
       <div class="card" style="margin-bottom:16px;padding:13px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span class="badge badge-info" id="solicitacoes-visao-label">Minhas solicitações</span><span style="font-size:12px;color:var(--ink-soft)" id="solicitacoes-resumo">Carregando solicitações…</span></div>
       <div class="dtable-wrap"><table class="dtable"><thead><tr><th>Tipo</th><th>Título da demanda</th><th>Solicitante</th><th>Área</th><th>Data</th><th>Status</th><th></th></tr></thead><tbody id="solicitacoes-tbody"></tbody></table></div>
       <div class="pagination" id="solicitacoes-paginacao"></div>
+      <section class="card" id="solicitacoes-alocadas-wrap" hidden style="margin-top:22px;overflow:hidden">
+        <div style="padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><b style="font-size:14px">Minhas demandas alocadas</b><p style="font-size:12px;color:var(--ink-mute);margin:4px 0 0">Solicitações sob responsabilidade do operador logado.</p></div><span class="badge badge-info" id="solicitacoes-alocadas-total">0 demanda(s)</span></div>
+        <div class="dtable-wrap" style="border:0;border-radius:0"><table class="dtable"><thead><tr><th>Tipo</th><th>Título da demanda</th><th>Solicitante</th><th>Data</th><th>Status</th><th></th></tr></thead><tbody id="solicitacoes-alocadas-tbody"></tbody></table></div>
+      </section>
     </div>
     <div class="page" id="page-configuracoes">
       <div class="card" style="max-width:760px">
@@ -1792,7 +1797,7 @@ body *, body *::before, body *::after{text-transform:none!important}
 </div>
 
 <div class="modal-overlay" id="modal-selecionar-projeto">
-  <div class="modal">
+  <div class="modal project-picker-modal">
     <div class="modal-header">
       <h3>Selecionar Projeto</h3>
       <button class="modal-close" onclick="fecharModal('modal-selecionar-projeto')">✕</button>
@@ -4457,11 +4462,22 @@ function renderIndicadoresSolicitacoes(lista,admin){
   const temposAnalise=lista.map(s=>{const inicio=s.created_at||s.criado_em,evento=(s.historico||[]).find(e=>e.new_status==='em_analise');const fim=evento?.created_at||(!['rascunho','enviada','reenviada'].includes(s.status)?(s.updated_at||s.atualizado_em):null);return diasEntreDatas(inicio,fim);}).filter(v=>v!==null),temposAtendimento=lista.filter(s=>['concluida','reprovada','cancelada'].includes(s.status)).map(s=>diasEntreDatas(s.created_at||s.criado_em,s.updated_at||s.atualizado_em)).filter(v=>v!==null),media=v=>v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1)+' dias':'—',agora=Date.now(),vencidas=lista.filter(s=>['enviada','reenviada'].includes(s.status)&&(agora-new Date(s.created_at||s.criado_em).getTime())/86400000>5).length;
   document.getElementById('sol-kpi-media-analise').textContent=media(temposAnalise);document.getElementById('sol-kpi-media-atendimento').textContent=media(temposAtendimento);document.getElementById('sol-kpi-vencidas').textContent=vencidas;
 }
+function renderSolicitacoesAlocadas(){
+  const bloco=document.getElementById('solicitacoes-alocadas-wrap'),tbody=document.getElementById('solicitacoes-alocadas-tbody'),total=document.getElementById('solicitacoes-alocadas-total');
+  if(!bloco||!tbody||!total)return;
+  const operadorLogado=papelPortal()==='operator';
+  bloco.hidden=!operadorLogado;
+  if(!operadorLogado)return;
+  const itens=solicitacoesVisiveis().filter(s=>s.responsible_operator_id===usuarioSolicitacaoAtual()).sort((a,b)=>String(b.updated_at||b.atualizado_em||b.created_at||'').localeCompare(String(a.updated_at||a.atualizado_em||a.created_at||'')));
+  total.textContent=`${itens.length} demanda(s)`;
+  if(!itens.length){tbody.innerHTML='<tr><td colspan="6"><div class="data-state">Nenhuma demanda está alocada a você no momento.</div></td></tr>';return;}
+  tbody.innerHTML=itens.map(s=>`<tr style="cursor:pointer" onclick="abrirDetalheSolicitacao('${s.id}')"><td><span class="badge badge-info">${esc(rotuloTipoSolicitacao(s.tipo_solicitacao))}</span></td><td><b>${esc(s.nome_projeto||s.titulo)}</b><small class="mono" style="display:block;color:var(--ink-mute);margin-top:3px">${esc(s.request_code||s.id)}</small></td><td>${esc(s.solicitante)}</td><td>${fmtData((s.created_at||s.criado_em||'').slice(0,10))}</td><td><span class="badge ${classeStatusSolicitacao(s.status)}">${STATUS_SOLICITACAO_LABEL[s.status]||s.status}</span></td><td class="dtable-actions"><button onclick="event.stopPropagation();abrirDetalheSolicitacao('${s.id}')" title="Visualizar">▣</button></td></tr>`).join('');
+}
 function renderSolicitacoes(){
   const tbody=document.getElementById('solicitacoes-tbody');if(!tbody)return;const admin=podeGerenciarSolicitacoes(),lista=solicitacoesVisiveis();
   const busca=(document.getElementById('sol-filtro-geral')?.value||'').toLocaleLowerCase('pt-BR'),tipo=document.getElementById('sol-filtro-tipo')?.value||'',status=document.getElementById('solicitacoes-filtro-status')?.value||'',inicio=document.getElementById('sol-filtro-inicio')?.value||'',fim=document.getElementById('sol-filtro-fim')?.value||'';
   const filtrada=lista.filter(s=>{const data=(s.criado_em||s.created_at||'').slice(0,10),conteudo=[s.request_code,s.titulo,s.nome_projeto,s.solicitante,s.owner_email,s.area_solicitante,s.areas_envolvidas,s.canal_digital,s.funcao_digital,(s.operadoras||[]).join(' '),s.responsible_operator_name,s.status,STATUS_SOLICITACAO_LABEL[s.status]].join(' ').toLocaleLowerCase('pt-BR');return(!busca||conteudo.includes(busca))&&(!tipo||s.tipo_solicitacao===tipo)&&(!status||s.status===status)&&(!inicio||data>=inicio)&&(!fim||data<=fim);});
-  renderIndicadoresSolicitacoes(lista,admin);
+  renderIndicadoresSolicitacoes(lista,admin);renderSolicitacoesAlocadas();
   const totalPaginas=Math.max(1,Math.ceil(filtrada.length/ITENS_POR_PAGINA));paginaSolicitacoes=Math.min(paginaSolicitacoes,totalPaginas);const pagina=filtrada.slice((paginaSolicitacoes-1)*ITENS_POR_PAGINA,paginaSolicitacoes*ITENS_POR_PAGINA);
   document.getElementById('solicitacoes-visao-label').textContent=admin?'Todas as solicitações':'Minhas solicitações';document.getElementById('solicitacoes-resumo').textContent=`${filtrada.length} solicitação(ões) encontrada(s) · página ${paginaSolicitacoes} de ${totalPaginas}`;
   if(!filtrada.length){tbody.innerHTML=estadoTabelaHtml('empty','Nenhuma solicitação encontrada para os filtros selecionados.');renderPaginacao('solicitacoes-paginacao',0,1,'irPaginaSolicitacoes');return;}
@@ -4472,9 +4488,9 @@ async function abrirDetalheSolicitacao(id){
   if(podeGerenciarAcessos())await carregarOperadoresSolicitacoes();
   const nomeOperadorResolvido=await resolverNomeOperadorSolicitacao(s);
   const linha=(label,val)=>`<div style="border-bottom:1px solid var(--line);padding:9px 0"><small style="display:block;color:var(--ink-mute);font-weight:800;text-transform:uppercase;font-size:10px">${label}</small><span style="display:block;margin-top:4px;white-space:pre-wrap">${esc(val||'—')}</span></div>`;
-  const admin=podeGerenciarSolicitacoes('edit'),adminSistema=podeGerenciarAcessos(),operadorAtual=papelPortal()==='operator',demandaDigital=s.tipo_solicitacao==='canais_digitais',operadorResponsavel=s.responsible_operator_id===usuarioSolicitacaoAtual(),filaDigital=['enviada','reenviada'].includes(s.status),podeGerirDemandaDigital=operadorAtual&&demandaDigital&&(filaDigital||operadorResponsavel),podeGerirSolicitacao=adminSistema||(operadorAtual&&(demandaDigital?podeGerirDemandaDigital:(s.status==='em_analise'&&operadorResponsavel)));
+  const admin=podeGerenciarSolicitacoes('edit'),adminSistema=podeGerenciarAcessos(),operadorAtual=papelPortal()==='operator',demandaDigital=s.tipo_solicitacao==='canais_digitais',operadorResponsavel=s.responsible_operator_id===usuarioSolicitacaoAtual(),filaDigital=['enviada','reenviada'].includes(s.status),podeGerirDemandaDigital=operadorAtual&&demandaDigital&&(filaDigital||operadorResponsavel),podeGerirSolicitacao=demandaDigital?podeGerirDemandaDigital:(adminSistema||(operadorAtual&&s.status==='em_analise'&&operadorResponsavel));
   const opcoesOperadores=operadoresSolicitacoesPortal.map(op=>`<option value="${op.id}" ${op.id===s.responsible_operator_id?'selected':''}>${esc(op.full_name)}</option>`).join('');
-  const statusDisponiveis=adminSistema?STATUS_ADMIN_SOLICITACAO:demandaDigital?(filaDigital?[s.status,'em_analise']:s.status==='em_analise'?['em_analise','aprovada','devolvida','cancelada']:s.status==='aprovada'?['aprovada','em_execucao','cancelada']:s.status==='em_execucao'?['em_execucao','concluida','cancelada']:[s.status]):(s.status==='em_analise'?['em_analise','aprovada','devolvida','cancelada']:[s.status]);
+  const statusDisponiveis=demandaDigital?(filaDigital?[s.status,'em_analise']:s.status==='em_analise'?['em_analise','em_execucao','devolvida','cancelada']:s.status==='em_execucao'?['em_execucao','cancelada','concluida']:[s.status]):(adminSistema?STATUS_ADMIN_SOLICITACAO:(s.status==='em_analise'?['em_analise','aprovada','devolvida','cancelada']:[s.status]));
   const rotuloOpcaoStatus=status=>demandaDigital&&filaDigital&&status==='em_analise'?'Assumir e iniciar análise':STATUS_SOLICITACAO_LABEL[status];
   const tituloGestao=demandaDigital&&filaDigital&&!adminSistema?'Assumir atendimento':'Gestão da solicitação';
   const gestaoHtml=podeGerirSolicitacao?`<section class="sol-management"><b class="sol-management-title">${tituloGestao}</b><input type="hidden" id="sol-operador-solicitacao-id" value="${s.id}"><div class="sol-management-grid"><label class="sol-management-field">Status do fluxo<select id="sol-status-admin" onchange="atualizarCamposGestaoSolicitacao()">${statusDisponiveis.map(status=>`<option value="${status}" ${status===s.status?'selected':''}>${rotuloOpcaoStatus(status)}</option>`).join('')}</select></label><label class="sol-management-field" id="sol-operador-wrap" hidden>Operador responsável <span class="req">*</span><select id="sol-operador-admin"><option value="">Selecione um operador ativo</option>${opcoesOperadores}</select><small>Atribuição obrigatória apenas na etapa Em análise.</small></label><label class="sol-management-field">Comentário da análise<input id="sol-admin-descricao" placeholder="Obrigatório ao devolver ou cancelar"></label><button class="btn btn-primary sol-management-action" onclick="salvarStatusSolicitacao('${s.id}')">${demandaDigital&&filaDigital&&!adminSistema?'Assumir demanda':'Atualizar solicitação'}</button></div>${adminSistema&&!operadoresSolicitacoesPortal.length?'<small class="sol-management-empty">Nenhum Operador ativo disponível. Cadastre ou ative um usuário com perfil Operador em Acessos.</small>':''}</section>`:'';
@@ -4523,7 +4539,7 @@ async function salvarStatusSolicitacao(id){
   const demandaDigital=s.tipo_solicitacao==='canais_digitais',operadorAtual=papelPortal()==='operator',assumindoDemandaDigital=!adminSistema&&operadorAtual&&demandaDigital&&['enviada','reenviada'].includes(statusAnterior)&&novoStatus==='em_analise',operadorResponsavel=s.responsible_operator_id===usuarioSolicitacaoAtual();
   if(!adminSistema){
     const podeDecidir=demandaDigital
-      ? (assumindoDemandaDigital||(operadorResponsavel&&((statusAnterior==='em_analise'&&['aprovada','devolvida','cancelada'].includes(novoStatus))||(statusAnterior==='aprovada'&&['em_execucao','cancelada'].includes(novoStatus))||(statusAnterior==='em_execucao'&&['concluida','cancelada'].includes(novoStatus)))))
+      ? (assumindoDemandaDigital||(operadorResponsavel&&((statusAnterior==='em_analise'&&['em_execucao','devolvida','cancelada'].includes(novoStatus))||(statusAnterior==='em_execucao'&&['concluida','cancelada'].includes(novoStatus)))))
       : (s.status==='em_analise'&&operadorResponsavel&&['aprovada','devolvida','cancelada'].includes(novoStatus));
     if(!podeDecidir){toast(demandaDigital?'Somente o operador que assumiu a demanda pode movimentá-la.':'Somente o operador responsável pode aprovar, cancelar ou devolver esta solicitação em análise.');return;}
   }
